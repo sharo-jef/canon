@@ -40,7 +40,7 @@ functionDefinition:
 	)? functionBody
 	| annotation* DECLARE FUN IDENTIFIER LPAREN parameterList? RPAREN (
 		COLON typeReference
-	)?;
+	)? SEMICOLON?;
 
 functionBody: LBRACE statement* RBRACE;
 parameterList: parameter (COMMA parameter)*;
@@ -107,12 +107,12 @@ multiplicativeExpression:
 	primaryExpression ((MULTIPLY | DIVIDE) primaryExpression)*;
 
 primaryExpression:
-	memberAccess
-	| functionCall
-	| IDENTIFIER
-	| literal
+	literal
 	| stringInterpolation
-	| IDENTIFIER LPAREN RPAREN // apply() style function call
+	| IDENTIFIER LPAREN RPAREN // apply() style function call (should match before functionCall)
+	| functionCall
+	| memberAccess
+	| IDENTIFIER
 	| LPAREN expression RPAREN;
 
 functionCall:
@@ -128,7 +128,7 @@ memberAccess: (THIS DOT IDENTIFIER)
 	| (IDENTIFIER DOT IDENTIFIER);
 
 stringInterpolation: BACKTICK stringContent BACKTICK;
-stringContent: (interpolationExpression | DOT)*;
+stringContent: (interpolationExpression | DOT | IDENTIFIER)*;
 interpolationExpression: INTERPOLATION_START expression RBRACE;
 
 // Literals

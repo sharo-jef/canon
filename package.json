@@ -2,20 +2,23 @@
   "name": "canon",
   "version": "1.0.0",
   "description": "The definitive canon for your application's configuration, written as declarative, schema-validated code.",
-  "main": "index.ts",
+  "main": "src/hierarchy.ts",
   "directories": {
     "example": "examples"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run generate && npm run parse",
-    "parse": "npx tsx index.ts",
+    "start": "npm run generate && npm run parse:hierarchy && npm run parse:ast",
+    "parse": "npm run parse:ast",
+    "parse:hierarchy": "npx tsx src/hierarchy.ts",
+    "parse:ast": "npx tsx src/ast.ts",
     "generate": "npx antlr4ts -visitor -listener definition/CanonLexer.g4 definition/CanonParser.g4 -o src/generated"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/js-yaml": "^4.0.0",
     "@types/node": "^20.0.0",
     "antlr4ts": "^0.5.0-alpha.4",
     "antlr4ts-cli": "^0.5.0-alpha.4",
@@ -23,6 +26,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "antlr4": "^4.13.2"
+    "antlr4": "^4.13.2",
+    "js-yaml": "^4.1.0"
   }
 }
