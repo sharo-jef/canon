@@ -1,0 +1,70 @@
+#schema 'canon::schema'
+
+schema {
+    @description 'hoge'
+    data1: data
+    @description 'fuga'
+    data2*: data2
+}
+
+struct data {
+    datam1: string
+    datam2?: string
+}
+
+// fun data() を明示的に定義しない場合、暗黙的に以下が定義されているのと同じ
+// struct と同名の fun はその struct のコンストラクタとなる
+// さらに、その fun は後置ラムダを自動的に実行する(this.apply())
+// 必須プロパティへの代入が無い後置ラムダは静的解析でエラーとする
+// fun data(): data {
+//     apply()
+// }
+
+struct data2 {
+    mixin data
+    name: string
+}
+
+// return を省略した場合は this を返す
+fun data2(name: string): data2 {
+    apply()  // 後置ラムダがあればそれを実行、なければ何もしない (this.apply() の this. を省略した形)
+    this.name = name
+}
+
+fun generateData3(): data2 {
+    return data2('generated') {
+        datam1 = 'generated1'
+        datam2 = 'generated2'
+    }
+}
+
+struct version {
+    @description 'The major version number.'
+    major: int
+
+    @description 'The minor version number.'
+    minor: int
+
+    @description 'The patch version number.'
+    patch: int
+
+    @description 'Get version as a string.'
+    toString(): string {
+        return `${this.major}.${this.minor}.${this.patch}`
+    }
+}
+
+// Native function
+@description 'Returns the version of the configuration schema.'
+declare fun getVersion(): version
+
+fun generateData4(version: version): data2 {
+    return data2(version.toString()) {
+        datam1 = 'generated1'
+        datam2 = 'generated2'
+    }
+}
+
+// アノテーションは本来は @hoge('fuga', 'piyo') のように書くが以下の例外がある
+// 1. @hoge() は @hoge と表記できる
+// 2. @hoge('fuga') は @hoge 'fuga' と表記できる

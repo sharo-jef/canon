@@ -1,0 +1,61 @@
+#schema 'schema.example.canon'
+
+version {
+    major = 1
+    minor = 0
+    patch = 0
+}
+
+parts1 [
+    {
+        name = 'Part B'
+        description = 'Part B'
+        version = {
+            major = 0
+            minor = 0
+            patch = 1
+        }
+    }
+]
+
+parts2 [
+    {
+        name = 'Part A'
+    },
+    {
+        name = 'Part B'
+        description = 'Part B'
+        version = {
+            major = 0
+            minor = 0
+            patch = 1
+        }
+    }
+]
+
+parts3 {
+    name = 'Part C'
+    description = 'Part C'
+    version = {
+        major = 0
+        minor = 0
+        patch = 2
+    }
+}
+parts3 {
+    name = 'Part D'
+    description = 'Part D'
+    version = {
+        major = 0
+        minor = 0
+        patch = 3
+    }
+}
+parts6 ('partE') {
+    description = name
+    version = {
+        major = 0
+        minor = 0
+        patch = 4
+    }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "canon",
+  "version": "1.0.0",
+  "description": "The definitive canon for your application's configuration, written as declarative, schema-validated code.",
+  "main": "index.ts",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run generate && npm run parse",
+    "parse": "npx tsx index.ts",
+    "generate": "npx antlr4ts -visitor -listener definition/CanonLexer.g4 definition/CanonParser.g4 -o src/generated"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "antlr4ts": "^0.5.0-alpha.4",
+    "antlr4ts-cli": "^0.5.0-alpha.4",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "antlr4": "^4.13.2"
+  }
+}

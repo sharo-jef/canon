@@ -1,0 +1,9 @@
+#schema 'schema.canon'
+
+data1 {
+    name = 'data1'
+}
+
+data2 {
+    name = 'data2'
+}

@@ -1,0 +1,49 @@
+#schema 'canon.schema'
+
+schema {
+    @description 'Mod version.'
+    version: version
+
+    parts1: specificPart[]
+    parts2?: <part | specificPart>[]
+    parts3+: specificPart
+    parts4*: part
+    parts5{0,2}: part
+    parts6*: generatePart
+}
+
+@description 'Semantic versioning structure.'
+struct version {
+    @description 'The major version number.'
+    major = int
+
+    @description 'The minor version number.'
+    minor = int
+
+    @description 'The patch version number.'
+    patch = int
+
+    @description 'Get version as a string.'
+    toString = fun(): string {
+        return `${this.major}.${this.minor}.${this.patch}`
+    }
+}
+
+@description 'Returns the version of the configuration schema.'
+declare fun getVersion(): version
+
+struct type = string
+infix fun type.in(list: list<type>): bool {
+    return list.contains(this)
+}
+
+struct part {
+    name = string
+}
+struct specificPart {
+    mixin part
+    description = string
+    version = version
+}
+
+declare trailing fun generatePart(): part

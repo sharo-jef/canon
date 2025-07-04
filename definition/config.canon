@@ -1,0 +1,36 @@
+#schema './schema.canon'
+
+data1 {
+    datam1 = 'datam1'
+}
+
+data2('hoge') {
+    datam1 = 'hoge1'
+}
+
+data2('fuga') {
+    datam1 = 'fuga1'
+
+    val datam2 = datam1 + '_2'
+    this.datam2 = datam2
+}
+
+data2 = generateData3()
+data2 = generateData4(getVersion())
+
+val name = 'data5'
+data2(name) {
+    datam1 = 'datam1'
+    datam2 = 'datam2'
+}
+
+var name2 = 'data6'
+data2(name2) {
+    datam1 = 'datam1'
+    datam2 = name2 + '_1'
+    datam2 = name2 + '_2'
+    this.datam2 = name2 + '_3'
+    for (i in 1..100) {
+        datam2 = name2 + '_loop_' + i
+    }
+}
