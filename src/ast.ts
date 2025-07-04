@@ -23,6 +23,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     }
 
     visitTerminal(node: TerminalNode): ASTNode {
+        // 重要な情報を持つTerminalのみ、簡潔な形で返す
         return {
             type: 'Terminal',
             text: node.text
@@ -33,14 +34,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         const ruleNames = (node as any).constructor.name || 'UnknownRule';
         const ruleName = ruleNames.replace('Context', '');
         
-        const result: ASTNode = {
-            type: ruleName,
-            children: []
-        };
-
-        // 特定のルールに対して詳細情報を追加
-        this.addRuleSpecificInfo(node, result);
-
         // 式の階層を簡略化: 単一の子ノードしか持たない式は省略
         if (this.isSimpleExpressionNode(node, ruleName)) {
             const child = node.getChild(0);
@@ -49,21 +42,43 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             }
         }
 
+        const result: ASTNode = {
+            type: ruleName,
+            children: []
+        };
+
+        // 特定のルールに対して詳細情報を追加
+        this.addRuleSpecificInfo(node, result);
+
+        // 一部のノードは詳細情報のみで十分（子ノードを含めない）
+        if (this.isInformationOnlyNode(ruleName, result)) {
+            delete result.children;
+            return result;
+        }
+
         // 子ノードを処理
         if (node.childCount > 0) {
             for (let i = 0; i < node.childCount; i++) {
                 const child = node.getChild(i);
                 if (child) {
                     const childNode = this.visit(child);
-                    if (childNode) {
-                        // 意味のないTerminalノードを除外
-                        if (childNode.type === 'Terminal' && this.isMeaninglessToken(childNode.text)) {
-                            continue;
+                    if (childNode && this.shouldIncludeNode(childNode, ruleName)) {
+                        // 冗長なノードの場合、その子ノードを直接追加
+                        if (this.isRedundantWrapperNode(childNode)) {
+                            if (childNode.children) {
+                                result.children!.push(...childNode.children);
+                            }
+                        } else {
+                            result.children!.push(childNode);
                         }
-                        result.children!.push(childNode);
                     }
                 }
             }
+        }
+
+        // 空のchildrenを持つノードの後処理
+        if (result.children!.length === 0) {
+            delete result.children;
         }
 
         return result;
@@ -85,9 +100,19 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         if (!text) return false;
         
         const meaninglessTokens = [
-            '{', '}', '(', ')', '[', ']', ':', ';', ',', '.', 
+            // 括弧類
+            '{', '}', '(', ')', '[', ']',
+            // 区切り文字
+            ':', ';', ',', '.', 
+            // 演算子
             '=', '+', '-', '*', '/', '==', '!=', '<', '>', '<=', '>=',
-            '`', '${', '#schema', '?', '@', '<EOF>'
+            // その他の記号
+            '`', '${', '#schema', '?', '@',
+            // 終端記号
+            '<EOF>',
+            // キーワード類（構造的な意味を持つものは除外対象）
+            'schema', 'struct', 'fun', 'declare', 'return', 'for', 'in',
+            'val', 'var', 'this', 'mixin'
         ];
         
         return meaninglessTokens.includes(text);
@@ -315,6 +340,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             }
         }
         
+        // Type reference
+        else if (ctx.constructor.name === 'TypeReferenceContext') {
+            const stringType = ctx.STRING_TYPE();
+            const intType = ctx.INT_TYPE();
+            const identifier = ctx.IDENTIFIER();
+            
+            if (stringType) {
+                result.typeName = 'string';
+            } else if (intType) {
+                result.typeName = 'int';
+            } else if (identifier) {
+                result.typeName = identifier.text;
+            }
+        }
+        
         // Annotation
         else if (ctx.constructor.name === 'AnnotationContext') {
             const identifier = ctx.IDENTIFIER();
@@ -330,6 +370,34 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     }
                     result.value = value;
                 }
+            }
+        }
+        
+        // Parameter
+        else if (ctx.constructor.name === 'ParameterContext') {
+            const identifier = ctx.IDENTIFIER();
+            const typeRef = ctx.typeReference();
+            
+            if (identifier) {
+                result.parameterName = identifier.text;
+                if (typeRef) {
+                    result.parameterType = typeRef.text;
+                }
+            }
+        }
+        
+        // Type reference
+        else if (ctx.constructor.name === 'TypeReferenceContext') {
+            const stringType = ctx.STRING_TYPE();
+            const intType = ctx.INT_TYPE();
+            const identifier = ctx.IDENTIFIER();
+            
+            if (stringType) {
+                result.typeName = 'string';
+            } else if (intType) {
+                result.typeName = 'int';
+            } else if (identifier) {
+                result.typeName = identifier.text;
             }
         }
     }
@@ -360,6 +428,82 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         const expressions = argumentList.expression();
         if (!expressions) return 0;
         return Array.isArray(expressions) ? expressions.length : 1;
+    }
+
+    private shouldIncludeNode(childNode: ASTNode, parentRuleName: string): boolean {
+        // Terminal ノードの場合、特定のコンテキストでのみ保持
+        if (childNode.type === 'Terminal') {
+            // 意味のないトークンは除外
+            if (this.isMeaninglessToken(childNode.text)) {
+                return false;
+            }
+            
+            // 識別子や値に関するTerminalは、すでにプロパティとして保存されているので除外
+            const parentsThatExtractTerminals = [
+                'SchemaDirective', 'SchemaMember', 'StructDefinition', 'StructMember',
+                'MixinDeclaration', 'FunctionDefinition', 'MethodDefinition', 'Parameter',
+                'Assignment', 'MemberAccess', 'Literal', 'Annotation'
+            ];
+            
+            if (parentsThatExtractTerminals.includes(parentRuleName)) {
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // 重要な構文要素は保持
+        const importantNodes = [
+            'StructMember', 'MixinDeclaration', 'MethodDefinition', 'Annotation',
+            'FunctionCall', 'Assignment', 'ReturnStatement', 'VariableDeclaration',
+            'Literal', 'MemberAccess', 'StringInterpolation', 'ObjectConstruction',
+            'ConstructionBody', 'StructContent', 'ExpressionStatement',
+            'InterpolationExpression', 'TypeReference', 'Parameter',
+            'ParameterList', 'ArgumentList', 'ForStatement', 'StringContent',
+            'FunctionBody'
+        ];
+        
+        if (importantNodes.includes(childNode.type)) {
+            return true;
+        }
+        
+        // Statement は子が複数あるか、意味的価値がある場合のみ保持
+        if (['Statement'].includes(childNode.type)) {
+            // FunctionBody内のStatementは常に保持
+            if (parentRuleName === 'FunctionBody') {
+                return true;
+            }
+            return !!(childNode.children && childNode.children.length > 1) || 
+                   this.hasSemanticValue(childNode);
+        }
+        
+        return true;
+    }
+
+    private isRedundantWrapperNode(node: ASTNode): boolean {
+        // 単一の子ノードを持つ構造的な wrapper ノードを判定
+        // Statement のみ対象（重要な情報を持たない場合）
+        // FunctionBody は関数の実装を含むため除外しない
+        const wrapperNodes = ['Statement'];
+        return wrapperNodes.includes(node.type) && 
+               !!node.children && 
+               node.children.length === 1 &&
+               !this.hasSemanticValue(node);
+    }
+
+    private hasSemanticValue(node: ASTNode): boolean {
+        // ノードが意味的な価値を持つかどうかを判定
+        // （プロパティを持つ、または特定の型の場合は意味的価値がある）
+        const keys = Object.keys(node);
+        return keys.some(key => key !== 'type' && key !== 'children');
+    }
+
+    private isInformationOnlyNode(ruleName: string, result: ASTNode): boolean {
+        // これらのノードは詳細情報のみで十分（子ノードは不要）
+        const informationOnlyNodes = [
+            'TypeReference', 'Parameter', 'Annotation', 'Literal', 'MemberAccess'
+        ];
+        return informationOnlyNodes.includes(ruleName) && this.hasSemanticValue(result);
     }
 
     // Visitor methods implementation

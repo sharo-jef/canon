@@ -1,68 +1,37 @@
 type: Program
 children:
   - type: SchemaDirective
-    children:
-      - type: Terminal
-        text: '''canon::schema'''
     schema: canon::schema
   - type: SchemaDefinition
     children:
-      - type: Terminal
-        text: schema
       - type: SchemaMember
         children:
           - type: Annotation
-            children:
-              - type: Terminal
-                text: description
-              - type: Terminal
-                text: '''hoge'''
             name: description
             value: hoge
-          - type: Terminal
-            text: data1
           - type: TypeReference
-            children:
-              - type: Terminal
-                text: data
+            typeName: data
         name: data1
         isMultiple: false
         dataType: data
       - type: SchemaMember
         children:
           - type: Annotation
-            children:
-              - type: Terminal
-                text: description
-              - type: Terminal
-                text: '''fuga'''
             name: description
             value: fuga
-          - type: Terminal
-            text: data2
           - type: TypeReference
-            children:
-              - type: Terminal
-                text: data2
+            typeName: data2
         name: data2
         isMultiple: true
         dataType: data2
   - type: StructDefinition
     children:
-      - type: Terminal
-        text: struct
-      - type: Terminal
-        text: data
       - type: StructContent
         children:
           - type: StructMember
             children:
-              - type: Terminal
-                text: datam1
               - type: TypeReference
-                children:
-                  - type: Terminal
-                    text: string
+                typeName: string
             name: datam1
             isOptional: false
             dataType: string
@@ -70,91 +39,55 @@ children:
         children:
           - type: StructMember
             children:
-              - type: Terminal
-                text: datam2
               - type: TypeReference
-                children:
-                  - type: Terminal
-                    text: string
+                typeName: string
             name: datam2
             isOptional: true
             dataType: string
     name: data
   - type: StructDefinition
     children:
-      - type: Terminal
-        text: struct
-      - type: Terminal
-        text: data2
       - type: StructContent
         children:
           - type: MixinDeclaration
-            children:
-              - type: Terminal
-                text: mixin
-              - type: Terminal
-                text: data
             mixinType: data
       - type: StructContent
         children:
           - type: StructMember
             children:
-              - type: Terminal
-                text: name
               - type: TypeReference
-                children:
-                  - type: Terminal
-                    text: string
+                typeName: string
             name: name
             isOptional: false
             dataType: string
     name: data2
   - type: FunctionDefinition
     children:
-      - type: Terminal
-        text: fun
-      - type: Terminal
-        text: data2
       - type: ParameterList
         children:
           - type: Parameter
-            children:
-              - type: Terminal
-                text: name
-              - type: TypeReference
-                children:
-                  - type: Terminal
-                    text: string
+            parameterName: name
+            parameterType: string
       - type: TypeReference
-        children:
-          - type: Terminal
-            text: data2
+        typeName: data2
       - type: FunctionBody
         children:
-          - type: Statement
+          - type: ExpressionStatement
             children:
-              - type: ExpressionStatement
-                children:
-                  - type: FunctionCall
-                    children:
-                      - type: Terminal
-                        text: apply
-                    functionName: apply
-                    hasArguments: false
-                    argumentCount: 0
-          - type: Statement
-            children:
-              - type: Assignment
+              - type: FunctionCall
                 children:
                   - type: Terminal
-                    text: this
+                    text: apply
+                functionName: apply
+                hasArguments: false
+                argumentCount: 0
+          - type: Assignment
+            children:
+              - type: PrimaryExpression
+                children:
                   - type: Terminal
                     text: name
-                  - type: PrimaryExpression
-                    children:
-                      - type: Terminal
-                        text: name
-                target: this.name
+            target: this.name
     name: data2
     isDeclare: false
     returnType: data2
@@ -163,98 +96,62 @@ children:
         type: string
   - type: FunctionDefinition
     children:
-      - type: Terminal
-        text: fun
-      - type: Terminal
-        text: generateData3
       - type: TypeReference
-        children:
-          - type: Terminal
-            text: data2
+        typeName: data2
       - type: FunctionBody
         children:
-          - type: Statement
+          - type: ReturnStatement
             children:
-              - type: ReturnStatement
+              - type: PrimaryExpression
                 children:
-                  - type: Terminal
-                    text: return
-                  - type: PrimaryExpression
+                  - type: FunctionCall
                     children:
-                      - type: FunctionCall
+                      - type: Terminal
+                        text: data2
+                      - type: ArgumentList
                         children:
-                          - type: Terminal
-                            text: data2
-                          - type: ArgumentList
+                          - type: PrimaryExpression
+                            children:
+                              - type: Literal
+                                literalType: string
+                                value: generated
+                      - type: ConstructionBody
+                        children:
+                          - type: Assignment
                             children:
                               - type: PrimaryExpression
                                 children:
                                   - type: Literal
-                                    children:
-                                      - type: Terminal
-                                        text: '''generated'''
                                     literalType: string
-                                    value: generated
-                          - type: ConstructionBody
+                                    value: generated1
+                            target: datam1
+                          - type: Assignment
                             children:
-                              - type: Assignment
+                              - type: PrimaryExpression
                                 children:
-                                  - type: Terminal
-                                    text: datam1
-                                  - type: PrimaryExpression
-                                    children:
-                                      - type: Literal
-                                        children:
-                                          - type: Terminal
-                                            text: '''generated1'''
-                                        literalType: string
-                                        value: generated1
-                                target: datam1
-                              - type: Assignment
-                                children:
-                                  - type: Terminal
-                                    text: datam2
-                                  - type: PrimaryExpression
-                                    children:
-                                      - type: Literal
-                                        children:
-                                          - type: Terminal
-                                            text: '''generated2'''
-                                        literalType: string
-                                        value: generated2
-                                target: datam2
-                        hasArguments: true
-                        argumentCount: 1
-                        isObjectConstruction: true
-                        hasBody: true
+                                  - type: Literal
+                                    literalType: string
+                                    value: generated2
+                            target: datam2
+                    hasArguments: true
+                    argumentCount: 1
+                    isObjectConstruction: true
+                    hasBody: true
     name: generateData3
     isDeclare: false
     returnType: data2
     parameters: []
   - type: StructDefinition
     children:
-      - type: Terminal
-        text: struct
-      - type: Terminal
-        text: version
       - type: StructContent
         children:
           - type: StructMember
             children:
               - type: Annotation
-                children:
-                  - type: Terminal
-                    text: description
-                  - type: Terminal
-                    text: '''The major version number.'''
                 name: description
                 value: The major version number.
-              - type: Terminal
-                text: major
               - type: TypeReference
-                children:
-                  - type: Terminal
-                    text: int
+                typeName: int
             name: major
             isOptional: false
             dataType: int
@@ -263,19 +160,10 @@ children:
           - type: StructMember
             children:
               - type: Annotation
-                children:
-                  - type: Terminal
-                    text: description
-                  - type: Terminal
-                    text: '''The minor version number.'''
                 name: description
                 value: The minor version number.
-              - type: Terminal
-                text: minor
               - type: TypeReference
-                children:
-                  - type: Terminal
-                    text: int
+                typeName: int
             name: minor
             isOptional: false
             dataType: int
@@ -284,19 +172,10 @@ children:
           - type: StructMember
             children:
               - type: Annotation
-                children:
-                  - type: Terminal
-                    text: description
-                  - type: Terminal
-                    text: '''The patch version number.'''
                 name: description
                 value: The patch version number.
-              - type: Terminal
-                text: patch
               - type: TypeReference
-                children:
-                  - type: Terminal
-                    text: int
+                typeName: int
             name: patch
             isOptional: false
             dataType: int
@@ -305,72 +184,44 @@ children:
           - type: MethodDefinition
             children:
               - type: Annotation
-                children:
-                  - type: Terminal
-                    text: description
-                  - type: Terminal
-                    text: '''Get version as a string.'''
                 name: description
                 value: Get version as a string.
-              - type: Terminal
-                text: toString
               - type: TypeReference
-                children:
-                  - type: Terminal
-                    text: string
+                typeName: string
               - type: FunctionBody
                 children:
-                  - type: Statement
+                  - type: ReturnStatement
                     children:
-                      - type: ReturnStatement
+                      - type: PrimaryExpression
                         children:
-                          - type: Terminal
-                            text: return
-                          - type: PrimaryExpression
+                          - type: StringInterpolation
                             children:
-                              - type: StringInterpolation
+                              - type: StringContent
                                 children:
-                                  - type: StringContent
+                                  - type: InterpolationExpression
                                     children:
-                                      - type: InterpolationExpression
+                                      - type: PrimaryExpression
                                         children:
-                                          - type: PrimaryExpression
-                                            children:
-                                              - type: MemberAccess
-                                                children:
-                                                  - type: Terminal
-                                                    text: this
-                                                  - type: Terminal
-                                                    text: major
-                                                object: this
-                                                member: major
-                                                fullAccess: this.major
-                                      - type: InterpolationExpression
+                                          - type: MemberAccess
+                                            object: this
+                                            member: major
+                                            fullAccess: this.major
+                                  - type: InterpolationExpression
+                                    children:
+                                      - type: PrimaryExpression
                                         children:
-                                          - type: PrimaryExpression
-                                            children:
-                                              - type: MemberAccess
-                                                children:
-                                                  - type: Terminal
-                                                    text: this
-                                                  - type: Terminal
-                                                    text: minor
-                                                object: this
-                                                member: minor
-                                                fullAccess: this.minor
-                                      - type: InterpolationExpression
+                                          - type: MemberAccess
+                                            object: this
+                                            member: minor
+                                            fullAccess: this.minor
+                                  - type: InterpolationExpression
+                                    children:
+                                      - type: PrimaryExpression
                                         children:
-                                          - type: PrimaryExpression
-                                            children:
-                                              - type: MemberAccess
-                                                children:
-                                                  - type: Terminal
-                                                    text: this
-                                                  - type: Terminal
-                                                    text: patch
-                                                object: this
-                                                member: patch
-                                                fullAccess: this.patch
+                                          - type: MemberAccess
+                                            object: this
+                                            member: patch
+                                            fullAccess: this.patch
             name: toString
             returnType: string
             parameters: []
@@ -378,109 +229,66 @@ children:
   - type: FunctionDefinition
     children:
       - type: Annotation
-        children:
-          - type: Terminal
-            text: description
-          - type: Terminal
-            text: '''Returns the version of the configuration schema.'''
         name: description
         value: Returns the version of the configuration schema.
-      - type: Terminal
-        text: declare
-      - type: Terminal
-        text: fun
-      - type: Terminal
-        text: getVersion
       - type: TypeReference
-        children:
-          - type: Terminal
-            text: version
+        typeName: version
     name: getVersion
     isDeclare: true
     returnType: version
     parameters: []
   - type: FunctionDefinition
     children:
-      - type: Terminal
-        text: fun
-      - type: Terminal
-        text: generateData4
       - type: ParameterList
         children:
           - type: Parameter
-            children:
-              - type: Terminal
-                text: version
-              - type: TypeReference
-                children:
-                  - type: Terminal
-                    text: version
+            parameterName: version
+            parameterType: version
       - type: TypeReference
-        children:
-          - type: Terminal
-            text: data2
+        typeName: data2
       - type: FunctionBody
         children:
-          - type: Statement
+          - type: ReturnStatement
             children:
-              - type: ReturnStatement
+              - type: PrimaryExpression
                 children:
-                  - type: Terminal
-                    text: return
-                  - type: PrimaryExpression
+                  - type: FunctionCall
                     children:
-                      - type: FunctionCall
+                      - type: Terminal
+                        text: data2
+                      - type: ArgumentList
                         children:
-                          - type: Terminal
-                            text: data2
-                          - type: ArgumentList
+                          - type: PrimaryExpression
+                            children:
+                              - type: FunctionCall
+                                children:
+                                  - type: MemberAccess
+                                    object: version
+                                    member: toString
+                                    fullAccess: version.toString
+                                isMethodCall: true
+                      - type: ConstructionBody
+                        children:
+                          - type: Assignment
                             children:
                               - type: PrimaryExpression
                                 children:
-                                  - type: FunctionCall
-                                    children:
-                                      - type: MemberAccess
-                                        children:
-                                          - type: Terminal
-                                            text: version
-                                          - type: Terminal
-                                            text: toString
-                                        object: version
-                                        member: toString
-                                        fullAccess: version.toString
-                                    isMethodCall: true
-                          - type: ConstructionBody
+                                  - type: Literal
+                                    literalType: string
+                                    value: generated1
+                            target: datam1
+                          - type: Assignment
                             children:
-                              - type: Assignment
+                              - type: PrimaryExpression
                                 children:
-                                  - type: Terminal
-                                    text: datam1
-                                  - type: PrimaryExpression
-                                    children:
-                                      - type: Literal
-                                        children:
-                                          - type: Terminal
-                                            text: '''generated1'''
-                                        literalType: string
-                                        value: generated1
-                                target: datam1
-                              - type: Assignment
-                                children:
-                                  - type: Terminal
-                                    text: datam2
-                                  - type: PrimaryExpression
-                                    children:
-                                      - type: Literal
-                                        children:
-                                          - type: Terminal
-                                            text: '''generated2'''
-                                        literalType: string
-                                        value: generated2
-                                target: datam2
-                        hasArguments: true
-                        argumentCount: 1
-                        isObjectConstruction: true
-                        hasBody: true
+                                  - type: Literal
+                                    literalType: string
+                                    value: generated2
+                            target: datam2
+                    hasArguments: true
+                    argumentCount: 1
+                    isObjectConstruction: true
+                    hasBody: true
     name: generateData4
     isDeclare: false
     returnType: data2
