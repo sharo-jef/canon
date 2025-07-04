@@ -56,6 +56,10 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 if (child) {
                     const childNode = this.visit(child);
                     if (childNode) {
+                        // 意味のないTerminalノードを除外
+                        if (childNode.type === 'Terminal' && this.isMeaninglessToken(childNode.text)) {
+                            continue;
+                        }
                         result.children!.push(childNode);
                     }
                 }
@@ -75,6 +79,18 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             return expressionTypes.includes(ruleName);
         }
         return false;
+    }
+
+    private isMeaninglessToken(text?: string): boolean {
+        if (!text) return false;
+        
+        const meaninglessTokens = [
+            '{', '}', '(', ')', '[', ']', ':', ';', ',', '.', 
+            '=', '+', '-', '*', '/', '==', '!=', '<', '>', '<=', '>=',
+            '`', '${', '#schema', '?', '@', '<EOF>'
+        ];
+        
+        return meaninglessTokens.includes(text);
     }
 
     private addRuleSpecificInfo(node: RuleNode, result: ASTNode): void {
@@ -121,29 +137,26 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             }
         }
         
+        // Mixin declaration
+        else if (ctx.constructor.name === 'MixinDeclarationContext') {
+            const identifier = ctx.IDENTIFIER();
+            if (identifier) {
+                result.mixinType = identifier.text;
+            }
+        }
+        
         // Struct member
         else if (ctx.constructor.name === 'StructMemberContext') {
-            if (ctx.MIXIN()) {
-                result.memberType = 'mixin';
-                const identifier = ctx.IDENTIFIER();
-                if (identifier) {
-                    result.mixinType = identifier.text;
+            const identifier = ctx.IDENTIFIER();
+            const question = ctx.QUESTION();
+            const typeRef = ctx.typeReference();
+            
+            if (identifier) {
+                result.name = identifier.text;
+                result.isOptional = !!question;
+                if (typeRef) {
+                    result.dataType = typeRef.text;
                 }
-            } else if (ctx.IDENTIFIER()) {
-                result.memberType = 'field';
-                const identifier = ctx.IDENTIFIER();
-                const question = ctx.QUESTION();
-                const typeRef = ctx.typeReference();
-                
-                if (identifier) {
-                    result.name = identifier.text;
-                    result.isOptional = !!question;
-                    if (typeRef) {
-                        result.dataType = typeRef.text;
-                    }
-                }
-            } else {
-                result.memberType = 'method';
             }
         }
         
@@ -355,6 +368,8 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     visitSchemaDefinition(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitSchemaMember(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitStructDefinition(ctx: any): ASTNode { return this.visitChildren(ctx); }
+    visitStructContent(ctx: any): ASTNode { return this.visitChildren(ctx); }
+    visitMixinDeclaration(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitStructMember(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitMethodDefinition(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitFunctionDefinition(ctx: any): ASTNode { return this.visitChildren(ctx); }
@@ -421,7 +436,12 @@ function parseSchemaCanonToAST(): void {
             skipInvalid: true
         });
         
-        console.log('AST (YAML format):');
+        // ast.yamlファイルに出力
+        const astYamlPath = path.join(__dirname, '..', 'ast.yaml');
+        fs.writeFileSync(astYamlPath, yamlOutput, 'utf-8');
+        console.log(`\nAST saved to: ${astYamlPath}`);
+        
+        console.log('\nAST (YAML format):');
         console.log('==================');
         console.log(yamlOutput);
         

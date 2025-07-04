@@ -8,11 +8,13 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run generate && npm run parse:hierarchy && npm run parse:ast",
+    "start": "npm run generate && npm run parse:hierarchy && npm run parse:ast && npm run generate:docs && npm run generate:ast-docs",
     "parse": "npm run parse:ast",
     "parse:hierarchy": "npx tsx src/hierarchy.ts",
     "parse:ast": "npx tsx src/ast.ts",
-    "generate": "npx antlr4ts -visitor -listener definition/CanonLexer.g4 definition/CanonParser.g4 -o src/generated"
+    "generate": "npx antlr4ts -visitor -listener definition/CanonLexer.g4 definition/CanonParser.g4 -o src/generated",
+    "generate:docs": "npx tsx src/generate-docs.ts",
+    "generate:ast-docs": "npx tsx src/generate-ast-docs.ts"
   },
   "keywords": [],
   "author": "",

@@ -8,6 +8,8 @@ import { SchemaDirectiveContext } from "./CanonParser";
 import { SchemaDefinitionContext } from "./CanonParser";
 import { SchemaMemberContext } from "./CanonParser";
 import { StructDefinitionContext } from "./CanonParser";
+import { StructContentContext } from "./CanonParser";
+import { MixinDeclarationContext } from "./CanonParser";
 import { StructMemberContext } from "./CanonParser";
 import { MethodDefinitionContext } from "./CanonParser";
 import { FunctionDefinitionContext } from "./CanonParser";
@@ -81,6 +83,20 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitStructDefinition?: (ctx: StructDefinitionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.structContent`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStructContent?: (ctx: StructContentContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.mixinDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitMixinDeclaration?: (ctx: MixinDeclarationContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.structMember`.

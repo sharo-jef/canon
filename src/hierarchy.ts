@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as yaml from 'js-yaml';
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
 import { CanonLexer } from './generated/CanonLexer';
 import { CanonParser } from './generated/CanonParser';
@@ -7,8 +8,20 @@ import { ParseTreeWalker } from 'antlr4ts/tree/ParseTreeWalker';
 import { CanonParserListener } from './generated/CanonParserListener';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 
+interface HierarchyNode {
+    type: string;
+    details?: string;
+    children: HierarchyNode[];
+}
+
 class SchemaCanonParseListener implements CanonParserListener {
     private depth = 0;
+    private hierarchyStack: HierarchyNode[] = [];
+    private rootHierarchy: HierarchyNode = { type: 'Root', children: [] };
+
+    constructor() {
+        this.hierarchyStack.push(this.rootHierarchy);
+    }
 
     private getIndent(): string {
         return '  '.repeat(this.depth);
@@ -18,10 +31,29 @@ class SchemaCanonParseListener implements CanonParserListener {
         const info = details ? `: ${details}` : '';
         console.log(`${this.getIndent()}${ruleName}${info}`);
         this.depth++;
+
+        // YAML階層も同時に構築
+        const node: HierarchyNode = {
+            type: ruleName,
+            details,
+            children: []
+        };
+        
+        this.getCurrentParent().children.push(node);
+        this.hierarchyStack.push(node);
     }
 
     private logExit(): void {
         this.depth--;
+        this.hierarchyStack.pop();
+    }
+
+    private getCurrentParent(): HierarchyNode {
+        return this.hierarchyStack[this.hierarchyStack.length - 1];
+    }
+
+    getHierarchy(): HierarchyNode {
+        return this.rootHierarchy;
     }
 
     enterProgram(ctx: any): void {
@@ -70,17 +102,10 @@ class SchemaCanonParseListener implements CanonParserListener {
     }
 
     enterStructMember(ctx: any): void {
-        if (ctx.MIXIN()) {
-            const mixinType = ctx.IDENTIFIER()?.text || 'unknown';
-            this.logEnter('StructMember', `mixin ${mixinType}`);
-        } else if (ctx.IDENTIFIER()) {
-            const name = ctx.IDENTIFIER()?.text || 'unknown';
-            const optional = ctx.QUESTION() ? '?' : '';
-            const type = ctx.typeReference()?.text || 'unknown';
-            this.logEnter('StructMember', `${name}${optional}: ${type}`);
-        } else {
-            this.logEnter('StructMember', 'method');
-        }
+        const name = ctx.IDENTIFIER()?.text || 'unknown';
+        const optional = ctx.QUESTION() ? '?' : '';
+        const type = ctx.typeReference()?.text || 'unknown';
+        this.logEnter('StructMember', `${name}${optional}: ${type}`);
     }
 
     exitStructMember(ctx: any): void {
@@ -300,6 +325,23 @@ class SchemaCanonParseListener implements CanonParserListener {
         this.logExit();
     }
 
+    enterMixinDeclaration(ctx: any): void {
+        const mixinType = ctx.IDENTIFIER()?.text || 'unknown';
+        this.logEnter('MixinDeclaration', `mixin ${mixinType}`);
+    }
+
+    exitMixinDeclaration(ctx: any): void {
+        this.logExit();
+    }
+
+    enterStructContent(ctx: any): void {
+        this.logEnter('StructContent');
+    }
+
+    exitStructContent(ctx: any): void {
+        this.logExit();
+    }
+
     // Default implementations for other methods
     enterTypeReference(ctx: any): void {}
     exitTypeReference(ctx: any): void {}
@@ -430,6 +472,20 @@ function parseSchemaCanon(): void {
         ParseTreeWalker.DEFAULT.walk(listener, tree);
         
         console.log('\nParsing completed successfully!');
+        
+        // YAML形式で階層構造を出力
+        const hierarchy = listener.getHierarchy();
+        const yamlOutput = yaml.dump(hierarchy, {
+            indent: 2,
+            lineWidth: -1,
+            noRefs: true,
+            skipInvalid: true
+        });
+        
+        // hierarchy.yamlファイルに出力
+        const outputPath = path.join(__dirname, '..', 'hierarchy.yaml');
+        fs.writeFileSync(outputPath, yamlOutput, 'utf-8');
+        console.log(`\nHierarchy saved to: ${outputPath}`);
         
     } catch (error) {
         console.error('Error parsing schema.canon:', error);

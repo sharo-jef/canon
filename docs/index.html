@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canon AST</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gray: {
+                            950: '#0a0b0f',
+                            900: '#0f1419',
+                            850: '#191d25',
+                            800: '#24292e',
+                            700: '#374151',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Consolas', monospace; }
+        .highlight { background-color: #0366d6 !important; color: #ffffff !important; }
+        .dark .highlight { background-color: #1f6feb !important; color: #ffffff !important; }
+    </style>
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+    <div class="min-h-screen">
+        <!-- Ultra Minimal Header -->
+        <header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+            <div class="max-w-full px-3 py-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-sm font-medium text-gray-900 dark:text-white">Canon AST</h1>
+                        <nav class="flex">
+                            <a href="index.html" class="bg-gray-900 dark:bg-gray-700 text-white px-2 py-1 text-xs">AST</a>
+                            <a href="hierarchy.html" class="bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 text-xs hover:bg-gray-400 dark:hover:bg-gray-500">Hierarchy</a>
+                        </nav>
+                    </div>
+                    <button onclick="toggleTheme()" class="p-1 text-gray-600 dark:text-gray-300">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path class="dark:hidden" d="M10 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6l2-6z"/>
+                            <path class="hidden dark:block" d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <div class="max-w-full px-3 py-2">
+            <!-- Ultra Compact Controls -->
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-2 mb-2">
+                <div class="flex items-center gap-2 text-xs">
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        class="flex-1 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
+                        placeholder="Search..." 
+                    />
+                    <div class="flex gap-1">
+                        <button onclick="expandAll()" class="bg-gray-800 dark:bg-gray-700 text-white px-2 py-1 text-xs">+</button>
+                        <button onclick="collapseAll()" class="bg-gray-800 dark:bg-gray-700 text-white px-2 py-1 text-xs">-</button>
+                        <button onclick="expandToLevel(2)" class="bg-gray-600 dark:bg-gray-600 text-white px-2 py-1 text-xs">2</button>
+                        <button onclick="expandToLevel(3)" class="bg-gray-600 dark:bg-gray-600 text-white px-2 py-1 text-xs">3</button>
+                    </div>
+                    <div id="stats-content" class="text-xs text-gray-600 dark:text-gray-400"></div>
+                </div>
+            </div>
+
+            <!-- AST Tree -->
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+                <div class="bg-gray-100 dark:bg-gray-850 px-3 py-1 border-b border-gray-200 dark:border-gray-800">
+                    <h2 class="text-xs font-medium text-gray-900 dark:text-white">AST</h2>
+                </div>
+                <div class="ast-tree p-2 overflow-x-auto max-h-screen overflow-y-auto">
+                    <div id="ast-root"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 " id="ast-node-1751671814281-gw02pevfi" onclick="toggleASTNode('ast-node-1751671814281-gw02pevfi')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Program</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814281-gw02pevfi-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-2" id="ast-node-1751671814282-5nrx6omy6" onclick="toggleASTNode('ast-node-1751671814282-5nrx6omy6')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">SchemaDirective</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">schema: canon::schema</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-5nrx6omy6-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-7gsc684zg" onclick="toggleASTNode('ast-node-1751671814282-7gsc684zg')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;canon::schema&#39;&quot;</span></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-2" id="ast-node-1751671814282-o29rzv2js" onclick="toggleASTNode('ast-node-1751671814282-o29rzv2js')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">SchemaDefinition</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-o29rzv2js-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-n2431rb3a" onclick="toggleASTNode('ast-node-1751671814282-n2431rb3a')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;schema&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-y4y8zl63f" onclick="toggleASTNode('ast-node-1751671814282-y4y8zl63f')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">SchemaMember</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-y4y8zl63f-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-uue8lrukr" onclick="toggleASTNode('ast-node-1751671814282-uue8lrukr')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Annotation</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">value: &quot;hoge&quot;</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-uue8lrukr-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-67f0za5h1" onclick="toggleASTNode('ast-node-1751671814282-67f0za5h1')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;description&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-dgps1zgjd" onclick="toggleASTNode('ast-node-1751671814282-dgps1zgjd')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;hoge&#39;&quot;</span></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-qwkyd3n03" onclick="toggleASTNode('ast-node-1751671814282-qwkyd3n03')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data1&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-hhsbp6mem" onclick="toggleASTNode('ast-node-1751671814282-hhsbp6mem')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-hhsbp6mem-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-bji9o7i66" onclick="toggleASTNode('ast-node-1751671814282-bji9o7i66')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data&quot;</span></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-oxvls0aki" onclick="toggleASTNode('ast-node-1751671814282-oxvls0aki')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">SchemaMember</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-oxvls0aki-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-h9wqdrk3g" onclick="toggleASTNode('ast-node-1751671814282-h9wqdrk3g')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Annotation</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">value: &quot;fuga&quot;</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-h9wqdrk3g-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-fhmyfzr5v" onclick="toggleASTNode('ast-node-1751671814282-fhmyfzr5v')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;description&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-k2114ozfm" onclick="toggleASTNode('ast-node-1751671814282-k2114ozfm')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;fuga&#39;&quot;</span></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-ps4qqtsz2" onclick="toggleASTNode('ast-node-1751671814282-ps4qqtsz2')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data2&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-x6ua3lwq2" onclick="toggleASTNode('ast-node-1751671814282-x6ua3lwq2')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-x6ua3lwq2-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-gymosxehi" onclick="toggleASTNode('ast-node-1751671814282-gymosxehi')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data2&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-2" id="ast-node-1751671814282-35kcaxf3p" onclick="toggleASTNode('ast-node-1751671814282-35kcaxf3p')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructDefinition</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-35kcaxf3p-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-9s0dksnth" onclick="toggleASTNode('ast-node-1751671814282-9s0dksnth')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;struct&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-ni1ih3nrm" onclick="toggleASTNode('ast-node-1751671814282-ni1ih3nrm')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-q6cfq097u" onclick="toggleASTNode('ast-node-1751671814282-q6cfq097u')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructContent</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-q6cfq097u-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-yghiu3lya" onclick="toggleASTNode('ast-node-1751671814282-yghiu3lya')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructMember</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-yghiu3lya-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-qjnxb95z3" onclick="toggleASTNode('ast-node-1751671814282-qjnxb95z3')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;datam1&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-9dkf8nunb" onclick="toggleASTNode('ast-node-1751671814282-9dkf8nunb')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-9dkf8nunb-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-um316fxrg" onclick="toggleASTNode('ast-node-1751671814282-um316fxrg')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;string&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-2fnp1gjjq" onclick="toggleASTNode('ast-node-1751671814282-2fnp1gjjq')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructContent</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-2fnp1gjjq-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-q8333413w" onclick="toggleASTNode('ast-node-1751671814282-q8333413w')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructMember</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-q8333413w-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-tfog9bipu" onclick="toggleASTNode('ast-node-1751671814282-tfog9bipu')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;datam2&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-fdg9suv10" onclick="toggleASTNode('ast-node-1751671814282-fdg9suv10')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-fdg9suv10-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-kiezlllej" onclick="toggleASTNode('ast-node-1751671814282-kiezlllej')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;string&quot;</span></div></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-2" id="ast-node-1751671814282-avg8j8440" onclick="toggleASTNode('ast-node-1751671814282-avg8j8440')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructDefinition</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-avg8j8440-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-no81err0i" onclick="toggleASTNode('ast-node-1751671814282-no81err0i')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;struct&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-18mymtx28" onclick="toggleASTNode('ast-node-1751671814282-18mymtx28')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data2&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-3vfby5s9h" onclick="toggleASTNode('ast-node-1751671814282-3vfby5s9h')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructContent</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-3vfby5s9h-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-nllfthdqr" onclick="toggleASTNode('ast-node-1751671814282-nllfthdqr')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">MixinDeclaration</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-nllfthdqr-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-x35b7a1jw" onclick="toggleASTNode('ast-node-1751671814282-x35b7a1jw')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;mixin&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-peapg4xdn" onclick="toggleASTNode('ast-node-1751671814282-peapg4xdn')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data&quot;</span></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-nsrl5hqnq" onclick="toggleASTNode('ast-node-1751671814282-nsrl5hqnq')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructContent</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-nsrl5hqnq-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-kumh474dx" onclick="toggleASTNode('ast-node-1751671814282-kumh474dx')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructMember</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-kumh474dx-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-9qu2px5fx" onclick="toggleASTNode('ast-node-1751671814282-9qu2px5fx')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;name&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-65se6va1u" onclick="toggleASTNode('ast-node-1751671814282-65se6va1u')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-65se6va1u-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-qc6ryl2bo" onclick="toggleASTNode('ast-node-1751671814282-qc6ryl2bo')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;string&quot;</span></div></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-2" id="ast-node-1751671814282-c0hq52s3o" onclick="toggleASTNode('ast-node-1751671814282-c0hq52s3o')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">FunctionDefinition</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">params: (name: string)</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-c0hq52s3o-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-2kiz8vv3n" onclick="toggleASTNode('ast-node-1751671814282-2kiz8vv3n')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;fun&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-0t78c3i0k" onclick="toggleASTNode('ast-node-1751671814282-0t78c3i0k')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data2&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-7f4zb7f7f" onclick="toggleASTNode('ast-node-1751671814282-7f4zb7f7f')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">ParameterList</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-7f4zb7f7f-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-2h963aqqq" onclick="toggleASTNode('ast-node-1751671814282-2h963aqqq')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Parameter</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-2h963aqqq-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-wzvmpuukb" onclick="toggleASTNode('ast-node-1751671814282-wzvmpuukb')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;name&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-ygqp1deyk" onclick="toggleASTNode('ast-node-1751671814282-ygqp1deyk')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-ygqp1deyk-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-enqlwkg9i" onclick="toggleASTNode('ast-node-1751671814282-enqlwkg9i')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;string&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-s0lv6hu14" onclick="toggleASTNode('ast-node-1751671814282-s0lv6hu14')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-s0lv6hu14-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-yb44h36hc" onclick="toggleASTNode('ast-node-1751671814282-yb44h36hc')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data2&quot;</span></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-qrbem6307" onclick="toggleASTNode('ast-node-1751671814282-qrbem6307')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">FunctionBody</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-qrbem6307-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-1f4ylstp3" onclick="toggleASTNode('ast-node-1751671814282-1f4ylstp3')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Statement</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-1f4ylstp3-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-r91hwp2bm" onclick="toggleASTNode('ast-node-1751671814282-r91hwp2bm')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">ExpressionStatement</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-r91hwp2bm-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-pgm6cc7y6" onclick="toggleASTNode('ast-node-1751671814282-pgm6cc7y6')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">FunctionCall</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">function: apply</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-pgm6cc7y6-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-rywmyo8pw" onclick="toggleASTNode('ast-node-1751671814282-rywmyo8pw')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;apply&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-q4z3t3a3c" onclick="toggleASTNode('ast-node-1751671814282-q4z3t3a3c')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Statement</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-q4z3t3a3c-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-yk6odb9o7" onclick="toggleASTNode('ast-node-1751671814282-yk6odb9o7')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Assignment</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">target: this.name</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-yk6odb9o7-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-3tioolzgm" onclick="toggleASTNode('ast-node-1751671814282-3tioolzgm')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;this&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-bzxq4cslb" onclick="toggleASTNode('ast-node-1751671814282-bzxq4cslb')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;name&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-ukpenfjf2" onclick="toggleASTNode('ast-node-1751671814282-ukpenfjf2')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-ukpenfjf2-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-dtbnx74rk" onclick="toggleASTNode('ast-node-1751671814282-dtbnx74rk')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;name&quot;</span></div></div></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-2" id="ast-node-1751671814282-bhsxg3fva" onclick="toggleASTNode('ast-node-1751671814282-bhsxg3fva')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">FunctionDefinition</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">params: ()</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-bhsxg3fva-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-542bo5nld" onclick="toggleASTNode('ast-node-1751671814282-542bo5nld')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;fun&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-a6st0ddar" onclick="toggleASTNode('ast-node-1751671814282-a6st0ddar')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;generateData3&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-3ta7yqjqj" onclick="toggleASTNode('ast-node-1751671814282-3ta7yqjqj')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-3ta7yqjqj-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-gu4r895ye" onclick="toggleASTNode('ast-node-1751671814282-gu4r895ye')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data2&quot;</span></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-qlyzux0di" onclick="toggleASTNode('ast-node-1751671814282-qlyzux0di')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">FunctionBody</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-qlyzux0di-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-3tfu2acic" onclick="toggleASTNode('ast-node-1751671814282-3tfu2acic')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Statement</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-3tfu2acic-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-pm5ac9v3k" onclick="toggleASTNode('ast-node-1751671814282-pm5ac9v3k')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">ReturnStatement</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-pm5ac9v3k-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-hfxaf2m22" onclick="toggleASTNode('ast-node-1751671814282-hfxaf2m22')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;return&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-bauj0sg80" onclick="toggleASTNode('ast-node-1751671814282-bauj0sg80')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-bauj0sg80-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-tyx530dg5" onclick="toggleASTNode('ast-node-1751671814282-tyx530dg5')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">FunctionCall</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-tyx530dg5-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-hv5fi9ld8" onclick="toggleASTNode('ast-node-1751671814282-hv5fi9ld8')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data2&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-pw84viirs" onclick="toggleASTNode('ast-node-1751671814282-pw84viirs')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">ArgumentList</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-pw84viirs-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-wm5db9bxp" onclick="toggleASTNode('ast-node-1751671814282-wm5db9bxp')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-wm5db9bxp-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-0wnistfug" onclick="toggleASTNode('ast-node-1751671814282-0wnistfug')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Literal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">value: &quot;generated&quot;, literal: string</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-0wnistfug-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-pznrjtt4q" onclick="toggleASTNode('ast-node-1751671814282-pznrjtt4q')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;generated&#39;&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-r4bm0mahx" onclick="toggleASTNode('ast-node-1751671814282-r4bm0mahx')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">ConstructionBody</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-r4bm0mahx-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-s5ojny2x0" onclick="toggleASTNode('ast-node-1751671814282-s5ojny2x0')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Assignment</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">target: datam1</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-s5ojny2x0-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-cwipo0315" onclick="toggleASTNode('ast-node-1751671814282-cwipo0315')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;datam1&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-ml0tux9u7" onclick="toggleASTNode('ast-node-1751671814282-ml0tux9u7')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-ml0tux9u7-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-n3tp6cq1f" onclick="toggleASTNode('ast-node-1751671814282-n3tp6cq1f')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Literal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">value: &quot;generated1&quot;, literal: string</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-n3tp6cq1f-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-klecn2x2j" onclick="toggleASTNode('ast-node-1751671814282-klecn2x2j')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;generated1&#39;&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-zpkn49e0l" onclick="toggleASTNode('ast-node-1751671814282-zpkn49e0l')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Assignment</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">target: datam2</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-zpkn49e0l-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-vwf0zgap6" onclick="toggleASTNode('ast-node-1751671814282-vwf0zgap6')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;datam2&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-wge2gqx91" onclick="toggleASTNode('ast-node-1751671814282-wge2gqx91')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-wge2gqx91-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-16wdx0ttz" onclick="toggleASTNode('ast-node-1751671814282-16wdx0ttz')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Literal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">value: &quot;generated2&quot;, literal: string</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-16wdx0ttz-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-8ixuml7cn" onclick="toggleASTNode('ast-node-1751671814282-8ixuml7cn')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;generated2&#39;&quot;</span></div></div></div></div></div></div></div></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-2" id="ast-node-1751671814282-y105ksjsf" onclick="toggleASTNode('ast-node-1751671814282-y105ksjsf')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructDefinition</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-y105ksjsf-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-n4ju1n11z" onclick="toggleASTNode('ast-node-1751671814282-n4ju1n11z')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;struct&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-rvek0py2n" onclick="toggleASTNode('ast-node-1751671814282-rvek0py2n')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;version&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-6kmmch3ub" onclick="toggleASTNode('ast-node-1751671814282-6kmmch3ub')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructContent</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-6kmmch3ub-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-kcqwyzohr" onclick="toggleASTNode('ast-node-1751671814282-kcqwyzohr')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructMember</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-kcqwyzohr-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-8w60p57o0" onclick="toggleASTNode('ast-node-1751671814282-8w60p57o0')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Annotation</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">value: &quot;The major version number.&quot;</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-8w60p57o0-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-dtkmodygg" onclick="toggleASTNode('ast-node-1751671814282-dtkmodygg')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;description&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-fyduffiyd" onclick="toggleASTNode('ast-node-1751671814282-fyduffiyd')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;The major version number.&#39;&quot;</span></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-5pz3bq5tg" onclick="toggleASTNode('ast-node-1751671814282-5pz3bq5tg')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;major&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-huvaj3x6l" onclick="toggleASTNode('ast-node-1751671814282-huvaj3x6l')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-huvaj3x6l-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-nh7fumdwq" onclick="toggleASTNode('ast-node-1751671814282-nh7fumdwq')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;int&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-b7d04fesp" onclick="toggleASTNode('ast-node-1751671814282-b7d04fesp')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructContent</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-b7d04fesp-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-t6fxowevl" onclick="toggleASTNode('ast-node-1751671814282-t6fxowevl')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructMember</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-t6fxowevl-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-l9u8v9wod" onclick="toggleASTNode('ast-node-1751671814282-l9u8v9wod')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Annotation</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">value: &quot;The minor version number.&quot;</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-l9u8v9wod-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-bkf2wdrwp" onclick="toggleASTNode('ast-node-1751671814282-bkf2wdrwp')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;description&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-a9uex72ep" onclick="toggleASTNode('ast-node-1751671814282-a9uex72ep')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;The minor version number.&#39;&quot;</span></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-xco58w2oj" onclick="toggleASTNode('ast-node-1751671814282-xco58w2oj')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;minor&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-9a1c91oah" onclick="toggleASTNode('ast-node-1751671814282-9a1c91oah')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-9a1c91oah-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-pf3181mg9" onclick="toggleASTNode('ast-node-1751671814282-pf3181mg9')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;int&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-uxa5r3mys" onclick="toggleASTNode('ast-node-1751671814282-uxa5r3mys')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructContent</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-uxa5r3mys-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-9xucwh675" onclick="toggleASTNode('ast-node-1751671814282-9xucwh675')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructMember</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-9xucwh675-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-7dbgjzy21" onclick="toggleASTNode('ast-node-1751671814282-7dbgjzy21')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Annotation</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">value: &quot;The patch version number.&quot;</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-7dbgjzy21-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-zk3ua20ds" onclick="toggleASTNode('ast-node-1751671814282-zk3ua20ds')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;description&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-0ccutk7xu" onclick="toggleASTNode('ast-node-1751671814282-0ccutk7xu')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;The patch version number.&#39;&quot;</span></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-e3xse0jjg" onclick="toggleASTNode('ast-node-1751671814282-e3xse0jjg')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;patch&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-dfuopetdd" onclick="toggleASTNode('ast-node-1751671814282-dfuopetdd')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-dfuopetdd-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-tk55o5vtk" onclick="toggleASTNode('ast-node-1751671814282-tk55o5vtk')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;int&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-5zeu05u0m" onclick="toggleASTNode('ast-node-1751671814282-5zeu05u0m')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StructContent</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-5zeu05u0m-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-r5ulzvj8b" onclick="toggleASTNode('ast-node-1751671814282-r5ulzvj8b')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">MethodDefinition</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">params: ()</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-r5ulzvj8b-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-nqwypgjfu" onclick="toggleASTNode('ast-node-1751671814282-nqwypgjfu')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Annotation</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">value: &quot;Get version as a string.&quot;</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-nqwypgjfu-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-u2r88qhs5" onclick="toggleASTNode('ast-node-1751671814282-u2r88qhs5')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;description&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-nyd7wxr8l" onclick="toggleASTNode('ast-node-1751671814282-nyd7wxr8l')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;Get version as a string.&#39;&quot;</span></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-mrlq0empz" onclick="toggleASTNode('ast-node-1751671814282-mrlq0empz')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;toString&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-nq8zlwgrc" onclick="toggleASTNode('ast-node-1751671814282-nq8zlwgrc')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-nq8zlwgrc-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-fjv5uoy8e" onclick="toggleASTNode('ast-node-1751671814282-fjv5uoy8e')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;string&quot;</span></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-shviremkj" onclick="toggleASTNode('ast-node-1751671814282-shviremkj')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">FunctionBody</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-shviremkj-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-9x6ux87jd" onclick="toggleASTNode('ast-node-1751671814282-9x6ux87jd')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Statement</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-9x6ux87jd-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-tyh9gow5m" onclick="toggleASTNode('ast-node-1751671814282-tyh9gow5m')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">ReturnStatement</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-tyh9gow5m-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-lp070wye3" onclick="toggleASTNode('ast-node-1751671814282-lp070wye3')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;return&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-x50qlmn0a" onclick="toggleASTNode('ast-node-1751671814282-x50qlmn0a')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-x50qlmn0a-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-ctpmj3w87" onclick="toggleASTNode('ast-node-1751671814282-ctpmj3w87')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StringInterpolation</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-ctpmj3w87-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-n777uogup" onclick="toggleASTNode('ast-node-1751671814282-n777uogup')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">StringContent</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-n777uogup-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-0qmrbowmt" onclick="toggleASTNode('ast-node-1751671814282-0qmrbowmt')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">InterpolationExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-0qmrbowmt-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-2dow72cgn" onclick="toggleASTNode('ast-node-1751671814282-2dow72cgn')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-2dow72cgn-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-h7bak0gcl" onclick="toggleASTNode('ast-node-1751671814282-h7bak0gcl')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">MemberAccess</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">access: this.major</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-h7bak0gcl-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-ux7uczily" onclick="toggleASTNode('ast-node-1751671814282-ux7uczily')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;this&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-jdinevzzb" onclick="toggleASTNode('ast-node-1751671814282-jdinevzzb')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;major&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-oqojj6tgv" onclick="toggleASTNode('ast-node-1751671814282-oqojj6tgv')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">InterpolationExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-oqojj6tgv-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-09yo7015g" onclick="toggleASTNode('ast-node-1751671814282-09yo7015g')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-09yo7015g-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-f2gjhdchp" onclick="toggleASTNode('ast-node-1751671814282-f2gjhdchp')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">MemberAccess</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">access: this.minor</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-f2gjhdchp-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-p3sdgmjh5" onclick="toggleASTNode('ast-node-1751671814282-p3sdgmjh5')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;this&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-scox6r3g8" onclick="toggleASTNode('ast-node-1751671814282-scox6r3g8')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;minor&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-0qlls418u" onclick="toggleASTNode('ast-node-1751671814282-0qlls418u')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">InterpolationExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-0qlls418u-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-00qug7ffg" onclick="toggleASTNode('ast-node-1751671814282-00qug7ffg')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-00qug7ffg-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-nrgzsxa99" onclick="toggleASTNode('ast-node-1751671814282-nrgzsxa99')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">MemberAccess</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">access: this.patch</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-nrgzsxa99-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-3t9se7ii9" onclick="toggleASTNode('ast-node-1751671814282-3t9se7ii9')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;this&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-2pkr5lz20" onclick="toggleASTNode('ast-node-1751671814282-2pkr5lz20')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;patch&quot;</span></div></div></div></div></div></div></div></div></div></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-2" id="ast-node-1751671814282-l3qgnedq3" onclick="toggleASTNode('ast-node-1751671814282-l3qgnedq3')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">FunctionDefinition</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">params: ()</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-l3qgnedq3-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-8h49qtpr3" onclick="toggleASTNode('ast-node-1751671814282-8h49qtpr3')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Annotation</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">value: &quot;Returns the version of the configuration schema.&quot;</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-8h49qtpr3-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-bcmpawosv" onclick="toggleASTNode('ast-node-1751671814282-bcmpawosv')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;description&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-q4aptr59o" onclick="toggleASTNode('ast-node-1751671814282-q4aptr59o')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;Returns the version of the configuration schema.&#39;&quot;</span></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-xtcrv172w" onclick="toggleASTNode('ast-node-1751671814282-xtcrv172w')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;declare&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-ctnt8l2db" onclick="toggleASTNode('ast-node-1751671814282-ctnt8l2db')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;fun&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-xxy98c9xd" onclick="toggleASTNode('ast-node-1751671814282-xxy98c9xd')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;getVersion&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-fh3124nru" onclick="toggleASTNode('ast-node-1751671814282-fh3124nru')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-fh3124nru-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-umzb431ld" onclick="toggleASTNode('ast-node-1751671814282-umzb431ld')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;version&quot;</span></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-2" id="ast-node-1751671814282-7kykp1oha" onclick="toggleASTNode('ast-node-1751671814282-7kykp1oha')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">FunctionDefinition</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">params: (version: version)</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-7kykp1oha-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-mc7t1b66d" onclick="toggleASTNode('ast-node-1751671814282-mc7t1b66d')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;fun&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-yo19k7vrl" onclick="toggleASTNode('ast-node-1751671814282-yo19k7vrl')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;generateData4&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-hf83ujdak" onclick="toggleASTNode('ast-node-1751671814282-hf83ujdak')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">ParameterList</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-hf83ujdak-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-u69n3m272" onclick="toggleASTNode('ast-node-1751671814282-u69n3m272')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Parameter</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-u69n3m272-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-jzmyjj54l" onclick="toggleASTNode('ast-node-1751671814282-jzmyjj54l')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;version&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-938xkeeqd" onclick="toggleASTNode('ast-node-1751671814282-938xkeeqd')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-938xkeeqd-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-t91xpad89" onclick="toggleASTNode('ast-node-1751671814282-t91xpad89')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;version&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-pww7gxtfu" onclick="toggleASTNode('ast-node-1751671814282-pww7gxtfu')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">TypeReference</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-pww7gxtfu-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-pqnkai2l4" onclick="toggleASTNode('ast-node-1751671814282-pqnkai2l4')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data2&quot;</span></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-4" id="ast-node-1751671814282-r25epditg" onclick="toggleASTNode('ast-node-1751671814282-r25epditg')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">FunctionBody</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-r25epditg-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-6" id="ast-node-1751671814282-g2wd73pt2" onclick="toggleASTNode('ast-node-1751671814282-g2wd73pt2')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Statement</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-g2wd73pt2-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-y3618hv4t" onclick="toggleASTNode('ast-node-1751671814282-y3618hv4t')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">ReturnStatement</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-y3618hv4t-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-idle2mn0l" onclick="toggleASTNode('ast-node-1751671814282-idle2mn0l')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;return&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-jjra3kwl9" onclick="toggleASTNode('ast-node-1751671814282-jjra3kwl9')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-jjra3kwl9-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-cfpm3h1eq" onclick="toggleASTNode('ast-node-1751671814282-cfpm3h1eq')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">FunctionCall</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-cfpm3h1eq-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-5pmjke6nr" onclick="toggleASTNode('ast-node-1751671814282-5pmjke6nr')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;data2&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-7zm02dbwq" onclick="toggleASTNode('ast-node-1751671814282-7zm02dbwq')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">ArgumentList</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-7zm02dbwq-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-jc4e27kw2" onclick="toggleASTNode('ast-node-1751671814282-jc4e27kw2')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-jc4e27kw2-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-sdask2f8j" onclick="toggleASTNode('ast-node-1751671814282-sdask2f8j')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">FunctionCall</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-sdask2f8j-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-gfyk4j9ej" onclick="toggleASTNode('ast-node-1751671814282-gfyk4j9ej')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">MemberAccess</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">access: version.toString</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-gfyk4j9ej-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-rani2jzyz" onclick="toggleASTNode('ast-node-1751671814282-rani2jzyz')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;version&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-a0vwwnco0" onclick="toggleASTNode('ast-node-1751671814282-a0vwwnco0')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;toString&quot;</span></div></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-rj61vgcyu" onclick="toggleASTNode('ast-node-1751671814282-rj61vgcyu')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">ConstructionBody</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-rj61vgcyu-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-zcowtvm5f" onclick="toggleASTNode('ast-node-1751671814282-zcowtvm5f')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Assignment</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">target: datam1</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-zcowtvm5f-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-usf66rks2" onclick="toggleASTNode('ast-node-1751671814282-usf66rks2')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;datam1&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-n2y8xgs9u" onclick="toggleASTNode('ast-node-1751671814282-n2y8xgs9u')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-n2y8xgs9u-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-j0ki905l2" onclick="toggleASTNode('ast-node-1751671814282-j0ki905l2')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Literal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">value: &quot;generated1&quot;, literal: string</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-j0ki905l2-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-n7ovuwewp" onclick="toggleASTNode('ast-node-1751671814282-n7ovuwewp')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;generated1&#39;&quot;</span></div></div></div></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-th63xk8qs" onclick="toggleASTNode('ast-node-1751671814282-th63xk8qs')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Assignment</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">target: datam2</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-th63xk8qs-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-zfoa79hg2" onclick="toggleASTNode('ast-node-1751671814282-zfoa79hg2')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;datam2&quot;</span></div><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-1wgealn3d" onclick="toggleASTNode('ast-node-1751671814282-1wgealn3d')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">PrimaryExpression</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-1wgealn3d-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-f77veltmy" onclick="toggleASTNode('ast-node-1751671814282-f77veltmy')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">▼</span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Literal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">value: &quot;generated2&quot;, literal: string</span></div><div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="ast-node-1751671814282-f77veltmy-children"><div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ml-8" id="ast-node-1751671814282-u9a66enoo" onclick="toggleASTNode('ast-node-1751671814282-u9a66enoo')"><span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600"> </span><span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">Terminal</span><span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">&quot;&#39;generated2&#39;&quot;</span></div></div></div></div></div></div></div></div></div></div></div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const astData = {
+  "type": "Program",
+  "children": [
+    {
+      "type": "SchemaDirective",
+      "children": [
+        {
+          "type": "Terminal",
+          "text": "'canon::schema'"
+        }
+      ],
+      "schema": "canon::schema"
+    },
+    {
+      "type": "SchemaDefinition",
+      "children": [
+        {
+          "type": "Terminal",
+          "text": "schema"
+        },
+        {
+          "type": "SchemaMember",
+          "children": [
+            {
+              "type": "Annotation",
+              "children": [
+                {
+                  "type": "Terminal",
+                  "text": "description"
+                },
+                {
+                  "type": "Terminal",
+                  "text": "'hoge'"
+                }
+              ],
+              "name": "description",
+              "value": "hoge"
+            },
+            {
+              "type": "Terminal",
+              "text": "data1"
+            },
+            {
+              "type": "TypeReference",
+              "children": [
+                {
+                  "type": "Terminal",
+                  "text": "data"
+                }
+              ]
+            }
+          ],
+          "name": "data1",
+          "isMultiple": false,
+          "dataType": "data"
+        },
+        {
+          "type": "SchemaMember",
+          "children": [
+            {
+              "type": "Annotation",
+              "children": [
+                {
+                  "type": "Terminal",
+                  "text": "description"
+                },
+                {
+                  "type": "Terminal",
+                  "text": "'fuga'"
+                }
+              ],
+              "name": "description",
+              "value": "fuga"
+            },
+            {
+              "type": "Terminal",
+              "text": "data2"
+            },
+            {
+              "type": "TypeReference",
+              "children": [
+                {
+                  "type": "Terminal",
+                  "text": "data2"
+                }
+              ]
+            }
+          ],
+          "name": "data2",
+          "isMultiple": true,
+          "dataType": "data2"
+        }
+      ]
+    },
+    {
+      "type": "StructDefinition",
+      "children": [
+        {
+          "type": "Terminal",
+          "text": "struct"
+        },
+        {
+          "type": "Terminal",
+          "text": "data"
+        },
+        {
+          "type": "StructContent",
+          "children": [
+            {
+              "type": "StructMember",
+              "children": [
+                {
+                  "type": "Terminal",
+                  "text": "datam1"
+                },
+                {
+                  "type": "TypeReference",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "string"
+                    }
+                  ]
+                }
+              ],
+              "name": "datam1",
+              "isOptional": false,
+              "dataType": "string"
+            }
+          ]
+        },
+        {
+          "type": "StructContent",
+          "children": [
+            {
+              "type": "StructMember",
+              "children": [
+                {
+                  "type": "Terminal",
+                  "text": "datam2"
+                },
+                {
+                  "type": "TypeReference",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "string"
+                    }
+                  ]
+                }
+              ],
+              "name": "datam2",
+              "isOptional": true,
+              "dataType": "string"
+            }
+          ]
+        }
+      ],
+      "name": "data"
+    },
+    {
+      "type": "StructDefinition",
+      "children": [
+        {
+          "type": "Terminal",
+          "text": "struct"
+        },
+        {
+          "type": "Terminal",
+          "text": "data2"
+        },
+        {
+          "type": "StructContent",
+          "children": [
+            {
+              "type": "MixinDeclaration",
+              "children": [
+                {
+                  "type": "Terminal",
+                  "text": "mixin"
+                },
+                {
+                  "type": "Terminal",
+                  "text": "data"
+                }
+              ],
+              "mixinType": "data"
+            }
+          ]
+        },
+        {
+          "type": "StructContent",
+          "children": [
+            {
+              "type": "StructMember",
+              "children": [
+                {
+                  "type": "Terminal",
+                  "text": "name"
+                },
+                {
+                  "type": "TypeReference",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "string"
+                    }
+                  ]
+                }
+              ],
+              "name": "name",
+              "isOptional": false,
+              "dataType": "string"
+            }
+          ]
+        }
+      ],
+      "name": "data2"
+    },
+    {
+      "type": "FunctionDefinition",
+      "children": [
+        {
+          "type": "Terminal",
+          "text": "fun"
+        },
+        {
+          "type": "Terminal",
+          "text": "data2"
+        },
+        {
+          "type": "ParameterList",
+          "children": [
+            {
+              "type": "Parameter",
+              "children": [
+                {
+                  "type": "Terminal",
+                  "text": "name"
+                },
+                {
+                  "type": "TypeReference",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "string"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "TypeReference",
+          "children": [
+            {
+              "type": "Terminal",
+              "text": "data2"
+            }
+          ]
+        },
+        {
+          "type": "FunctionBody",
+          "children": [
+            {
+              "type": "Statement",
+              "children": [
+                {
+                  "type": "ExpressionStatement",
+                  "children": [
+                    {
+                      "type": "FunctionCall",
+                      "children": [
+                        {
+                          "type": "Terminal",
+                          "text": "apply"
+                        }
+                      ],
+                      "functionName": "apply",
+                      "hasArguments": false,
+                      "argumentCount": 0
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Statement",
+              "children": [
+                {
+                  "type": "Assignment",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "this"
+                    },
+                    {
+                      "type": "Terminal",
+                      "text": "name"
+                    },
+                    {
+                      "type": "PrimaryExpression",
+                      "children": [
+                        {
+                          "type": "Terminal",
+                          "text": "name"
+                        }
+                      ]
+                    }
+                  ],
+                  "target": "this.name"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "name": "data2",
+      "isDeclare": false,
+      "returnType": "data2",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "type": "FunctionDefinition",
+      "children": [
+        {
+          "type": "Terminal",
+          "text": "fun"
+        },
+        {
+          "type": "Terminal",
+          "text": "generateData3"
+        },
+        {
+          "type": "TypeReference",
+          "children": [
+            {
+              "type": "Terminal",
+              "text": "data2"
+            }
+          ]
+        },
+        {
+          "type": "FunctionBody",
+          "children": [
+            {
+              "type": "Statement",
+              "children": [
+                {
+                  "type": "ReturnStatement",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "return"
+                    },
+                    {
+                      "type": "PrimaryExpression",
+                      "children": [
+                        {
+                          "type": "FunctionCall",
+                          "children": [
+                            {
+                              "type": "Terminal",
+                              "text": "data2"
+                            },
+                            {
+                              "type": "ArgumentList",
+                              "children": [
+                                {
+                                  "type": "PrimaryExpression",
+                                  "children": [
+                                    {
+                                      "type": "Literal",
+                                      "children": [
+                                        {
+                                          "type": "Terminal",
+                                          "text": "'generated'"
+                                        }
+                                      ],
+                                      "literalType": "string",
+                                      "value": "generated"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "ConstructionBody",
+                              "children": [
+                                {
+                                  "type": "Assignment",
+                                  "children": [
+                                    {
+                                      "type": "Terminal",
+                                      "text": "datam1"
+                                    },
+                                    {
+                                      "type": "PrimaryExpression",
+                                      "children": [
+                                        {
+                                          "type": "Literal",
+                                          "children": [
+                                            {
+                                              "type": "Terminal",
+                                              "text": "'generated1'"
+                                            }
+                                          ],
+                                          "literalType": "string",
+                                          "value": "generated1"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "target": "datam1"
+                                },
+                                {
+                                  "type": "Assignment",
+                                  "children": [
+                                    {
+                                      "type": "Terminal",
+                                      "text": "datam2"
+                                    },
+                                    {
+                                      "type": "PrimaryExpression",
+                                      "children": [
+                                        {
+                                          "type": "Literal",
+                                          "children": [
+                                            {
+                                              "type": "Terminal",
+                                              "text": "'generated2'"
+                                            }
+                                          ],
+                                          "literalType": "string",
+                                          "value": "generated2"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "target": "datam2"
+                                }
+                              ]
+                            }
+                          ],
+                          "hasArguments": true,
+                          "argumentCount": 1,
+                          "isObjectConstruction": true,
+                          "hasBody": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "name": "generateData3",
+      "isDeclare": false,
+      "returnType": "data2",
+      "parameters": []
+    },
+    {
+      "type": "StructDefinition",
+      "children": [
+        {
+          "type": "Terminal",
+          "text": "struct"
+        },
+        {
+          "type": "Terminal",
+          "text": "version"
+        },
+        {
+          "type": "StructContent",
+          "children": [
+            {
+              "type": "StructMember",
+              "children": [
+                {
+                  "type": "Annotation",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "description"
+                    },
+                    {
+                      "type": "Terminal",
+                      "text": "'The major version number.'"
+                    }
+                  ],
+                  "name": "description",
+                  "value": "The major version number."
+                },
+                {
+                  "type": "Terminal",
+                  "text": "major"
+                },
+                {
+                  "type": "TypeReference",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "int"
+                    }
+                  ]
+                }
+              ],
+              "name": "major",
+              "isOptional": false,
+              "dataType": "int"
+            }
+          ]
+        },
+        {
+          "type": "StructContent",
+          "children": [
+            {
+              "type": "StructMember",
+              "children": [
+                {
+                  "type": "Annotation",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "description"
+                    },
+                    {
+                      "type": "Terminal",
+                      "text": "'The minor version number.'"
+                    }
+                  ],
+                  "name": "description",
+                  "value": "The minor version number."
+                },
+                {
+                  "type": "Terminal",
+                  "text": "minor"
+                },
+                {
+                  "type": "TypeReference",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "int"
+                    }
+                  ]
+                }
+              ],
+              "name": "minor",
+              "isOptional": false,
+              "dataType": "int"
+            }
+          ]
+        },
+        {
+          "type": "StructContent",
+          "children": [
+            {
+              "type": "StructMember",
+              "children": [
+                {
+                  "type": "Annotation",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "description"
+                    },
+                    {
+                      "type": "Terminal",
+                      "text": "'The patch version number.'"
+                    }
+                  ],
+                  "name": "description",
+                  "value": "The patch version number."
+                },
+                {
+                  "type": "Terminal",
+                  "text": "patch"
+                },
+                {
+                  "type": "TypeReference",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "int"
+                    }
+                  ]
+                }
+              ],
+              "name": "patch",
+              "isOptional": false,
+              "dataType": "int"
+            }
+          ]
+        },
+        {
+          "type": "StructContent",
+          "children": [
+            {
+              "type": "MethodDefinition",
+              "children": [
+                {
+                  "type": "Annotation",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "description"
+                    },
+                    {
+                      "type": "Terminal",
+                      "text": "'Get version as a string.'"
+                    }
+                  ],
+                  "name": "description",
+                  "value": "Get version as a string."
+                },
+                {
+                  "type": "Terminal",
+                  "text": "toString"
+                },
+                {
+                  "type": "TypeReference",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "string"
+                    }
+                  ]
+                },
+                {
+                  "type": "FunctionBody",
+                  "children": [
+                    {
+                      "type": "Statement",
+                      "children": [
+                        {
+                          "type": "ReturnStatement",
+                          "children": [
+                            {
+                              "type": "Terminal",
+                              "text": "return"
+                            },
+                            {
+                              "type": "PrimaryExpression",
+                              "children": [
+                                {
+                                  "type": "StringInterpolation",
+                                  "children": [
+                                    {
+                                      "type": "StringContent",
+                                      "children": [
+                                        {
+                                          "type": "InterpolationExpression",
+                                          "children": [
+                                            {
+                                              "type": "PrimaryExpression",
+                                              "children": [
+                                                {
+                                                  "type": "MemberAccess",
+                                                  "children": [
+                                                    {
+                                                      "type": "Terminal",
+                                                      "text": "this"
+                                                    },
+                                                    {
+                                                      "type": "Terminal",
+                                                      "text": "major"
+                                                    }
+                                                  ],
+                                                  "object": "this",
+                                                  "member": "major",
+                                                  "fullAccess": "this.major"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "InterpolationExpression",
+                                          "children": [
+                                            {
+                                              "type": "PrimaryExpression",
+                                              "children": [
+                                                {
+                                                  "type": "MemberAccess",
+                                                  "children": [
+                                                    {
+                                                      "type": "Terminal",
+                                                      "text": "this"
+                                                    },
+                                                    {
+                                                      "type": "Terminal",
+                                                      "text": "minor"
+                                                    }
+                                                  ],
+                                                  "object": "this",
+                                                  "member": "minor",
+                                                  "fullAccess": "this.minor"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "InterpolationExpression",
+                                          "children": [
+                                            {
+                                              "type": "PrimaryExpression",
+                                              "children": [
+                                                {
+                                                  "type": "MemberAccess",
+                                                  "children": [
+                                                    {
+                                                      "type": "Terminal",
+                                                      "text": "this"
+                                                    },
+                                                    {
+                                                      "type": "Terminal",
+                                                      "text": "patch"
+                                                    }
+                                                  ],
+                                                  "object": "this",
+                                                  "member": "patch",
+                                                  "fullAccess": "this.patch"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "name": "toString",
+              "returnType": "string",
+              "parameters": []
+            }
+          ]
+        }
+      ],
+      "name": "version"
+    },
+    {
+      "type": "FunctionDefinition",
+      "children": [
+        {
+          "type": "Annotation",
+          "children": [
+            {
+              "type": "Terminal",
+              "text": "description"
+            },
+            {
+              "type": "Terminal",
+              "text": "'Returns the version of the configuration schema.'"
+            }
+          ],
+          "name": "description",
+          "value": "Returns the version of the configuration schema."
+        },
+        {
+          "type": "Terminal",
+          "text": "declare"
+        },
+        {
+          "type": "Terminal",
+          "text": "fun"
+        },
+        {
+          "type": "Terminal",
+          "text": "getVersion"
+        },
+        {
+          "type": "TypeReference",
+          "children": [
+            {
+              "type": "Terminal",
+              "text": "version"
+            }
+          ]
+        }
+      ],
+      "name": "getVersion",
+      "isDeclare": true,
+      "returnType": "version",
+      "parameters": []
+    },
+    {
+      "type": "FunctionDefinition",
+      "children": [
+        {
+          "type": "Terminal",
+          "text": "fun"
+        },
+        {
+          "type": "Terminal",
+          "text": "generateData4"
+        },
+        {
+          "type": "ParameterList",
+          "children": [
+            {
+              "type": "Parameter",
+              "children": [
+                {
+                  "type": "Terminal",
+                  "text": "version"
+                },
+                {
+                  "type": "TypeReference",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "version"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "TypeReference",
+          "children": [
+            {
+              "type": "Terminal",
+              "text": "data2"
+            }
+          ]
+        },
+        {
+          "type": "FunctionBody",
+          "children": [
+            {
+              "type": "Statement",
+              "children": [
+                {
+                  "type": "ReturnStatement",
+                  "children": [
+                    {
+                      "type": "Terminal",
+                      "text": "return"
+                    },
+                    {
+                      "type": "PrimaryExpression",
+                      "children": [
+                        {
+                          "type": "FunctionCall",
+                          "children": [
+                            {
+                              "type": "Terminal",
+                              "text": "data2"
+                            },
+                            {
+                              "type": "ArgumentList",
+                              "children": [
+                                {
+                                  "type": "PrimaryExpression",
+                                  "children": [
+                                    {
+                                      "type": "FunctionCall",
+                                      "children": [
+                                        {
+                                          "type": "MemberAccess",
+                                          "children": [
+                                            {
+                                              "type": "Terminal",
+                                              "text": "version"
+                                            },
+                                            {
+                                              "type": "Terminal",
+                                              "text": "toString"
+                                            }
+                                          ],
+                                          "object": "version",
+                                          "member": "toString",
+                                          "fullAccess": "version.toString"
+                                        }
+                                      ],
+                                      "isMethodCall": true
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "ConstructionBody",
+                              "children": [
+                                {
+                                  "type": "Assignment",
+                                  "children": [
+                                    {
+                                      "type": "Terminal",
+                                      "text": "datam1"
+                                    },
+                                    {
+                                      "type": "PrimaryExpression",
+                                      "children": [
+                                        {
+                                          "type": "Literal",
+                                          "children": [
+                                            {
+                                              "type": "Terminal",
+                                              "text": "'generated1'"
+                                            }
+                                          ],
+                                          "literalType": "string",
+                                          "value": "generated1"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "target": "datam1"
+                                },
+                                {
+                                  "type": "Assignment",
+                                  "children": [
+                                    {
+                                      "type": "Terminal",
+                                      "text": "datam2"
+                                    },
+                                    {
+                                      "type": "PrimaryExpression",
+                                      "children": [
+                                        {
+                                          "type": "Literal",
+                                          "children": [
+                                            {
+                                              "type": "Terminal",
+                                              "text": "'generated2'"
+                                            }
+                                          ],
+                                          "literalType": "string",
+                                          "value": "generated2"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "target": "datam2"
+                                }
+                              ]
+                            }
+                          ],
+                          "hasArguments": true,
+                          "argumentCount": 1,
+                          "isObjectConstruction": true,
+                          "hasBody": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "name": "generateData4",
+      "isDeclare": false,
+      "returnType": "data2",
+      "parameters": [
+        {
+          "name": "version",
+          "type": "version"
+        }
+      ]
+    }
+  ]
+};
+        
+        // Theme functionality
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemTheme;
+            
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        function countNodes(node) {
+            let count = 1;
+            if (node.children) {
+                for (const child of node.children) {
+                    count += countNodes(child);
+                }
+            }
+            return count;
+        }
+        
+        function getNodeTypes(node, types = new Set()) {
+            types.add(node.type);
+            if (node.children) {
+                for (const child of node.children) {
+                    getNodeTypes(child, types);
+                }
+            }
+            return types;
+        }
+        
+        function updateStats() {
+            const totalNodes = countNodes(astData);
+            const nodeTypes = getNodeTypes(astData);
+            const uniqueTypes = nodeTypes.size;
+            
+            document.getElementById('stats-content').textContent = 
+                'Total nodes: ' + totalNodes + ', Unique types: ' + uniqueTypes;
+        }
+        
+        function toggleASTNode(nodeId) {
+            const node = document.getElementById(nodeId);
+            const children = document.getElementById(nodeId + '-children');
+            
+            if (children) {
+                if (children.style.display === 'none') {
+                    children.style.display = 'block';
+                    node.classList.remove('collapsed');
+                    node.classList.add('expanded');
+                    node.querySelector('.toggle').textContent = '▼';
+                } else {
+                    children.style.display = 'none';
+                    node.classList.remove('expanded');
+                    node.classList.add('collapsed');
+                    node.querySelector('.toggle').textContent = '▶';
+                }
+            }
+        }
+        
+        function expandAll() {
+            const childrenDivs = document.querySelectorAll('.children');
+            const nodes = document.querySelectorAll('.ast-node');
+            
+            childrenDivs.forEach(div => {
+                div.style.display = 'block';
+            });
+            
+            nodes.forEach(node => {
+                node.classList.remove('collapsed');
+                node.classList.add('expanded');
+                const toggle = node.querySelector('.toggle');
+                if (toggle && toggle.textContent.trim() === '▶') {
+                    toggle.textContent = '▼';
+                }
+            });
+        }
+        
+        function collapseAll() {
+            const childrenDivs = document.querySelectorAll('.children');
+            const nodes = document.querySelectorAll('.ast-node');
+            
+            childrenDivs.forEach(div => {
+                div.style.display = 'none';
+            });
+            
+            nodes.forEach(node => {
+                node.classList.remove('expanded');
+                node.classList.add('collapsed');
+                const toggle = node.querySelector('.toggle');
+                if (toggle && toggle.textContent.trim() === '▼') {
+                    toggle.textContent = '▶';
+                }
+            });
+        }
+        
+        function expandToLevel(maxLevel) {
+            const allNodes = document.querySelectorAll('.ast-node');
+            
+            allNodes.forEach(node => {
+                const classes = node.className;
+                const mlMatch = classes.match(/ml-(\d+)/);
+                const depth = mlMatch ? parseInt(mlMatch[1]) : 0;
+                const nodeLevel = Math.floor(depth / 4) + 1;
+                const children = document.getElementById(node.id + '-children');
+                
+                if (children) {
+                    if (nodeLevel < maxLevel) {
+                        children.style.display = 'block';
+                        node.classList.remove('collapsed');
+                        node.classList.add('expanded');
+                        node.querySelector('.toggle').textContent = '▼';
+                    } else {
+                        children.style.display = 'none';
+                        node.classList.remove('expanded');
+                        node.classList.add('collapsed');
+                        node.querySelector('.toggle').textContent = '▶';
+                    }
+                }
+            });
+        }
+        
+        function searchNodes() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const nodes = document.querySelectorAll('.ast-node');
+            
+            nodes.forEach(node => {
+                const text = node.textContent.toLowerCase();
+                node.classList.remove('highlight');
+                
+                if (query && text.includes(query)) {
+                    node.classList.add('highlight');
+                    
+                    // Show path to highlighted node
+                    let parent = node.parentElement;
+                    while (parent && parent.classList.contains('children')) {
+                        parent.style.display = 'block';
+                        const parentNode = parent.previousElementSibling;
+                        if (parentNode && parentNode.classList.contains('ast-node')) {
+                            parentNode.classList.remove('collapsed');
+                            parentNode.classList.add('expanded');
+                            const toggle = parentNode.querySelector('.toggle');
+                            if (toggle) toggle.textContent = '▼';
+                        }
+                        parent = parent.parentElement;
+                    }
+                }
+            });
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            updateStats();
+            
+            // Search functionality
+            const searchInput = document.getElementById('search-input');
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(searchNodes, 300);
+            });
+            
+            // Initially collapse some levels for better overview
+            setTimeout(() => expandToLevel(3), 100);
+        });
+    </script>
+</body>
+</html>

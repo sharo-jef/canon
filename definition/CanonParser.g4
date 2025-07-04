@@ -21,11 +21,16 @@ schemaMember:
 	annotation* IDENTIFIER (MULTIPLY)? COLON typeReference;
 
 // Struct definition
-structDefinition: STRUCT IDENTIFIER LBRACE structMember* RBRACE;
-structMember:
-	MIXIN IDENTIFIER
-	| annotation* IDENTIFIER (QUESTION)? COLON typeReference
+structDefinition:
+	STRUCT IDENTIFIER LBRACE structContent* RBRACE;
+structContent:
+	mixinDeclaration
+	| structMember
 	| methodDefinition;
+
+mixinDeclaration: MIXIN IDENTIFIER;
+structMember:
+	annotation* IDENTIFIER (QUESTION)? COLON typeReference;
 
 // Method definition (inside struct)
 methodDefinition:

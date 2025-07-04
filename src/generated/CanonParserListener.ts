@@ -8,6 +8,8 @@ import { SchemaDirectiveContext } from "./CanonParser";
 import { SchemaDefinitionContext } from "./CanonParser";
 import { SchemaMemberContext } from "./CanonParser";
 import { StructDefinitionContext } from "./CanonParser";
+import { StructContentContext } from "./CanonParser";
+import { MixinDeclarationContext } from "./CanonParser";
 import { StructMemberContext } from "./CanonParser";
 import { MethodDefinitionContext } from "./CanonParser";
 import { FunctionDefinitionContext } from "./CanonParser";
@@ -98,6 +100,28 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitStructDefinition?: (ctx: StructDefinitionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.structContent`.
+	 * @param ctx the parse tree
+	 */
+	enterStructContent?: (ctx: StructContentContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.structContent`.
+	 * @param ctx the parse tree
+	 */
+	exitStructContent?: (ctx: StructContentContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.mixinDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	enterMixinDeclaration?: (ctx: MixinDeclarationContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.mixinDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	exitMixinDeclaration?: (ctx: MixinDeclarationContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.structMember`.
