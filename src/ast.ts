@@ -6,7 +6,6 @@ import { CanonLexer } from './generated/CanonLexer';
 import { CanonParser } from './generated/CanonParser';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { CanonParserVisitor } from './generated/CanonParserVisitor';
-import { ParseTree } from 'antlr4ts/tree/ParseTree';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 import { RuleNode } from 'antlr4ts/tree/RuleNode';
 
@@ -26,8 +25,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     visitTerminal(node: TerminalNode): ASTNode {
         return {
             type: 'Terminal',
-            text: node.text,
-            tokenType: node.symbol.type
+            text: node.text
         };
     }
 
@@ -42,6 +40,14 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
         // 特定のルールに対して詳細情報を追加
         this.addRuleSpecificInfo(node, result);
+
+        // 式の階層を簡略化: 単一の子ノードしか持たない式は省略
+        if (this.isSimpleExpressionNode(node, ruleName)) {
+            const child = node.getChild(0);
+            if (child) {
+                return this.visit(child);
+            }
+        }
 
         // 子ノードを処理
         if (node.childCount > 0) {
@@ -59,6 +65,18 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         return result;
     }
 
+    private isSimpleExpressionNode(node: RuleNode, ruleName: string): boolean {
+        // 単一の子ノードしか持たない式ノードかチェック
+        if (node.childCount === 1) {
+            const expressionTypes = [
+                'Expression', 'RangeExpression', 'ComparisonExpression',
+                'AdditiveExpression', 'MultiplicativeExpression'
+            ];
+            return expressionTypes.includes(ruleName);
+        }
+        return false;
+    }
+
     private addRuleSpecificInfo(node: RuleNode, result: ASTNode): void {
         const ctx = node as any;
         
@@ -71,7 +89,12 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         else if (ctx.constructor.name === 'SchemaDirectiveContext') {
             const stringLiteral = ctx.STRING_LITERAL();
             if (stringLiteral) {
-                result.schema = stringLiteral.text;
+                // スキーマディレクティブからクォートを除去
+                let value = stringLiteral.text;
+                if (value.startsWith("'") && value.endsWith("'")) {
+                    value = value.slice(1, -1);
+                }
+                result.schema = value;
             }
         }
         
@@ -142,6 +165,8 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const parameterList = ctx.parameterList();
             if (parameterList) {
                 result.parameters = this.extractParameters(parameterList);
+            } else {
+                result.parameters = []; // 明示的に空の配列を設定
             }
         }
         
@@ -160,13 +185,20 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const parameterList = ctx.parameterList();
             if (parameterList) {
                 result.parameters = this.extractParameters(parameterList);
+            } else {
+                result.parameters = []; // 明示的に空の配列を設定
             }
         }
         
         // Function call
         else if (ctx.constructor.name === 'FunctionCallContext') {
             const identifier = ctx.IDENTIFIER();
-            if (identifier && identifier.length > 0) {
+            const memberAccess = ctx.memberAccess();
+            
+            if (memberAccess) {
+                // Member function call (e.g., version.toString())
+                result.isMethodCall = true;
+            } else if (identifier && identifier.length > 0) {
                 result.functionName = identifier[0].text;
             }
             
@@ -174,6 +206,13 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             if (argumentList) {
                 result.hasArguments = true;
                 result.argumentCount = this.countArguments(argumentList);
+            }
+            
+            const constructionBody = ctx.constructionBody();
+            if (constructionBody) {
+                // This is actually an object construction with trailing lambda
+                result.isObjectConstruction = true;
+                result.hasBody = true;
             }
         }
         
@@ -193,6 +232,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const constructionBody = ctx.constructionBody();
             if (constructionBody) {
                 result.hasBody = true;
+            }
+        }
+        
+        // Primary expression - handle apply() style calls
+        else if (ctx.constructor.name === 'PrimaryExpressionContext') {
+            const identifier = ctx.IDENTIFIER();
+            const lparen = ctx.LPAREN();
+            const rparen = ctx.RPAREN();
+            
+            if (identifier && lparen && rparen) {
+                // This is an apply() style function call
+                result.type = 'FunctionCall';
+                result.functionName = identifier.text;
+                result.hasArguments = false;
+                result.argumentCount = 0;
             }
         }
         
@@ -236,10 +290,15 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             
             if (stringLiteral) {
                 result.literalType = 'string';
-                result.value = stringLiteral.text;
+                // 文字列リテラルからクォートを除去
+                let value = stringLiteral.text;
+                if (value.startsWith("'") && value.endsWith("'")) {
+                    value = value.slice(1, -1);
+                }
+                result.value = value;
             } else if (integerLiteral) {
                 result.literalType = 'integer';
-                result.value = integerLiteral.text;
+                result.value = parseInt(integerLiteral.text);
             }
         }
         
@@ -251,7 +310,12 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             if (identifier) {
                 result.name = identifier.text;
                 if (stringLiteral) {
-                    result.value = stringLiteral.text;
+                    // アノテーション値からクォートを除去
+                    let value = stringLiteral.text;
+                    if (value.startsWith("'") && value.endsWith("'")) {
+                        value = value.slice(1, -1);
+                    }
+                    result.value = value;
                 }
             }
         }

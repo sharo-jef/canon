@@ -1,5 +1,0 @@
-#schema 'test'
-
-schema {
-    data1: string
-}

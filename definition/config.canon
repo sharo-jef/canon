@@ -30,6 +30,8 @@ data2(name2) {
     datam2 = name2 + '_1'
     datam2 = name2 + '_2'
     this.datam2 = name2 + '_3'
+    // this is not infix function call
+    // syntax: for (<int> i in (<list> | <rangeExpression>)) {
     for (i in 1..100) {
         datam2 = name2 + '_loop_' + i
     }
