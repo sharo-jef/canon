@@ -70,6 +70,13 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         return identifier;
     }
 
+    private unquote(text: string): string {
+        if ((text.startsWith("'") && text.endsWith("'")) || (text.startsWith('"') && text.endsWith('"'))) {
+            return text.slice(1, -1);
+        }
+        return text;
+    }
+
     visitTerminal(node: TerminalNode): ASTNode {
         // 重要な情報を持つTerminalのみ、簡潔な形で返す
         const result: ASTNode = {
@@ -119,12 +126,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         // 特定のルールに対して詳細情報を追加
         this.addRuleSpecificInfo(node, result);
 
-        // 一部のノードは詳細情報のみで十分（子ノードを含めない）
-        if (this.isInformationOnlyNode(ruleName, result)) {
-            delete result.children;
-            return result;
-        }
-        
         // Binary expressions that have been structured should not process children
         const binaryExpressions = ['BinaryExpression'];
         if ((binaryExpressions.includes(ruleName) || result.type === 'BinaryExpression') && result.left && result.operator && result.right) {
@@ -223,12 +224,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         else if (ctx.constructor.name === 'SchemaDirectiveContext') {
             const stringLiteral = ctx.STRING_LITERAL();
             if (stringLiteral) {
-                // スキーマディレクティブからクォートを除去
-                let value = stringLiteral.text;
-                if (value.startsWith("'") && value.endsWith("'")) {
-                    value = value.slice(1, -1);
-                }
-                result.schema = value;
+                result.schema = this.unquote(stringLiteral.text);
             }
         }
         
@@ -262,220 +258,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             }
         }
         
-        // Struct definition
-        else if (ctx.constructor.name === 'StructDefinitionContext') {
-            const identifier = ctx.IDENTIFIER();
-            if (identifier) {
-                result.name = this.createIdentifierWithLocation(identifier.text, identifier);
-            }
-        }
-        
-        // Mixin declaration
-        else if (ctx.constructor.name === 'MixinDeclarationContext') {
-            const identifier = ctx.IDENTIFIER();
-            if (identifier) {
-                result.mixinType = {
-                    type: 'TypeReference',
-                    typeName: identifier.text
-                };
-            }
-        }
-        
-        // Struct member
-        else if (ctx.constructor.name === 'StructMemberContext') {
-            const identifier = ctx.IDENTIFIER();
-            const question = ctx.QUESTION();
-            const typeRef = ctx.typeReference();
-            
-            if (identifier) {
-                result.name = this.createIdentifierWithLocation(identifier.text, identifier);
-                result.required = !question; // ? があれば任意、なければ必須
-                if (typeRef) {
-                    result.dataType = this.visit(typeRef);
-                }
-            }
-        }
-        
-        // Function definition
-        else if (ctx.constructor.name === 'FunctionDefinitionContext') {
-            const identifier = ctx.IDENTIFIER();
-            const isDeclare = ctx.DECLARE();
-            const returnType = ctx.typeReference();
-            
-            if (identifier) {
-                result.name = this.createIdentifierWithLocation(identifier.text, identifier);
-                result.isDeclare = !!isDeclare;
-                if (returnType) {
-                    result.returnType = this.visit(returnType);
-                }
-            }
-            
-            // パラメータ情報
-            const parameterList = ctx.parameterList();
-            if (parameterList) {
-                result.parameters = this.extractParameters(parameterList);
-            } else {
-                result.parameters = []; // 明示的に空の配列を設定
-            }
-            
-            // FunctionBody を直接プロパティとして設定
-            const functionBody = ctx.functionBody();
-            if (functionBody) {
-                result.functionBody = this.visit(functionBody);
-            }
-        }
-        
-        // Method definition
-        else if (ctx.constructor.name === 'MethodDefinitionContext') {
-            const identifier = ctx.IDENTIFIER();
-            const returnType = ctx.typeReference();
-            
-            if (identifier) {
-                result.name = this.createIdentifierWithLocation(identifier.text, identifier);
-                if (returnType) {
-                    result.returnType = this.visit(returnType);
-                }
-            }
-            
-            const parameterList = ctx.parameterList();
-            if (parameterList) {
-                result.parameters = this.extractParameters(parameterList);
-            } else {
-                result.parameters = []; // 明示的に空の配列を設定
-            }
-            
-            // FunctionBody を直接プロパティとして設定
-            const functionBody = ctx.functionBody();
-            if (functionBody) {
-                result.functionBody = this.visit(functionBody);
-            }
-        }
-        
-        // Function call
-        else if (ctx.constructor.name === 'FunctionCallContext') {
-            const identifier = ctx.IDENTIFIER();
-            const memberAccess = ctx.memberAccess();
-            
-            if (memberAccess) {
-                // Member function call (e.g., version.toString())
-                result.isMethodCall = true;
-                // memberAccessの情報も抽出
-                const memberAccessCtx = memberAccess as any;
-                const identifiers = memberAccessCtx.IDENTIFIER();
-                const thisToken = memberAccessCtx.THIS();
-                
-                if (thisToken && identifiers?.[0]) {
-                    result.functionName = `this.${identifiers[0].text}`;
-                    result.target = {
-                        type: 'MemberAccess',
-                        object: {
-                            type: 'ThisReference'
-                        },
-                        member: this.createIdentifierWithLocation(identifiers[0].text, identifiers[0])
-                    };
-                } else if (identifiers?.length >= 2) {
-                    result.functionName = `${identifiers[0].text}.${identifiers[1].text}`;
-                    result.target = {
-                        type: 'MemberAccess',
-                        object: this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]),
-                        member: this.createIdentifierWithLocation(identifiers[1].text, identifiers[1])
-                    };
-                }
-            } else if (identifier) {
-                // 通常の関数呼び出し (e.g., data2(), apply())
-                // identifierは単一の要素またはTerminalNodeの場合がある
-                if (Array.isArray(identifier)) {
-                    result.functionName = this.createIdentifierWithLocation(identifier[0]?.text, identifier[0]);
-                } else {
-                    result.functionName = this.createIdentifierWithLocation(identifier.text, identifier);
-                }
-            }
-            
-            const argumentList = ctx.argumentList();
-            if (argumentList) {
-                // ArgumentListの中身を直接argumentsプロパティに
-                result.arguments = this.extractArgumentsFromList(argumentList);
-            } else {
-                result.arguments = [];
-            }
-            
-            const constructionBody = ctx.constructionBody();
-            if (constructionBody) {
-                // This is actually an object construction with trailing lambda
-                result.isObjectConstruction = true;
-                // ConstructionBodyの中身を直接bodyプロパティに
-                result.body = this.extractStatementsFromBody(constructionBody);
-            } else {
-                result.body = [];
-            }
-        }
-        
-        // Configuration call (was ObjectConstruction)
-        else if (ctx.constructor.name === 'ConfigurationCallContext') {
-            const identifier = ctx.IDENTIFIER();
-            if (identifier) {
-                result.functionName = this.createIdentifierWithLocation(identifier.text, identifier);
-            }
-            
-            const argumentList = ctx.argumentList();
-            if (argumentList) {
-                // ArgumentListの中身を直接argumentsプロパティに
-                result.arguments = this.extractArgumentsFromList(argumentList);
-            } else {
-                result.arguments = [];
-            }
-            
-            const constructionBody = ctx.constructionBody();
-            if (constructionBody) {
-                // ConstructionBodyの中身を直接bodyプロパティに
-                result.body = this.extractStatementsFromBody(constructionBody);
-            } else {
-                result.body = [];
-            }
-        }
-        
-        // Variable declaration - single expression, not children
-        else if (ctx.constructor.name === 'VariableDeclarationContext') {
-            const valToken = ctx.VAL();
-            const varToken = ctx.VAR();
-            const identifier = ctx.IDENTIFIER();
-            
-            if (identifier) {
-                result.variableName = this.createIdentifierWithLocation(identifier.text, identifier);
-                // Simplified: only use isMutable boolean
-                result.isMutable = !!varToken; // true for 'var', false for 'val'
-            }
-            
-            // Get the expression directly, not as children
-            const expression = ctx.expression();
-            if (expression) {
-                result.expression = this.visit(expression);
-                result.children = []; // Clear children since we have direct expression
-            }
-        }
-        
-        // For statement
-        else if (ctx.constructor.name === 'ForStatementContext') {
-            const identifier = ctx.IDENTIFIER();
-            if (identifier) {
-                result.iteratorVariable = this.createIdentifierWithLocation(identifier.text, identifier);
-            }
-            
-            // 反復対象の式（範囲式など）
-            const expression = ctx.expression();
-            if (expression) {
-                result.iterable = this.visit(expression);
-            }
-            
-            // ループ本体の文
-            const statements = ctx.statement();
-            if (statements && statements.length > 0) {
-                result.body = statements.map(stmt => this.visit(stmt));
-            } else {
-                result.body = [];
-            }
-        }
-        
         // Primary expression - delegate to specific subtypes
         else if (ctx.constructor.name === 'PrimaryExpressionContext') {
             const identifier = ctx.IDENTIFIER();
@@ -498,245 +280,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 }
             }
             // For other cases (literals, complex expressions), let normal processing handle delegation
-        }
-        
-        // Assignment - single expression, not children
-        else if (ctx.constructor.name === 'AssignmentContext') {
-            const identifiers = ctx.IDENTIFIER();
-            const thisToken = ctx.THIS();
-            
-            // Create structured target node instead of string
-            if (thisToken && identifiers?.[0]) {
-                // this.property pattern
-                result.target = {
-                    type: 'MemberAccess',
-                    object: {
-                        type: 'ThisReference'
-                    },
-                    member: this.createIdentifierWithLocation(identifiers[0].text, identifiers[0])
-                };
-            } else if (identifiers?.length >= 2) {
-                // object.property pattern
-                result.target = {
-                    type: 'MemberAccess',
-                    object: this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]),
-                    member: this.createIdentifierWithLocation(identifiers[1].text, identifiers[1])
-                };
-            } else if (identifiers?.[0]) {
-                // Simple identifier pattern
-                result.target = this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]);
-            } else {
-                // Fallback for unknown patterns
-                result.target = {
-                    type: 'Identifier',
-                    name: 'unknown'
-                };
-            }
-            
-            // Get the expression directly, not as children
-            const expression = ctx.expression();
-            if (expression) {
-                result.expression = this.visit(expression);
-                result.children = []; // Clear children since we have direct expression
-            }
-        }
-        
-        // Member access
-        else if (ctx.constructor.name === 'MemberAccessContext') {
-            const identifiers = ctx.IDENTIFIER();
-            const thisToken = ctx.THIS();
-            
-            if (thisToken && identifiers?.[0]) {
-                result.object = {
-                    type: 'ThisReference'
-                };
-                result.member = this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]);
-            } else if (identifiers?.length >= 2) {
-                result.object = this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]);
-                result.member = this.createIdentifierWithLocation(identifiers[1].text, identifiers[1]);
-            }
-        }
-        
-        // Literal
-        else if (ctx.constructor.name === 'LiteralContext') {
-            const stringLiteral = ctx.STRING_LITERAL();
-            const integerLiteral = ctx.INTEGER_LITERAL();
-            
-            if (stringLiteral) {
-                result.literalType = 'string';
-                // 文字列リテラルからクォートを除去
-                let value = stringLiteral.text;
-                if (value.startsWith("'") && value.endsWith("'")) {
-                    value = value.slice(1, -1);
-                }
-                result.value = value;
-            } else if (integerLiteral) {
-                result.literalType = 'integer';
-                result.value = parseInt(integerLiteral.text);
-            }
-        }
-        
-        // Type reference
-        else if (ctx.constructor.name === 'TypeReferenceContext') {
-            const stringType = ctx.STRING_TYPE();
-            const intType = ctx.INT_TYPE();
-            const identifier = ctx.IDENTIFIER();
-            
-            if (stringType) {
-                result.typeName = 'string';
-            } else if (intType) {
-                result.typeName = 'int';
-            } else if (identifier) {
-                result.typeName = identifier.text;
-            }
-        }
-        
-        // Annotation
-        else if (ctx.constructor.name === 'AnnotationContext') {
-            const identifier = ctx.IDENTIFIER();
-            const stringLiteral = ctx.STRING_LITERAL();
-            
-            if (identifier) {
-                result.name = this.createIdentifierWithLocation(identifier.text, identifier);
-                if (stringLiteral) {
-                    // アノテーション値からクォートを除去
-                    let value = stringLiteral.text;
-                    if (value.startsWith("'") && value.endsWith("'")) {
-                        value = value.slice(1, -1);
-                    }
-                    result.value = value;
-                }
-            }
-        }
-        
-        // Parameter
-        else if (ctx.constructor.name === 'ParameterContext') {
-            const identifier = ctx.IDENTIFIER();
-            const typeRef = ctx.typeReference();
-            
-            if (identifier) {
-                result.parameterName = identifier.text;
-                if (typeRef) {
-                    result.parameterType = typeRef.text;
-                }
-            }
-        }
-        
-        // Type reference
-        else if (ctx.constructor.name === 'TypeReferenceContext') {
-            const stringType = ctx.STRING_TYPE();
-            const intType = ctx.INT_TYPE();
-            const identifier = ctx.IDENTIFIER();
-            
-            if (stringType) {
-                result.typeName = 'string';
-            } else if (intType) {
-                result.typeName = 'int';
-            } else if (identifier) {
-                result.typeName = identifier.text;
-            }
-        }
-        
-        // Binary expressions - use left/right/operator structure instead of children
-        else if (ctx.constructor.name === 'ExpressionContext') {
-            if (ctx.childCount >= 3) {
-                // Range expression: left .. right
-                const leftChild = ctx.getChild(0);
-                const operatorChild = ctx.getChild(1);
-                const rightChild = ctx.getChild(2);
-                
-                if (leftChild && operatorChild && rightChild && operatorChild.text === '..') {
-                    result.type = 'BinaryExpression';
-                    result.left = this.visit(leftChild);
-                    result.operator = operatorChild.text; // RANGE (..)
-                    result.right = this.visit(rightChild);
-                    // Don't include children for binary expressions
-                    delete result.children;
-                }
-            }
-        }
-        
-        else if (ctx.constructor.name === 'AdditiveExpressionContext') {
-            if (ctx.childCount >= 3) {
-                // 左結合で複数の加算/減算を処理
-                let currentLeft = this.visit(ctx.getChild(0));
-                
-                for (let i = 1; i < ctx.childCount; i += 2) {
-                    const operatorChild = ctx.getChild(i);
-                    const rightChild = ctx.getChild(i + 1);
-                    
-                    if (operatorChild && rightChild) {
-                        const rightNode = this.visit(rightChild);
-                        const binaryNode: ASTNode = {
-                            type: 'BinaryExpression',
-                            left: currentLeft,
-                            operator: operatorChild.text,
-                            right: rightNode
-                        };
-                        
-                        // Add location information for the binary expression
-                        const loc = this.getLocationInfo(ctx as any);
-                        if (loc) {
-                            binaryNode.loc = loc;
-                        }
-                        
-                        currentLeft = binaryNode;
-                    }
-                }
-                
-                // 最終結果をresultにコピー
-                Object.assign(result, currentLeft);
-            }
-        }
-        
-        else if (ctx.constructor.name === 'MultiplicativeExpressionContext') {
-            if (ctx.childCount >= 3) {
-                // 左結合で複数の乗算/除算を処理
-                let currentLeft = this.visit(ctx.getChild(0));
-                
-                for (let i = 1; i < ctx.childCount; i += 2) {
-                    const operatorChild = ctx.getChild(i);
-                    const rightChild = ctx.getChild(i + 1);
-                    
-                    if (operatorChild && rightChild) {
-                        const rightNode = this.visit(rightChild);
-                        const binaryNode: ASTNode = {
-                            type: 'BinaryExpression',
-                            left: currentLeft,
-                            operator: operatorChild.text,
-                            right: rightNode
-                        };
-                        
-                        // Add location information for the binary expression
-                        const loc = this.getLocationInfo(ctx as any);
-                        if (loc) {
-                            binaryNode.loc = loc;
-                        }
-                        
-                        currentLeft = binaryNode;
-                    }
-                }
-                
-                // 最終結果をresultにコピー
-                Object.assign(result, currentLeft);
-            }
-        }
-        
-        else if (ctx.constructor.name === 'ComparisonExpressionContext') {
-            if (ctx.childCount >= 3) {
-                const leftChild = ctx.getChild(0);
-                const operatorChild = ctx.getChild(1);
-                const rightChild = ctx.getChild(2);
-                
-                if (leftChild && operatorChild && rightChild) {
-                    result.type = 'BinaryExpression';
-                    result.left = this.visit(leftChild);
-                    result.operator = operatorChild.text; // Comparison operators
-                    result.right = this.visit(rightChild);
-                    // Don't include children for binary expressions
-                    delete result.children;
-                }
-            }
         }
     }
     
@@ -869,77 +412,478 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         return keys.some(key => key !== 'type' && key !== 'children');
     }
 
-    private isInformationOnlyNode(ruleName: string, result: ASTNode): boolean {
-        // これらのノードは詳細情報のみで十分（子ノードは不要）
-        const informationOnlyNodes = [
-            'TypeReference', 'Parameter', 'Annotation', 'Literal', 'MemberAccess',
-            'VariableDeclaration', 'Assignment', 'BinaryExpression', 
-            'Expression', 'Identifier', 'ArgumentList', 'ConstructionBody', 'ForStatement'
-        ];
-        
-        if (informationOnlyNodes.includes(ruleName)) {
-            return true;
-        }
-        
-        // Assignment with structured target/expression
-        if (ruleName === 'Assignment' && result.target && result.expression) {
-            return true;
-        }
-        
-        // Variable declaration with structured variableName/expression  
-        if (ruleName === 'VariableDeclaration' && result.variableName && result.expression) {
-            return true;
-        }
-        
-        // Binary expressions with left/operator/right structure
-        if (ruleName === 'BinaryExpression' && result.left && result.operator && result.right) {
-            return true;
-        }
-        
-        // For statement with structured iteratorVariable/iterable/body
-        if (ruleName === 'ForStatement' && result.iteratorVariable && result.iterable && result.body) {
-            return true;
-        }
-        
-        return false;
-    }
-
     // Visitor methods implementation
     visitProgram(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitConfigurationCall(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitSchemaDirective(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitSchemaDefinition(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitSchemaMember(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitStructDefinition(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitStructContent(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitMixinDeclaration(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitStructMember(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitMethodDefinition(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitFunctionDefinition(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitFunctionBody(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitParameterList(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitParameter(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitTypeReference(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitStatement(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitVariableDeclaration(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitAssignment(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitExpressionStatement(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitReturnStatement(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitForStatement(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitConstructionBody(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitComparisonExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitAdditiveExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitMultiplicativeExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitPrimaryExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitFunctionCall(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitArgumentList(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitMemberAccess(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitStringInterpolation(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitStringContent(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitInterpolationExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitLiteral(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitAnnotation(ctx: any): ASTNode { return this.visitChildren(ctx); }
+
+    visitVariableDeclaration(ctx: any): ASTNode {
+        const identifier = ctx.IDENTIFIER();
+        const expression = ctx.expression();
+        
+        return {
+            type: 'VariableDeclaration',
+            isMutable: !!ctx.VAR(), // true for 'var', false for 'val'
+            variableName: this.createIdentifierWithLocation(identifier.text, identifier),
+            expression: expression ? this.visit(expression) : undefined,
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitAssignment(ctx: any): ASTNode {
+        const identifiers = ctx.IDENTIFIER();
+        const thisToken = ctx.THIS();
+        const expression = ctx.expression();
+
+        let target: any;
+        if (thisToken && identifiers?.[0]) {
+            // this.property pattern
+            target = {
+                type: 'MemberAccess',
+                object: {
+                    type: 'ThisReference'
+                },
+                member: this.createIdentifierWithLocation(identifiers[0].text, identifiers[0])
+            };
+        } else if (identifiers?.length >= 2) {
+            // object.property pattern
+            target = {
+                type: 'MemberAccess',
+                object: this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]),
+                member: this.createIdentifierWithLocation(identifiers[1].text, identifiers[1])
+            };
+        } else if (identifiers?.[0]) {
+            // Simple identifier pattern
+            target = this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]);
+        } else {
+            // Fallback for unknown patterns
+            target = {
+                type: 'Identifier',
+                name: 'unknown'
+            };
+        }
+
+        return {
+            type: 'Assignment',
+            target: target,
+            expression: expression ? this.visit(expression) : undefined,
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitLiteral(ctx: any): ASTNode {
+        const stringLiteral = ctx.STRING_LITERAL();
+        const integerLiteral = ctx.INTEGER_LITERAL();
+        
+        let literalType: string;
+        let value: any;
+        
+        if (stringLiteral) {
+            literalType = 'string';
+            value = this.unquote(stringLiteral.text);
+        } else if (integerLiteral) {
+            literalType = 'integer';
+            value = parseInt(integerLiteral.text);
+        } else {
+            literalType = 'unknown';
+            value = null;
+        }
+
+        return {
+            type: 'Literal',
+            literalType: literalType,
+            value: value,
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitMemberAccess(ctx: any): ASTNode {
+        const identifiers = ctx.IDENTIFIER();
+        const thisToken = ctx.THIS();
+        
+        let object: any;
+        let member: any;
+        
+        if (thisToken && identifiers?.[0]) {
+            object = {
+                type: 'ThisReference'
+            };
+            member = this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]);
+        } else if (identifiers?.length >= 2) {
+            object = this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]);
+            member = this.createIdentifierWithLocation(identifiers[1].text, identifiers[1]);
+        } else {
+            object = { type: 'Unknown' };
+            member = { type: 'Unknown' };
+        }
+
+        return {
+            type: 'MemberAccess',
+            object: object,
+            member: member,
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitFunctionCall(ctx: any): ASTNode {
+        const identifier = ctx.IDENTIFIER();
+        const memberAccess = ctx.memberAccess();
+        const argumentList = ctx.argumentList();
+        const constructionBody = ctx.constructionBody();
+        
+        let functionName: any;
+        let target: any = undefined;
+        let isMethodCall = false;
+        
+        if (memberAccess) {
+            // Member function call (e.g., version.toString())
+            isMethodCall = true;
+            const memberAccessCtx = memberAccess as any;
+            const identifiers = memberAccessCtx.IDENTIFIER();
+            const thisToken = memberAccessCtx.THIS();
+            
+            if (thisToken && identifiers?.[0]) {
+                functionName = `this.${identifiers[0].text}`;
+                target = {
+                    type: 'MemberAccess',
+                    object: {
+                        type: 'ThisReference'
+                    },
+                    member: this.createIdentifierWithLocation(identifiers[0].text, identifiers[0])
+                };
+            } else if (identifiers?.length >= 2) {
+                functionName = `${identifiers[0].text}.${identifiers[1].text}`;
+                target = {
+                    type: 'MemberAccess',
+                    object: this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]),
+                    member: this.createIdentifierWithLocation(identifiers[1].text, identifiers[1])
+                };
+            }
+        } else if (identifier) {
+            // Normal function call (e.g., data2(), apply())
+            if (Array.isArray(identifier)) {
+                functionName = this.createIdentifierWithLocation(identifier[0]?.text, identifier[0]);
+            } else {
+                functionName = this.createIdentifierWithLocation(identifier.text, identifier);
+            }
+        }
+        
+        const result: ASTNode = {
+            type: 'FunctionCall',
+            functionName: functionName,
+            arguments: argumentList ? this.extractArgumentsFromList(argumentList) : [],
+            loc: this.getLocationInfo(ctx)
+        };
+        
+        if (isMethodCall && target) {
+            result.isMethodCall = true;
+            result.target = target;
+        }
+        
+        if (constructionBody) {
+            // This is actually an object construction with trailing lambda
+            result.isObjectConstruction = true;
+            result.body = this.extractStatementsFromBody(constructionBody);
+        } else {
+            result.body = [];
+        }
+        
+        return result;
+    }
+
+    visitTypeReference(ctx: any): ASTNode {
+        const stringType = ctx.STRING_TYPE();
+        const intType = ctx.INT_TYPE();
+        const identifier = ctx.IDENTIFIER();
+        
+        let typeName: string;
+        if (stringType) {
+            typeName = 'string';
+        } else if (intType) {
+            typeName = 'int';
+        } else if (identifier) {
+            typeName = identifier.text;
+        } else {
+            typeName = 'unknown';
+        }
+
+        return {
+            type: 'TypeReference',
+            typeName: typeName,
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitSchemaDirective(ctx: any): ASTNode {
+        const stringLiteral = ctx.STRING_LITERAL();
+        
+        return {
+            type: 'SchemaDirective',
+            schema: stringLiteral ? this.unquote(stringLiteral.text) : '',
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitAnnotation(ctx: any): ASTNode {
+        const identifier = ctx.IDENTIFIER();
+        const stringLiteral = ctx.STRING_LITERAL();
+        
+        const result: ASTNode = {
+            type: 'Annotation',
+            loc: this.getLocationInfo(ctx)
+        };
+        
+        if (identifier) {
+            result.name = this.createIdentifierWithLocation(identifier.text, identifier);
+            if (stringLiteral) {
+                result.value = this.unquote(stringLiteral.text);
+            }
+        }
+        
+        return result;
+    }
+
+    visitStructDefinition(ctx: any): ASTNode {
+        const identifier = ctx.IDENTIFIER();
+        
+        return {
+            type: 'StructDefinition',
+            name: identifier ? this.createIdentifierWithLocation(identifier.text, identifier) : undefined,
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitSchemaMember(ctx: any): ASTNode {
+        const identifier = ctx.IDENTIFIER();
+        const multiply = ctx.MULTIPLY();
+        const question = ctx.QUESTION();
+        const plus = ctx.PLUS();
+        const typeRef = ctx.typeReference();
+        
+        const result: ASTNode = {
+            type: 'SchemaMember',
+            loc: this.getLocationInfo(ctx)
+        };
+        
+        if (identifier) {
+            result.name = this.createIdentifierWithLocation(identifier.text, identifier);
+            result.multiple = !!multiply || !!plus; // * または + の場合は複数
+            
+            // * は multiple: true, required: false
+            // + は multiple: true, required: true
+            // ? は multiple: false, required: false
+            // 修飾子なしは multiple: false, required: true
+            if (multiply) {
+                result.required = false; // * は0個以上（任意）
+            } else if (plus) {
+                result.required = true;  // + は1個以上必須
+            } else if (question) {
+                result.required = false; // ? は任意
+            } else {
+                result.required = true;  // 修飾子なしは必須
+            }
+            
+            if (typeRef) {
+                result.dataType = this.visit(typeRef);
+            }
+        }
+        
+        return result;
+    }
+
+    visitMixinDeclaration(ctx: any): ASTNode {
+        const identifier = ctx.IDENTIFIER();
+        
+        return {
+            type: 'MixinDeclaration',
+            mixinType: identifier ? {
+                type: 'TypeReference',
+                typeName: identifier.text
+            } : undefined,
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitStructMember(ctx: any): ASTNode {
+        const identifier = ctx.IDENTIFIER();
+        const question = ctx.QUESTION();
+        const typeRef = ctx.typeReference();
+        
+        return {
+            type: 'StructMember',
+            name: identifier ? this.createIdentifierWithLocation(identifier.text, identifier) : undefined,
+            required: !question, // ? があれば任意、なければ必須
+            dataType: typeRef ? this.visit(typeRef) : undefined,
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitFunctionDefinition(ctx: any): ASTNode {
+        const identifier = ctx.IDENTIFIER();
+        const isDeclare = ctx.DECLARE();
+        const returnType = ctx.typeReference();
+        const parameterList = ctx.parameterList();
+        const functionBody = ctx.functionBody();
+        
+        return {
+            type: 'FunctionDefinition',
+            name: identifier ? this.createIdentifierWithLocation(identifier.text, identifier) : undefined,
+            isDeclare: !!isDeclare,
+            returnType: returnType ? this.visit(returnType) : undefined,
+            parameters: parameterList ? this.extractParameters(parameterList) : [],
+            functionBody: functionBody ? this.visit(functionBody) : undefined,
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitMethodDefinition(ctx: any): ASTNode {
+        const identifier = ctx.IDENTIFIER();
+        const returnType = ctx.typeReference();
+        const parameterList = ctx.parameterList();
+        const functionBody = ctx.functionBody();
+        
+        return {
+            type: 'MethodDefinition',
+            name: identifier ? this.createIdentifierWithLocation(identifier.text, identifier) : undefined,
+            returnType: returnType ? this.visit(returnType) : undefined,
+            parameters: parameterList ? this.extractParameters(parameterList) : [],
+            functionBody: functionBody ? this.visit(functionBody) : undefined,
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitConfigurationCall(ctx: any): ASTNode {
+        const identifier = ctx.IDENTIFIER();
+        const argumentList = ctx.argumentList();
+        const constructionBody = ctx.constructionBody();
+        
+        return {
+            type: 'ConfigurationCall',
+            functionName: identifier ? this.createIdentifierWithLocation(identifier.text, identifier) : undefined,
+            arguments: argumentList ? this.extractArgumentsFromList(argumentList) : [],
+            body: constructionBody ? this.extractStatementsFromBody(constructionBody) : [],
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitForStatement(ctx: any): ASTNode {
+        const identifier = ctx.IDENTIFIER();
+        const expression = ctx.expression();
+        const statements = ctx.statement();
+        
+        return {
+            type: 'ForStatement',
+            iteratorVariable: identifier ? this.createIdentifierWithLocation(identifier.text, identifier) : undefined,
+            iterable: expression ? this.visit(expression) : undefined,
+            body: statements && statements.length > 0 ? statements.map((stmt: any) => this.visit(stmt)) : [],
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitParameter(ctx: any): ASTNode {
+        const identifier = ctx.IDENTIFIER();
+        const typeRef = ctx.typeReference();
+        
+        return {
+            type: 'Parameter',
+            parameterName: identifier ? identifier.text : undefined,
+            parameterType: typeRef ? typeRef.text : undefined,
+            loc: this.getLocationInfo(ctx)
+        };
+    }
+
+    visitExpression(ctx: any): ASTNode {
+        if (ctx.childCount >= 3) {
+            // Range expression: left .. right
+            const leftChild = ctx.getChild(0);
+            const operatorChild = ctx.getChild(1);
+            const rightChild = ctx.getChild(2);
+            
+            if (leftChild && operatorChild && rightChild && operatorChild.text === '..') {
+                return {
+                    type: 'BinaryExpression',
+                    left: this.visit(leftChild),
+                    operator: operatorChild.text, // RANGE (..)
+                    right: this.visit(rightChild),
+                    loc: this.getLocationInfo(ctx)
+                };
+            }
+        }
+        // For other cases, delegate to default behavior
+        return this.visitChildren(ctx);
+    }
+
+    visitAdditiveExpression(ctx: any): ASTNode {
+        if (ctx.childCount >= 3) {
+            // 左結合で複数の加算/減算を処理
+            let currentLeft = this.visit(ctx.getChild(0));
+            
+            for (let i = 1; i < ctx.childCount; i += 2) {
+                const operatorChild = ctx.getChild(i);
+                const rightChild = ctx.getChild(i + 1);
+                
+                if (operatorChild && rightChild) {
+                    const rightNode = this.visit(rightChild);
+                    currentLeft = {
+                        type: 'BinaryExpression',
+                        left: currentLeft,
+                        operator: operatorChild.text,
+                        right: rightNode,
+                        loc: this.getLocationInfo(ctx)
+                    };
+                }
+            }
+            
+            return currentLeft;
+        }
+        // For other cases, delegate to default behavior
+        return this.visitChildren(ctx);
+    }
+
+    visitMultiplicativeExpression(ctx: any): ASTNode {
+        if (ctx.childCount >= 3) {
+            // 左結合で複数の乗算/除算を処理
+            let currentLeft = this.visit(ctx.getChild(0));
+            
+            for (let i = 1; i < ctx.childCount; i += 2) {
+                const operatorChild = ctx.getChild(i);
+                const rightChild = ctx.getChild(i + 1);
+                
+                if (operatorChild && rightChild) {
+                    const rightNode = this.visit(rightChild);
+                    currentLeft = {
+                        type: 'BinaryExpression',
+                        left: currentLeft,
+                        operator: operatorChild.text,
+                        right: rightNode,
+                        loc: this.getLocationInfo(ctx)
+                    };
+                }
+            }
+            
+            return currentLeft;
+        }
+        // For other cases, delegate to default behavior
+        return this.visitChildren(ctx);
+    }
+
+    visitComparisonExpression(ctx: any): ASTNode {
+        if (ctx.childCount >= 3) {
+            const leftChild = ctx.getChild(0);
+            const operatorChild = ctx.getChild(1);
+            const rightChild = ctx.getChild(2);
+            
+            if (leftChild && operatorChild && rightChild) {
+                return {
+                    type: 'BinaryExpression',
+                    left: this.visit(leftChild),
+                    operator: operatorChild.text, // Comparison operators
+                    right: this.visit(rightChild),
+                    loc: this.getLocationInfo(ctx)
+                };
+            }
+        }
+        // For other cases, delegate to default behavior
+        return this.visitChildren(ctx);
+    }
 }
 
 function parseCanonToAST(filename: string): void {
