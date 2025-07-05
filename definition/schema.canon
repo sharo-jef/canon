@@ -5,6 +5,8 @@ schema {
     data1: data
     @description 'fuga'
     data2*: data2
+    data3?: data2
+    data4+: data2
 }
 
 struct data {

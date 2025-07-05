@@ -18,7 +18,7 @@ schemaDirective: SCHEMA_DIRECTIVE STRING_LITERAL;
 // Schema definition
 schemaDefinition: SCHEMA LBRACE schemaMember* RBRACE;
 schemaMember:
-	annotation* IDENTIFIER (MULTIPLY)? COLON typeReference;
+	annotation* IDENTIFIER (MULTIPLY | QUESTION | PLUS)? COLON typeReference;
 
 // Struct definition
 structDefinition:

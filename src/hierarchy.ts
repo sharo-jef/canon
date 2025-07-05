@@ -83,9 +83,12 @@ class SchemaCanonParseListener implements CanonParserListener {
 
     enterSchemaMember(ctx: any): void {
         const identifier = ctx.IDENTIFIER()?.text || 'unknown';
-        const isMultiple = ctx.MULTIPLY() ? '*' : '';
+        const multiply = ctx.MULTIPLY() ? '*' : '';
+        const question = ctx.QUESTION() ? '?' : '';
+        const plus = ctx.PLUS() ? '+' : '';
+        const modifier = multiply || question || plus;
         const type = ctx.typeReference()?.text || 'unknown';
-        this.logEnter('SchemaMember', `${identifier}${isMultiple}: ${type}`);
+        this.logEnter('SchemaMember', `${identifier}${modifier}: ${type}`);
     }
 
     exitSchemaMember(ctx: any): void {

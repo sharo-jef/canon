@@ -19,6 +19,12 @@ children:
               - type: Annotation
                 details: '@description ''fuga'''
                 children: []
+          - type: SchemaMember
+            details: 'data3?: data2'
+            children: []
+          - type: SchemaMember
+            details: 'data4+: data2'
+            children: []
       - type: StructDefinition
         details: data
         children:

@@ -143,11 +143,16 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         else if (ctx.constructor.name === 'SchemaMemberContext') {
             const identifier = ctx.IDENTIFIER();
             const multiply = ctx.MULTIPLY();
+            const question = ctx.QUESTION();
+            const plus = ctx.PLUS();
             const typeRef = ctx.typeReference();
             
             if (identifier) {
                 result.name = identifier.text;
                 result.isMultiple = !!multiply;
+                result.isOptional = !!question;
+                // 修飾子がない場合は必須、? がある場合は任意
+                result.isRequired = !question;
                 if (typeRef) {
                     result.dataType = typeRef.text;
                 }

@@ -13,6 +13,8 @@ children:
             typeName: data
         name: data1
         isMultiple: false
+        isOptional: false
+        isRequired: true
         dataType: data
       - type: SchemaMember
         children:
@@ -23,6 +25,26 @@ children:
             typeName: data2
         name: data2
         isMultiple: true
+        isOptional: false
+        isRequired: true
+        dataType: data2
+      - type: SchemaMember
+        children:
+          - type: TypeReference
+            typeName: data2
+        name: data3
+        isMultiple: false
+        isOptional: true
+        isRequired: false
+        dataType: data2
+      - type: SchemaMember
+        children:
+          - type: TypeReference
+            typeName: data2
+        name: data4
+        isMultiple: false
+        isOptional: false
+        isRequired: true
         dataType: data2
   - type: StructDefinition
     children:
