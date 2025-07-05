@@ -6,10 +6,7 @@ children:
     functionName:
       type: Identifier
       name: data1
-    hasArguments: false
-    argumentCount: 0
     arguments: []
-    hasBody: true
     body:
       - type: Assignment
         target:
@@ -23,13 +20,10 @@ children:
     functionName:
       type: Identifier
       name: data2
-    hasArguments: true
-    argumentCount: 1
     arguments:
       - type: Literal
         literalType: string
         value: hoge
-    hasBody: true
     body:
       - type: Assignment
         target:
@@ -43,13 +37,10 @@ children:
     functionName:
       type: Identifier
       name: data2
-    hasArguments: true
-    argumentCount: 1
     arguments:
       - type: Literal
         literalType: string
         value: fuga
-    hasBody: true
     body:
       - type: Assignment
         target:
@@ -67,7 +58,6 @@ children:
           member:
             type: Identifier
             name: datam2
-          fullAccess: this.datam2
         expression:
           type: Identifier
           name: datam2
@@ -93,9 +83,10 @@ children:
       name: data2
     expression:
       type: FunctionCall
-      functionName: generateData3
-      hasArguments: false
-      argumentCount: 0
+      functionName:
+        type: Identifier
+        name: generateData3
+      arguments: []
   - type: Assignment
     target:
       type: Identifier
@@ -105,14 +96,12 @@ children:
       functionName:
         type: Identifier
         name: generateData4
-      hasArguments: true
-      argumentCount: 1
       arguments:
         - type: FunctionCall
-          functionName: getVersion
-          hasArguments: false
-          argumentCount: 0
-      hasBody: false
+          functionName:
+            type: Identifier
+            name: getVersion
+          arguments: []
       body: []
   - type: VariableDeclaration
     variableName:
@@ -128,12 +117,9 @@ children:
     functionName:
       type: Identifier
       name: data2
-    hasArguments: true
-    argumentCount: 1
     arguments:
       - type: Identifier
         name: name
-    hasBody: true
     body:
       - type: Assignment
         target:
@@ -165,12 +151,9 @@ children:
     functionName:
       type: Identifier
       name: data2
-    hasArguments: true
-    argumentCount: 1
     arguments:
       - type: Identifier
         name: name2
-    hasBody: true
     body:
       - type: Assignment
         target:
@@ -216,7 +199,6 @@ children:
           member:
             type: Identifier
             name: datam2
-          fullAccess: this.datam2
         expression:
           type: AdditiveExpression
           left:

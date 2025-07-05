@@ -40,8 +40,6 @@ yarn-debug.log*
 yarn-error.log*
 .npm
 .yarn/
-package-lock.json
-yarn.lock
 
 # Python (if using Python target)
 __pycache__/

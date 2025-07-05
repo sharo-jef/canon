@@ -328,8 +328,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                         member: {
                             type: 'Identifier',
                             name: identifiers[0].text
-                        },
-                        fullAccess: `this.${identifiers[0].text}`
+                        }
                     };
                 } else if (identifiers?.length >= 2) {
                     result.functionName = `${identifiers[0].text}.${identifiers[1].text}`;
@@ -342,8 +341,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                         member: {
                             type: 'Identifier',
                             name: identifiers[1].text
-                        },
-                        fullAccess: `${identifiers[0].text}.${identifiers[1].text}`
+                        }
                     };
                 }
             } else if (identifier) {
@@ -364,13 +362,9 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             
             const argumentList = ctx.argumentList();
             if (argumentList) {
-                result.hasArguments = true;
-                result.argumentCount = this.countArguments(argumentList);
                 // ArgumentListの中身を直接argumentsプロパティに
                 result.arguments = this.extractArgumentsFromList(argumentList);
             } else {
-                result.hasArguments = false;
-                result.argumentCount = 0;
                 result.arguments = [];
             }
             
@@ -378,11 +372,9 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             if (constructionBody) {
                 // This is actually an object construction with trailing lambda
                 result.isObjectConstruction = true;
-                result.hasBody = true;
                 // ConstructionBodyの中身を直接bodyプロパティに
                 result.body = this.extractStatementsFromBody(constructionBody);
             } else {
-                result.hasBody = false;
                 result.body = [];
             }
         }
@@ -399,23 +391,17 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             
             const argumentList = ctx.argumentList();
             if (argumentList) {
-                result.hasArguments = true;
-                result.argumentCount = this.countArguments(argumentList);
                 // ArgumentListの中身を直接argumentsプロパティに
                 result.arguments = this.extractArgumentsFromList(argumentList);
             } else {
-                result.hasArguments = false;
-                result.argumentCount = 0;
                 result.arguments = [];
             }
             
             const constructionBody = ctx.constructionBody();
             if (constructionBody) {
-                result.hasBody = true;
                 // ConstructionBodyの中身を直接bodyプロパティに
                 result.body = this.extractStatementsFromBody(constructionBody);
             } else {
-                result.hasBody = false;
                 result.body = [];
             }
         }
@@ -477,9 +463,11 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             if (identifier && lparen && rparen) {
                 // This is an apply() style function call
                 result.type = 'FunctionCall';
-                result.functionName = identifier.text;
-                result.hasArguments = false;
-                result.argumentCount = 0;
+                result.functionName = {
+                    type: 'Identifier',
+                    name: identifier.text
+                };
+                result.arguments = [];
             } else if (identifier && !lparen && !rparen) {
                 // Simple identifier reference - create Identifier node
                 result.type = 'Identifier';
@@ -505,8 +493,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     member: {
                         type: 'Identifier',
                         name: identifiers[0].text
-                    },
-                    fullAccess: `this.${identifiers[0].text}`
+                    }
                 };
             } else if (identifiers?.length >= 2) {
                 // object.property pattern
@@ -519,8 +506,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     member: {
                         type: 'Identifier',
                         name: identifiers[1].text
-                    },
-                    fullAccess: `${identifiers[0].text}.${identifiers[1].text}`
+                    }
                 };
             } else if (identifiers?.[0]) {
                 // Simple identifier pattern
@@ -557,7 +543,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     type: 'Identifier',
                     name: identifiers[0].text
                 };
-                result.fullAccess = `this.${identifiers[0].text}`;
             } else if (identifiers?.length >= 2) {
                 result.object = {
                     type: 'Identifier',
@@ -567,7 +552,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     type: 'Identifier',
                     name: identifiers[1].text
                 };
-                result.fullAccess = `${identifiers[0].text}.${identifiers[1].text}`;
             }
         }
         
