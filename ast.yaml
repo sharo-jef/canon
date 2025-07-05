@@ -3,76 +3,69 @@ children:
   - type: SchemaDirective
     schema: ./schema.canon
   - type: ConfigurationCall
-    children:
-      - type: ConstructionBody
-        children:
-          - type: Assignment
-            target: datam1
-            expression:
-              type: Literal
-              literalType: string
-              value: datam1
     functionName: data1
     hasArguments: false
     argumentCount: 0
+    arguments: []
     hasBody: true
+    body:
+      - type: Assignment
+        target: datam1
+        expression:
+          type: Literal
+          literalType: string
+          value: datam1
   - type: ConfigurationCall
-    children:
-      - type: ArgumentList
-        children:
-          - type: Literal
-            literalType: string
-            value: hoge
-      - type: ConstructionBody
-        children:
-          - type: Assignment
-            target: datam1
-            expression:
-              type: Literal
-              literalType: string
-              value: hoge1
     functionName: data2
     hasArguments: true
     argumentCount: 1
+    arguments:
+      - type: Literal
+        literalType: string
+        value: hoge
     hasBody: true
+    body:
+      - type: Assignment
+        target: datam1
+        expression:
+          type: Literal
+          literalType: string
+          value: hoge1
   - type: ConfigurationCall
-    children:
-      - type: ArgumentList
-        children:
-          - type: Literal
-            literalType: string
-            value: fuga
-      - type: ConstructionBody
-        children:
-          - type: Assignment
-            target: datam1
-            expression:
-              type: Literal
-              literalType: string
-              value: fuga1
-          - type: VariableDeclaration
-            variableName: datam2
-            variableType: val
-            isMutable: false
-            expression:
-              type: AdditiveExpression
-              left:
-                type: Identifier
-                name: datam1
-              operator: +
-              right:
-                type: Literal
-                literalType: string
-                value: _2
-          - type: Assignment
-            target: this.datam2
-            expression:
-              type: Identifier
-              name: datam2
     functionName: data2
     hasArguments: true
     argumentCount: 1
+    arguments:
+      - type: Literal
+        literalType: string
+        value: fuga
     hasBody: true
+    body:
+      - type: Assignment
+        target: datam1
+        expression:
+          type: Literal
+          literalType: string
+          value: fuga1
+      - type: Assignment
+        target: this.datam2
+        expression:
+          type: Identifier
+          name: datam2
+      - type: VariableDeclaration
+        variableName: datam2
+        variableType: val
+        isMutable: false
+        expression:
+          type: AdditiveExpression
+          left:
+            type: Identifier
+            name: datam1
+          operator: +
+          right:
+            type: Literal
+            literalType: string
+            value: _2
   - type: Assignment
     target: data2
     expression:
@@ -84,16 +77,16 @@ children:
     target: data2
     expression:
       type: FunctionCall
-      children:
-        - type: ArgumentList
-          children:
-            - type: FunctionCall
-              functionName: getVersion
-              hasArguments: false
-              argumentCount: 0
       functionName: generateData4
       hasArguments: true
       argumentCount: 1
+      arguments:
+        - type: FunctionCall
+          functionName: getVersion
+          hasArguments: false
+          argumentCount: 0
+      hasBody: false
+      body: []
   - type: VariableDeclaration
     variableName: name
     variableType: val
@@ -103,29 +96,26 @@ children:
       literalType: string
       value: data5
   - type: ConfigurationCall
-    children:
-      - type: ArgumentList
-        children:
-          - type: Identifier
-            name: name
-      - type: ConstructionBody
-        children:
-          - type: Assignment
-            target: datam1
-            expression:
-              type: Literal
-              literalType: string
-              value: datam1
-          - type: Assignment
-            target: datam2
-            expression:
-              type: Literal
-              literalType: string
-              value: datam2
     functionName: data2
     hasArguments: true
     argumentCount: 1
+    arguments:
+      - type: Identifier
+        name: name
     hasBody: true
+    body:
+      - type: Assignment
+        target: datam1
+        expression:
+          type: Literal
+          literalType: string
+          value: datam1
+      - type: Assignment
+        target: datam2
+        expression:
+          type: Literal
+          literalType: string
+          value: datam2
   - type: VariableDeclaration
     variableName: name2
     variableType: var
@@ -135,81 +125,78 @@ children:
       literalType: string
       value: data6
   - type: ConfigurationCall
-    children:
-      - type: ArgumentList
-        children:
-          - type: Identifier
-            name: name2
-      - type: ConstructionBody
-        children:
-          - type: Assignment
-            target: datam1
-            expression:
-              type: Literal
-              literalType: string
-              value: datam1
-          - type: Assignment
-            target: datam2
-            expression:
-              type: AdditiveExpression
-              left:
-                type: Identifier
-                name: name2
-              operator: +
-              right:
-                type: Literal
-                literalType: string
-                value: _1
-          - type: Assignment
-            target: datam2
-            expression:
-              type: AdditiveExpression
-              left:
-                type: Identifier
-                name: name2
-              operator: +
-              right:
-                type: Literal
-                literalType: string
-                value: _2
-          - type: Assignment
-            target: this.datam2
-            expression:
-              type: AdditiveExpression
-              left:
-                type: Identifier
-                name: name2
-              operator: +
-              right:
-                type: Literal
-                literalType: string
-                value: _3
-          - type: ForStatement
-            children:
-              - type: RangeExpression
-                left:
-                  type: Literal
-                  literalType: integer
-                  value: 1
-                operator: ..
-                right:
-                  type: Literal
-                  literalType: integer
-                  value: 100
-              - type: Assignment
-                target: datam2
-                expression:
-                  type: AdditiveExpression
-                  left:
-                    type: Identifier
-                    name: name2
-                  operator: +
-                  right:
-                    type: Literal
-                    literalType: string
-                    value: _loop_
-            iteratorVariable: i
     functionName: data2
     hasArguments: true
     argumentCount: 1
+    arguments:
+      - type: Identifier
+        name: name2
     hasBody: true
+    body:
+      - type: Assignment
+        target: datam1
+        expression:
+          type: Literal
+          literalType: string
+          value: datam1
+      - type: Assignment
+        target: datam2
+        expression:
+          type: AdditiveExpression
+          left:
+            type: Identifier
+            name: name2
+          operator: +
+          right:
+            type: Literal
+            literalType: string
+            value: _1
+      - type: Assignment
+        target: datam2
+        expression:
+          type: AdditiveExpression
+          left:
+            type: Identifier
+            name: name2
+          operator: +
+          right:
+            type: Literal
+            literalType: string
+            value: _2
+      - type: Assignment
+        target: this.datam2
+        expression:
+          type: AdditiveExpression
+          left:
+            type: Identifier
+            name: name2
+          operator: +
+          right:
+            type: Literal
+            literalType: string
+            value: _3
+      - type: ForStatement
+        children:
+          - type: RangeExpression
+            left:
+              type: Literal
+              literalType: integer
+              value: 1
+            operator: ..
+            right:
+              type: Literal
+              literalType: integer
+              value: 100
+          - type: Assignment
+            target: datam2
+            expression:
+              type: AdditiveExpression
+              left:
+                type: Identifier
+                name: name2
+              operator: +
+              right:
+                type: Literal
+                literalType: string
+                value: _loop_
+        iteratorVariable: i

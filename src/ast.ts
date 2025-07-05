@@ -311,9 +311,12 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             if (argumentList) {
                 result.hasArguments = true;
                 result.argumentCount = this.countArguments(argumentList);
+                // ArgumentListの中身を直接argumentsプロパティに
+                result.arguments = this.extractArgumentsFromList(argumentList);
             } else {
                 result.hasArguments = false;
                 result.argumentCount = 0;
+                result.arguments = [];
             }
             
             const constructionBody = ctx.constructionBody();
@@ -321,6 +324,11 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 // This is actually an object construction with trailing lambda
                 result.isObjectConstruction = true;
                 result.hasBody = true;
+                // ConstructionBodyの中身を直接bodyプロパティに
+                result.body = this.extractStatementsFromBody(constructionBody);
+            } else {
+                result.hasBody = false;
+                result.body = [];
             }
         }
         
@@ -335,16 +343,22 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             if (argumentList) {
                 result.hasArguments = true;
                 result.argumentCount = this.countArguments(argumentList);
+                // ArgumentListの中身を直接argumentsプロパティに
+                result.arguments = this.extractArgumentsFromList(argumentList);
             } else {
                 result.hasArguments = false;
                 result.argumentCount = 0;
+                result.arguments = [];
             }
             
             const constructionBody = ctx.constructionBody();
             if (constructionBody) {
                 result.hasBody = true;
+                // ConstructionBodyの中身を直接bodyプロパティに
+                result.body = this.extractStatementsFromBody(constructionBody);
             } else {
                 result.hasBody = false;
+                result.body = [];
             }
         }
         
@@ -606,6 +620,48 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         return Array.isArray(expressions) ? expressions.length : 1;
     }
 
+    private extractArgumentsFromList(argumentList: any): ASTNode[] {
+        const expressions = argumentList.expression();
+        if (!expressions) return [];
+        
+        if (Array.isArray(expressions)) {
+            return expressions.map((expr: any) => this.visit(expr));
+        } else {
+            return [this.visit(expressions)];
+        }
+    }
+
+    private extractStatementsFromBody(constructionBody: any): ASTNode[] {
+        const statements: ASTNode[] = [];
+        
+        // ConstructionBodyの各ステートメントを処理
+        const assignments = constructionBody.assignment();
+        if (assignments) {
+            const assignmentList = Array.isArray(assignments) ? assignments : [assignments];
+            statements.push(...assignmentList.map((stmt: any) => this.visit(stmt)));
+        }
+        
+        const variableDeclarations = constructionBody.variableDeclaration();
+        if (variableDeclarations) {
+            const varDeclList = Array.isArray(variableDeclarations) ? variableDeclarations : [variableDeclarations];
+            statements.push(...varDeclList.map((stmt: any) => this.visit(stmt)));
+        }
+        
+        const forStatements = constructionBody.forStatement();
+        if (forStatements) {
+            const forStmtList = Array.isArray(forStatements) ? forStatements : [forStatements];
+            statements.push(...forStmtList.map((stmt: any) => this.visit(stmt)));
+        }
+        
+        const configurationCalls = constructionBody.configurationCall();
+        if (configurationCalls) {
+            const configCallList = Array.isArray(configurationCalls) ? configurationCalls : [configurationCalls];
+            statements.push(...configCallList.map((stmt: any) => this.visit(stmt)));
+        }
+        
+        return statements;
+    }
+
     private shouldIncludeNode(childNode: ASTNode, parentRuleName: string): boolean {
         // Terminal ノードは全て除外（重要な情報は親ノードでプロパティとして抽出済み）
         if (childNode.type === 'Terminal') {
@@ -619,14 +675,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             }
         }
         
+        // ConfigurationCall と FunctionCall の構造的ラッパーは除外（プロパティとして直接設定済み）
+        if (['ConfigurationCall', 'FunctionCall'].includes(parentRuleName)) {
+            if (['ArgumentList', 'ConstructionBody'].includes(childNode.type)) {
+                return false;
+            }
+        }
+        
         // 重要な構文要素は保持
         const importantNodes = [
             'StructMember', 'MixinDeclaration', 'MethodDefinition', 'Annotation',
             'FunctionCall', 'Assignment', 'ReturnStatement', 'VariableDeclaration',
             'Literal', 'MemberAccess', 'StringInterpolation', 'ConfigurationCall',
-            'ConstructionBody', 'StructContent', 'ExpressionStatement',
+            'StructContent', 'ExpressionStatement',
             'InterpolationExpression', 'TypeReference', 'Parameter',
-            'ParameterList', 'ArgumentList', 'ForStatement', 'StringContent',
+            'ParameterList', 'ForStatement', 'StringContent',
             'FunctionBody', 'Statement', 'Identifier'
         ];
         
@@ -661,7 +724,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             'TypeReference', 'Parameter', 'Annotation', 'Literal', 'MemberAccess',
             'VariableDeclaration', 'Assignment', 'AdditiveExpression', 
             'MultiplicativeExpression', 'ComparisonExpression', 'Expression',
-            'Identifier'  // New: simple identifier references
+            'Identifier', 'ArgumentList', 'ConstructionBody'  // Added structural wrappers
         ];
         
         // PrimaryExpression with specific type info should not have children
