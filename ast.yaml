@@ -10,7 +10,9 @@ children:
     hasBody: true
     body:
       - type: Assignment
-        target: datam1
+        target:
+          type: Identifier
+          name: datam1
         expression:
           type: Literal
           literalType: string
@@ -26,7 +28,9 @@ children:
     hasBody: true
     body:
       - type: Assignment
-        target: datam1
+        target:
+          type: Identifier
+          name: datam1
         expression:
           type: Literal
           literalType: string
@@ -42,13 +46,19 @@ children:
     hasBody: true
     body:
       - type: Assignment
-        target: datam1
+        target:
+          type: Identifier
+          name: datam1
         expression:
           type: Literal
           literalType: string
           value: fuga1
       - type: Assignment
-        target: this.datam2
+        target:
+          type: MemberAccess
+          object: this
+          member: datam2
+          fullAccess: this.datam2
         expression:
           type: Identifier
           name: datam2
@@ -67,14 +77,18 @@ children:
             literalType: string
             value: _2
   - type: Assignment
-    target: data2
+    target:
+      type: Identifier
+      name: data2
     expression:
       type: FunctionCall
       functionName: generateData3
       hasArguments: false
       argumentCount: 0
   - type: Assignment
-    target: data2
+    target:
+      type: Identifier
+      name: data2
     expression:
       type: FunctionCall
       functionName: generateData4
@@ -105,13 +119,17 @@ children:
     hasBody: true
     body:
       - type: Assignment
-        target: datam1
+        target:
+          type: Identifier
+          name: datam1
         expression:
           type: Literal
           literalType: string
           value: datam1
       - type: Assignment
-        target: datam2
+        target:
+          type: Identifier
+          name: datam2
         expression:
           type: Literal
           literalType: string
@@ -134,13 +152,17 @@ children:
     hasBody: true
     body:
       - type: Assignment
-        target: datam1
+        target:
+          type: Identifier
+          name: datam1
         expression:
           type: Literal
           literalType: string
           value: datam1
       - type: Assignment
-        target: datam2
+        target:
+          type: Identifier
+          name: datam2
         expression:
           type: AdditiveExpression
           left:
@@ -152,7 +174,9 @@ children:
             literalType: string
             value: _1
       - type: Assignment
-        target: datam2
+        target:
+          type: Identifier
+          name: datam2
         expression:
           type: AdditiveExpression
           left:
@@ -164,7 +188,11 @@ children:
             literalType: string
             value: _2
       - type: Assignment
-        target: this.datam2
+        target:
+          type: MemberAccess
+          object: this
+          member: datam2
+          fullAccess: this.datam2
         expression:
           type: AdditiveExpression
           left:
@@ -188,7 +216,9 @@ children:
               literalType: integer
               value: 100
           - type: Assignment
-            target: datam2
+            target:
+              type: Identifier
+              name: datam2
             expression:
               type: AdditiveExpression
               left:

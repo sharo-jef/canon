@@ -413,19 +413,39 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         // Assignment
         // Assignment - single expression, not children
         else if (ctx.constructor.name === 'AssignmentContext') {
-            let target = 'unknown';
             const identifiers = ctx.IDENTIFIER();
             const thisToken = ctx.THIS();
             
+            // Create structured target node instead of string
             if (thisToken && identifiers?.[0]) {
-                target = `this.${identifiers[0].text}`;
+                // this.property pattern
+                result.target = {
+                    type: 'MemberAccess',
+                    object: 'this',
+                    member: identifiers[0].text,
+                    fullAccess: `this.${identifiers[0].text}`
+                };
             } else if (identifiers?.length >= 2) {
-                target = `${identifiers[0].text}.${identifiers[1].text}`;
+                // object.property pattern
+                result.target = {
+                    type: 'MemberAccess',
+                    object: identifiers[0].text,
+                    member: identifiers[1].text,
+                    fullAccess: `${identifiers[0].text}.${identifiers[1].text}`
+                };
             } else if (identifiers?.[0]) {
-                target = identifiers[0].text;
+                // Simple identifier pattern
+                result.target = {
+                    type: 'Identifier',
+                    name: identifiers[0].text
+                };
+            } else {
+                // Fallback for unknown patterns
+                result.target = {
+                    type: 'Identifier',
+                    name: 'unknown'
+                };
             }
-            
-            result.target = target;
             
             // Get the expression directly, not as children
             const expression = ctx.expression();
