@@ -294,8 +294,31 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 
                 if (thisToken && identifiers?.[0]) {
                     result.functionName = `this.${identifiers[0].text}`;
+                    result.target = {
+                        type: 'MemberAccess',
+                        object: {
+                            type: 'ThisReference'
+                        },
+                        member: {
+                            type: 'Identifier',
+                            name: identifiers[0].text
+                        },
+                        fullAccess: `this.${identifiers[0].text}`
+                    };
                 } else if (identifiers?.length >= 2) {
                     result.functionName = `${identifiers[0].text}.${identifiers[1].text}`;
+                    result.target = {
+                        type: 'MemberAccess',
+                        object: {
+                            type: 'Identifier',
+                            name: identifiers[0].text
+                        },
+                        member: {
+                            type: 'Identifier',
+                            name: identifiers[1].text
+                        },
+                        fullAccess: `${identifiers[0].text}.${identifiers[1].text}`
+                    };
                 }
             } else if (identifier) {
                 // 通常の関数呼び出し (e.g., data2(), apply())
@@ -421,16 +444,27 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 // this.property pattern
                 result.target = {
                     type: 'MemberAccess',
-                    object: 'this',
-                    member: identifiers[0].text,
+                    object: {
+                        type: 'ThisReference'
+                    },
+                    member: {
+                        type: 'Identifier',
+                        name: identifiers[0].text
+                    },
                     fullAccess: `this.${identifiers[0].text}`
                 };
             } else if (identifiers?.length >= 2) {
                 // object.property pattern
                 result.target = {
                     type: 'MemberAccess',
-                    object: identifiers[0].text,
-                    member: identifiers[1].text,
+                    object: {
+                        type: 'Identifier',
+                        name: identifiers[0].text
+                    },
+                    member: {
+                        type: 'Identifier',
+                        name: identifiers[1].text
+                    },
                     fullAccess: `${identifiers[0].text}.${identifiers[1].text}`
                 };
             } else if (identifiers?.[0]) {
@@ -461,12 +495,23 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const thisToken = ctx.THIS();
             
             if (thisToken && identifiers?.[0]) {
-                result.object = 'this';
-                result.member = identifiers[0].text;
+                result.object = {
+                    type: 'ThisReference'
+                };
+                result.member = {
+                    type: 'Identifier',
+                    name: identifiers[0].text
+                };
                 result.fullAccess = `this.${identifiers[0].text}`;
             } else if (identifiers?.length >= 2) {
-                result.object = identifiers[0].text;
-                result.member = identifiers[1].text;
+                result.object = {
+                    type: 'Identifier',
+                    name: identifiers[0].text
+                };
+                result.member = {
+                    type: 'Identifier',
+                    name: identifiers[1].text
+                };
                 result.fullAccess = `${identifiers[0].text}.${identifiers[1].text}`;
             }
         }

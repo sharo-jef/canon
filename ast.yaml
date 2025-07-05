@@ -56,8 +56,11 @@ children:
       - type: Assignment
         target:
           type: MemberAccess
-          object: this
-          member: datam2
+          object:
+            type: ThisReference
+          member:
+            type: Identifier
+            name: datam2
           fullAccess: this.datam2
         expression:
           type: Identifier
@@ -190,8 +193,11 @@ children:
       - type: Assignment
         target:
           type: MemberAccess
-          object: this
-          member: datam2
+          object:
+            type: ThisReference
+          member:
+            type: Identifier
+            name: datam2
           fullAccess: this.datam2
         expression:
           type: AdditiveExpression
