@@ -69,17 +69,15 @@ children:
                     children:
                       - type: Expression
                         children:
-                          - type: RangeExpression
+                          - type: ComparisonExpression
                             children:
-                              - type: ComparisonExpression
+                              - type: AdditiveExpression
                                 children:
-                                  - type: AdditiveExpression
+                                  - type: MultiplicativeExpression
                                     children:
-                                      - type: MultiplicativeExpression
-                                        children:
-                                          - type: PrimaryExpression
-                                            details: unknown pattern
-                                            children: []
+                                      - type: PrimaryExpression
+                                        details: unknown pattern
+                                        children: []
               - type: Statement
                 children:
                   - type: Assignment
@@ -87,17 +85,15 @@ children:
                     children:
                       - type: Expression
                         children:
-                          - type: RangeExpression
+                          - type: ComparisonExpression
                             children:
-                              - type: ComparisonExpression
+                              - type: AdditiveExpression
                                 children:
-                                  - type: AdditiveExpression
+                                  - type: MultiplicativeExpression
                                     children:
-                                      - type: MultiplicativeExpression
-                                        children:
-                                          - type: PrimaryExpression
-                                            details: unknown pattern
-                                            children: []
+                                      - type: PrimaryExpression
+                                        details: unknown pattern
+                                        children: []
       - type: FunctionDefinition
         details: 'generateData3(): data2'
         children:
@@ -109,74 +105,66 @@ children:
                     children:
                       - type: Expression
                         children:
-                          - type: RangeExpression
+                          - type: ComparisonExpression
                             children:
-                              - type: ComparisonExpression
+                              - type: AdditiveExpression
                                 children:
-                                  - type: AdditiveExpression
+                                  - type: MultiplicativeExpression
                                     children:
-                                      - type: MultiplicativeExpression
+                                      - type: PrimaryExpression
+                                        details: contains functionCall
                                         children:
-                                          - type: PrimaryExpression
-                                            details: contains functionCall
+                                          - type: FunctionCall
+                                            details: unknown(arg0)
                                             children:
-                                              - type: FunctionCall
-                                                details: unknown(arg0)
+                                              - type: Expression
+                                                children:
+                                                  - type: ComparisonExpression
+                                                    children:
+                                                      - type: AdditiveExpression
+                                                        children:
+                                                          - type: MultiplicativeExpression
+                                                            children:
+                                                              - type: PrimaryExpression
+                                                                details: contains literal
+                                                                children:
+                                                                  - type: Literal
+                                                                    details: '''generated'''
+                                                                    children: []
+                                              - type: Assignment
+                                                details: datam1 = ...
                                                 children:
                                                   - type: Expression
                                                     children:
-                                                      - type: RangeExpression
+                                                      - type: ComparisonExpression
                                                         children:
-                                                          - type: ComparisonExpression
+                                                          - type: AdditiveExpression
                                                             children:
-                                                              - type: AdditiveExpression
+                                                              - type: MultiplicativeExpression
                                                                 children:
-                                                                  - type: MultiplicativeExpression
+                                                                  - type: PrimaryExpression
+                                                                    details: contains literal
                                                                     children:
-                                                                      - type: PrimaryExpression
-                                                                        details: contains literal
-                                                                        children:
-                                                                          - type: Literal
-                                                                            details: '''generated'''
-                                                                            children: []
-                                                  - type: Assignment
-                                                    details: datam1 = ...
+                                                                      - type: Literal
+                                                                        details: '''generated1'''
+                                                                        children: []
+                                              - type: Assignment
+                                                details: datam2 = ...
+                                                children:
+                                                  - type: Expression
                                                     children:
-                                                      - type: Expression
+                                                      - type: ComparisonExpression
                                                         children:
-                                                          - type: RangeExpression
+                                                          - type: AdditiveExpression
                                                             children:
-                                                              - type: ComparisonExpression
+                                                              - type: MultiplicativeExpression
                                                                 children:
-                                                                  - type: AdditiveExpression
+                                                                  - type: PrimaryExpression
+                                                                    details: contains literal
                                                                     children:
-                                                                      - type: MultiplicativeExpression
-                                                                        children:
-                                                                          - type: PrimaryExpression
-                                                                            details: contains literal
-                                                                            children:
-                                                                              - type: Literal
-                                                                                details: '''generated1'''
-                                                                                children: []
-                                                  - type: Assignment
-                                                    details: datam2 = ...
-                                                    children:
-                                                      - type: Expression
-                                                        children:
-                                                          - type: RangeExpression
-                                                            children:
-                                                              - type: ComparisonExpression
-                                                                children:
-                                                                  - type: AdditiveExpression
-                                                                    children:
-                                                                      - type: MultiplicativeExpression
-                                                                        children:
-                                                                          - type: PrimaryExpression
-                                                                            details: contains literal
-                                                                            children:
-                                                                              - type: Literal
-                                                                                details: '''generated2'''
-                                                                                children: []
+                                                                      - type: Literal
+                                                                        details: '''generated2'''
+                                                                        children: []
       - type: StructDefinition
         details: version
         children:
@@ -220,75 +208,67 @@ children:
                             children:
                               - type: Expression
                                 children:
-                                  - type: RangeExpression
+                                  - type: ComparisonExpression
                                     children:
-                                      - type: ComparisonExpression
+                                      - type: AdditiveExpression
                                         children:
-                                          - type: AdditiveExpression
+                                          - type: MultiplicativeExpression
                                             children:
-                                              - type: MultiplicativeExpression
+                                              - type: PrimaryExpression
+                                                details: contains stringInterpolation
                                                 children:
-                                                  - type: PrimaryExpression
-                                                    details: contains stringInterpolation
+                                                  - type: StringInterpolation
                                                     children:
-                                                      - type: StringInterpolation
+                                                      - type: StringContent
                                                         children:
-                                                          - type: StringContent
+                                                          - type: InterpolationExpression
                                                             children:
-                                                              - type: InterpolationExpression
+                                                              - type: Expression
                                                                 children:
-                                                                  - type: Expression
+                                                                  - type: ComparisonExpression
                                                                     children:
-                                                                      - type: RangeExpression
+                                                                      - type: AdditiveExpression
                                                                         children:
-                                                                          - type: ComparisonExpression
+                                                                          - type: MultiplicativeExpression
                                                                             children:
-                                                                              - type: AdditiveExpression
+                                                                              - type: PrimaryExpression
+                                                                                details: contains memberAccess
                                                                                 children:
-                                                                                  - type: MultiplicativeExpression
-                                                                                    children:
-                                                                                      - type: PrimaryExpression
-                                                                                        details: contains memberAccess
-                                                                                        children:
-                                                                                          - type: MemberAccess
-                                                                                            details: this.major
-                                                                                            children: []
-                                                              - type: InterpolationExpression
+                                                                                  - type: MemberAccess
+                                                                                    details: this.major
+                                                                                    children: []
+                                                          - type: InterpolationExpression
+                                                            children:
+                                                              - type: Expression
                                                                 children:
-                                                                  - type: Expression
+                                                                  - type: ComparisonExpression
                                                                     children:
-                                                                      - type: RangeExpression
+                                                                      - type: AdditiveExpression
                                                                         children:
-                                                                          - type: ComparisonExpression
+                                                                          - type: MultiplicativeExpression
                                                                             children:
-                                                                              - type: AdditiveExpression
+                                                                              - type: PrimaryExpression
+                                                                                details: contains memberAccess
                                                                                 children:
-                                                                                  - type: MultiplicativeExpression
-                                                                                    children:
-                                                                                      - type: PrimaryExpression
-                                                                                        details: contains memberAccess
-                                                                                        children:
-                                                                                          - type: MemberAccess
-                                                                                            details: this.minor
-                                                                                            children: []
-                                                              - type: InterpolationExpression
+                                                                                  - type: MemberAccess
+                                                                                    details: this.minor
+                                                                                    children: []
+                                                          - type: InterpolationExpression
+                                                            children:
+                                                              - type: Expression
                                                                 children:
-                                                                  - type: Expression
+                                                                  - type: ComparisonExpression
                                                                     children:
-                                                                      - type: RangeExpression
+                                                                      - type: AdditiveExpression
                                                                         children:
-                                                                          - type: ComparisonExpression
+                                                                          - type: MultiplicativeExpression
                                                                             children:
-                                                                              - type: AdditiveExpression
+                                                                              - type: PrimaryExpression
+                                                                                details: contains memberAccess
                                                                                 children:
-                                                                                  - type: MultiplicativeExpression
-                                                                                    children:
-                                                                                      - type: PrimaryExpression
-                                                                                        details: contains memberAccess
-                                                                                        children:
-                                                                                          - type: MemberAccess
-                                                                                            details: this.patch
-                                                                                            children: []
+                                                                                  - type: MemberAccess
+                                                                                    details: this.patch
+                                                                                    children: []
       - type: FunctionDefinition
         details: 'declare getVersion(): version'
         children:
@@ -306,74 +286,66 @@ children:
                     children:
                       - type: Expression
                         children:
-                          - type: RangeExpression
+                          - type: ComparisonExpression
                             children:
-                              - type: ComparisonExpression
+                              - type: AdditiveExpression
                                 children:
-                                  - type: AdditiveExpression
+                                  - type: MultiplicativeExpression
                                     children:
-                                      - type: MultiplicativeExpression
+                                      - type: PrimaryExpression
+                                        details: contains functionCall
                                         children:
-                                          - type: PrimaryExpression
-                                            details: contains functionCall
+                                          - type: FunctionCall
+                                            details: unknown(arg0)
                                             children:
-                                              - type: FunctionCall
-                                                details: unknown(arg0)
+                                              - type: Expression
+                                                children:
+                                                  - type: ComparisonExpression
+                                                    children:
+                                                      - type: AdditiveExpression
+                                                        children:
+                                                          - type: MultiplicativeExpression
+                                                            children:
+                                                              - type: PrimaryExpression
+                                                                details: contains functionCall
+                                                                children:
+                                                                  - type: FunctionCall
+                                                                    details: version.toString()
+                                                                    children:
+                                                                      - type: MemberAccess
+                                                                        details: version.toString
+                                                                        children: []
+                                              - type: Assignment
+                                                details: datam1 = ...
                                                 children:
                                                   - type: Expression
                                                     children:
-                                                      - type: RangeExpression
+                                                      - type: ComparisonExpression
                                                         children:
-                                                          - type: ComparisonExpression
+                                                          - type: AdditiveExpression
                                                             children:
-                                                              - type: AdditiveExpression
+                                                              - type: MultiplicativeExpression
                                                                 children:
-                                                                  - type: MultiplicativeExpression
+                                                                  - type: PrimaryExpression
+                                                                    details: contains literal
                                                                     children:
-                                                                      - type: PrimaryExpression
-                                                                        details: contains functionCall
-                                                                        children:
-                                                                          - type: FunctionCall
-                                                                            details: version.toString()
-                                                                            children:
-                                                                              - type: MemberAccess
-                                                                                details: version.toString
-                                                                                children: []
-                                                  - type: Assignment
-                                                    details: datam1 = ...
+                                                                      - type: Literal
+                                                                        details: '''generated1'''
+                                                                        children: []
+                                              - type: Assignment
+                                                details: datam2 = ...
+                                                children:
+                                                  - type: Expression
                                                     children:
-                                                      - type: Expression
+                                                      - type: ComparisonExpression
                                                         children:
-                                                          - type: RangeExpression
+                                                          - type: AdditiveExpression
                                                             children:
-                                                              - type: ComparisonExpression
+                                                              - type: MultiplicativeExpression
                                                                 children:
-                                                                  - type: AdditiveExpression
+                                                                  - type: PrimaryExpression
+                                                                    details: contains literal
                                                                     children:
-                                                                      - type: MultiplicativeExpression
-                                                                        children:
-                                                                          - type: PrimaryExpression
-                                                                            details: contains literal
-                                                                            children:
-                                                                              - type: Literal
-                                                                                details: '''generated1'''
-                                                                                children: []
-                                                  - type: Assignment
-                                                    details: datam2 = ...
-                                                    children:
-                                                      - type: Expression
-                                                        children:
-                                                          - type: RangeExpression
-                                                            children:
-                                                              - type: ComparisonExpression
-                                                                children:
-                                                                  - type: AdditiveExpression
-                                                                    children:
-                                                                      - type: MultiplicativeExpression
-                                                                        children:
-                                                                          - type: PrimaryExpression
-                                                                            details: contains literal
-                                                                            children:
-                                                                              - type: Literal
-                                                                                details: '''generated2'''
-                                                                                children: []
+                                                                      - type: Literal
+                                                                        details: '''generated2'''
+                                                                        children: []

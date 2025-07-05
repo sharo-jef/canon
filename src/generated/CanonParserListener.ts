@@ -26,7 +26,6 @@ import { ReturnStatementContext } from "./CanonParser";
 import { ForStatementContext } from "./CanonParser";
 import { ConstructionBodyContext } from "./CanonParser";
 import { ExpressionContext } from "./CanonParser";
-import { RangeExpressionContext } from "./CanonParser";
 import { ComparisonExpressionContext } from "./CanonParser";
 import { AdditiveExpressionContext } from "./CanonParser";
 import { MultiplicativeExpressionContext } from "./CanonParser";
@@ -298,17 +297,6 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitExpression?: (ctx: ExpressionContext) => void;
-
-	/**
-	 * Enter a parse tree produced by `CanonParser.rangeExpression`.
-	 * @param ctx the parse tree
-	 */
-	enterRangeExpression?: (ctx: RangeExpressionContext) => void;
-	/**
-	 * Exit a parse tree produced by `CanonParser.rangeExpression`.
-	 * @param ctx the parse tree
-	 */
-	exitRangeExpression?: (ctx: RangeExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.comparisonExpression`.

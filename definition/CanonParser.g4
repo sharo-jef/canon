@@ -96,11 +96,8 @@ constructionBody: (
 		| configurationCall
 	)*;
 
-// Expressions - optimized hierarchy
-expression: rangeExpression;
-
-rangeExpression:
-	comparisonExpression (RANGE comparisonExpression)*;
+// Expressions - hierarchy from lowest to highest precedence
+expression: comparisonExpression (RANGE comparisonExpression)*;
 
 comparisonExpression:
 	additiveExpression (

@@ -7,13 +7,11 @@ children:
       - type: ConstructionBody
         children:
           - type: Assignment
-            children:
-              - type: PrimaryExpression
-                children:
-                  - type: Literal
-                    literalType: string
-                    value: datam1
             target: datam1
+            expression:
+              type: Literal
+              literalType: string
+              value: datam1
     functionName: data1
     hasArguments: false
     argumentCount: 0
@@ -22,21 +20,17 @@ children:
     children:
       - type: ArgumentList
         children:
-          - type: PrimaryExpression
-            children:
-              - type: Literal
-                literalType: string
-                value: hoge
+          - type: Literal
+            literalType: string
+            value: hoge
       - type: ConstructionBody
         children:
           - type: Assignment
-            children:
-              - type: PrimaryExpression
-                children:
-                  - type: Literal
-                    literalType: string
-                    value: hoge1
             target: datam1
+            expression:
+              type: Literal
+              literalType: string
+              value: hoge1
     functionName: data2
     hasArguments: true
     argumentCount: 1
@@ -45,186 +39,175 @@ children:
     children:
       - type: ArgumentList
         children:
-          - type: PrimaryExpression
-            children:
-              - type: Literal
-                literalType: string
-                value: fuga
+          - type: Literal
+            literalType: string
+            value: fuga
       - type: ConstructionBody
         children:
           - type: Assignment
-            children:
-              - type: PrimaryExpression
-                children:
-                  - type: Literal
-                    literalType: string
-                    value: fuga1
             target: datam1
+            expression:
+              type: Literal
+              literalType: string
+              value: fuga1
           - type: VariableDeclaration
-            children:
-              - type: AdditiveExpression
-                children:
-                  - type: PrimaryExpression
-                  - type: PrimaryExpression
-                    children:
-                      - type: Literal
-                        literalType: string
-                        value: _2
             variableName: datam2
             variableType: val
             isMutable: false
+            expression:
+              type: AdditiveExpression
+              left:
+                type: Identifier
+                name: datam1
+              operator: +
+              right:
+                type: Literal
+                literalType: string
+                value: _2
           - type: Assignment
-            children:
-              - type: PrimaryExpression
             target: this.datam2
+            expression:
+              type: Identifier
+              name: datam2
     functionName: data2
     hasArguments: true
     argumentCount: 1
     hasBody: true
   - type: Assignment
-    children:
-      - type: FunctionCall
-        functionName: generateData3
-        hasArguments: false
-        argumentCount: 0
     target: data2
+    expression:
+      type: FunctionCall
+      functionName: generateData3
+      hasArguments: false
+      argumentCount: 0
   - type: Assignment
-    children:
-      - type: PrimaryExpression
-        children:
-          - type: FunctionCall
-            children:
-              - type: ArgumentList
-                children:
-                  - type: FunctionCall
-                    functionName: getVersion
-                    hasArguments: false
-                    argumentCount: 0
-            functionName: generateData4
-            hasArguments: true
-            argumentCount: 1
     target: data2
+    expression:
+      type: FunctionCall
+      children:
+        - type: ArgumentList
+          children:
+            - type: FunctionCall
+              functionName: getVersion
+              hasArguments: false
+              argumentCount: 0
+      functionName: generateData4
+      hasArguments: true
+      argumentCount: 1
   - type: VariableDeclaration
-    children:
-      - type: PrimaryExpression
-        children:
-          - type: Literal
-            literalType: string
-            value: data5
     variableName: name
     variableType: val
     isMutable: false
+    expression:
+      type: Literal
+      literalType: string
+      value: data5
   - type: ConfigurationCall
     children:
       - type: ArgumentList
         children:
-          - type: PrimaryExpression
+          - type: Identifier
+            name: name
       - type: ConstructionBody
         children:
           - type: Assignment
-            children:
-              - type: PrimaryExpression
-                children:
-                  - type: Literal
-                    literalType: string
-                    value: datam1
             target: datam1
+            expression:
+              type: Literal
+              literalType: string
+              value: datam1
           - type: Assignment
-            children:
-              - type: PrimaryExpression
-                children:
-                  - type: Literal
-                    literalType: string
-                    value: datam2
             target: datam2
+            expression:
+              type: Literal
+              literalType: string
+              value: datam2
     functionName: data2
     hasArguments: true
     argumentCount: 1
     hasBody: true
   - type: VariableDeclaration
-    children:
-      - type: PrimaryExpression
-        children:
-          - type: Literal
-            literalType: string
-            value: data6
     variableName: name2
     variableType: var
     isMutable: true
+    expression:
+      type: Literal
+      literalType: string
+      value: data6
   - type: ConfigurationCall
     children:
       - type: ArgumentList
         children:
-          - type: PrimaryExpression
+          - type: Identifier
+            name: name2
       - type: ConstructionBody
         children:
           - type: Assignment
-            children:
-              - type: PrimaryExpression
-                children:
-                  - type: Literal
-                    literalType: string
-                    value: datam1
             target: datam1
+            expression:
+              type: Literal
+              literalType: string
+              value: datam1
           - type: Assignment
-            children:
-              - type: AdditiveExpression
-                children:
-                  - type: PrimaryExpression
-                  - type: PrimaryExpression
-                    children:
-                      - type: Literal
-                        literalType: string
-                        value: _1
             target: datam2
+            expression:
+              type: AdditiveExpression
+              left:
+                type: Identifier
+                name: name2
+              operator: +
+              right:
+                type: Literal
+                literalType: string
+                value: _1
           - type: Assignment
-            children:
-              - type: AdditiveExpression
-                children:
-                  - type: PrimaryExpression
-                  - type: PrimaryExpression
-                    children:
-                      - type: Literal
-                        literalType: string
-                        value: _2
             target: datam2
+            expression:
+              type: AdditiveExpression
+              left:
+                type: Identifier
+                name: name2
+              operator: +
+              right:
+                type: Literal
+                literalType: string
+                value: _2
           - type: Assignment
-            children:
-              - type: AdditiveExpression
-                children:
-                  - type: PrimaryExpression
-                  - type: PrimaryExpression
-                    children:
-                      - type: Literal
-                        literalType: string
-                        value: _3
             target: this.datam2
+            expression:
+              type: AdditiveExpression
+              left:
+                type: Identifier
+                name: name2
+              operator: +
+              right:
+                type: Literal
+                literalType: string
+                value: _3
           - type: ForStatement
             children:
               - type: RangeExpression
-                children:
-                  - type: PrimaryExpression
-                    children:
-                      - type: Literal
-                        literalType: integer
-                        value: 1
-                  - type: PrimaryExpression
-                    children:
-                      - type: Literal
-                        literalType: integer
-                        value: 100
+                left:
+                  type: Literal
+                  literalType: integer
+                  value: 1
+                operator: ..
+                right:
+                  type: Literal
+                  literalType: integer
+                  value: 100
               - type: Assignment
-                children:
-                  - type: AdditiveExpression
-                    children:
-                      - type: PrimaryExpression
-                      - type: PrimaryExpression
-                        children:
-                          - type: Literal
-                            literalType: string
-                            value: _loop_
-                      - type: PrimaryExpression
                 target: datam2
+                expression:
+                  type: AdditiveExpression
+                  left:
+                    type: Identifier
+                    name: name2
+                  operator: +
+                  right:
+                    type: Literal
+                    literalType: string
+                    value: _loop_
             iteratorVariable: i
     functionName: data2
     hasArguments: true

@@ -55,6 +55,13 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             delete result.children;
             return result;
         }
+        
+        // Binary expressions that have been structured should not process children
+        const binaryExpressions = ['AdditiveExpression', 'MultiplicativeExpression', 'ComparisonExpression', 'RangeExpression'];
+        if (binaryExpressions.includes(ruleName) && result.left && result.operator && result.right) {
+            delete result.children;
+            return result;
+        }
 
         // 子ノードを処理
         if (node.childCount > 0) {
@@ -79,16 +86,33 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         // 空のchildrenを持つノードの後処理
         if (result.children!.length === 0) {
             delete result.children;
+        } else if (ruleName === 'PrimaryExpression' && result.children!.length === 1 && result.type === 'PrimaryExpression') {
+            // PrimaryExpression with single child should delegate to the child
+            const singleChild = result.children![0];
+            if (singleChild.type === 'Literal' || singleChild.type === 'MemberAccess' || 
+                singleChild.type === 'StringInterpolation' || singleChild.type === 'FunctionCall') {
+                // Return the child directly (transparent delegation)
+                return singleChild;
+            }
         }
 
         return result;
     }
 
     private isSimpleExpressionNode(node: RuleNode, ruleName: string): boolean {
+        // 二項演算子のコンテキストの場合は透過処理しない
+        const binaryExpressions = ['AdditiveExpression', 'MultiplicativeExpression', 'ComparisonExpression', 'Expression'];
+        if (binaryExpressions.includes(ruleName)) {
+            // 3つ以上の子ノードがある場合は二項演算の可能性が高いので透過処理しない
+            if (node.childCount >= 3) {
+                return false;
+            }
+        }
+        
         // 単一の子ノードしか持たない式ノードかチェック
         if (node.childCount === 1) {
             const expressionTypes = [
-                'Expression', 'RangeExpression', 'ComparisonExpression',
+                'Expression', 'ComparisonExpression',
                 'AdditiveExpression', 'MultiplicativeExpression'
             ];
             return expressionTypes.includes(ruleName);
@@ -324,7 +348,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             }
         }
         
-        // Variable declaration
+        // Variable declaration - single expression, not children
         else if (ctx.constructor.name === 'VariableDeclarationContext') {
             const valToken = ctx.VAL();
             const varToken = ctx.VAR();
@@ -334,6 +358,13 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 result.variableName = identifier.text;
                 result.variableType = valToken ? 'val' : 'var';
                 result.isMutable = !!varToken;
+            }
+            
+            // Get the expression directly, not as children
+            const expression = ctx.expression();
+            if (expression) {
+                result.expression = this.visit(expression);
+                result.children = []; // Clear children since we have direct expression
             }
         }
         
@@ -345,7 +376,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             }
         }
         
-        // Primary expression - handle apply() style calls
+        // Primary expression - delegate to specific subtypes
         else if (ctx.constructor.name === 'PrimaryExpressionContext') {
             const identifier = ctx.IDENTIFIER();
             const lparen = ctx.LPAREN();
@@ -357,10 +388,16 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 result.functionName = identifier.text;
                 result.hasArguments = false;
                 result.argumentCount = 0;
+            } else if (identifier && !lparen && !rparen) {
+                // Simple identifier reference - create Identifier node
+                result.type = 'Identifier';
+                result.name = identifier.text;
             }
+            // For other cases (literals, complex expressions), let normal processing handle delegation
         }
         
         // Assignment
+        // Assignment - single expression, not children
         else if (ctx.constructor.name === 'AssignmentContext') {
             let target = 'unknown';
             const identifiers = ctx.IDENTIFIER();
@@ -375,6 +412,13 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             }
             
             result.target = target;
+            
+            // Get the expression directly, not as children
+            const expression = ctx.expression();
+            if (expression) {
+                result.expression = this.visit(expression);
+                result.children = []; // Clear children since we have direct expression
+            }
         }
         
         // Member access
@@ -472,6 +516,66 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 result.typeName = identifier.text;
             }
         }
+        
+        // Binary expressions - use left/right/operator structure instead of children
+        else if (ctx.constructor.name === 'ExpressionContext') {
+            if (ctx.childCount >= 3) {
+                // Range expression: left .. right
+                const leftChild = ctx.getChild(0);
+                const operatorChild = ctx.getChild(1);
+                const rightChild = ctx.getChild(2);
+                
+                if (leftChild && operatorChild && rightChild && operatorChild.text === '..') {
+                    result.type = 'RangeExpression';
+                    result.left = this.visit(leftChild);
+                    result.operator = operatorChild.text; // RANGE (..)
+                    result.right = this.visit(rightChild);
+                }
+            }
+        }
+        
+        else if (ctx.constructor.name === 'AdditiveExpressionContext') {
+            if (ctx.childCount >= 3) {
+                // Binary operation: left operator right
+                const leftChild = ctx.getChild(0);
+                const operatorChild = ctx.getChild(1);
+                const rightChild = ctx.getChild(2);
+                
+                if (leftChild && operatorChild && rightChild) {
+                    result.left = this.visit(leftChild);
+                    result.operator = operatorChild.text; // PLUS or MINUS
+                    result.right = this.visit(rightChild);
+                }
+            }
+        }
+        
+        else if (ctx.constructor.name === 'MultiplicativeExpressionContext') {
+            if (ctx.childCount >= 3) {
+                const leftChild = ctx.getChild(0);
+                const operatorChild = ctx.getChild(1);
+                const rightChild = ctx.getChild(2);
+                
+                if (leftChild && operatorChild && rightChild) {
+                    result.left = this.visit(leftChild);
+                    result.operator = operatorChild.text; // MULTIPLY or DIVIDE
+                    result.right = this.visit(rightChild);
+                }
+            }
+        }
+        
+        else if (ctx.constructor.name === 'ComparisonExpressionContext') {
+            if (ctx.childCount >= 3) {
+                const leftChild = ctx.getChild(0);
+                const operatorChild = ctx.getChild(1);
+                const rightChild = ctx.getChild(2);
+                
+                if (leftChild && operatorChild && rightChild) {
+                    result.left = this.visit(leftChild);
+                    result.operator = operatorChild.text; // Comparison operators
+                    result.right = this.visit(rightChild);
+                }
+            }
+        }
     }
     
     private extractParameters(parameterList: any): any[] {
@@ -523,7 +627,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             'ConstructionBody', 'StructContent', 'ExpressionStatement',
             'InterpolationExpression', 'TypeReference', 'Parameter',
             'ParameterList', 'ArgumentList', 'ForStatement', 'StringContent',
-            'FunctionBody', 'Statement'
+            'FunctionBody', 'Statement', 'Identifier'
         ];
         
         if (importantNodes.includes(childNode.type)) {
@@ -554,8 +658,17 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     private isInformationOnlyNode(ruleName: string, result: ASTNode): boolean {
         // これらのノードは詳細情報のみで十分（子ノードは不要）
         const informationOnlyNodes = [
-            'TypeReference', 'Parameter', 'Annotation', 'Literal', 'MemberAccess'
+            'TypeReference', 'Parameter', 'Annotation', 'Literal', 'MemberAccess',
+            'VariableDeclaration', 'Assignment', 'AdditiveExpression', 
+            'MultiplicativeExpression', 'ComparisonExpression', 'Expression',
+            'Identifier'  // New: simple identifier references
         ];
+        
+        // PrimaryExpression with specific type info should not have children
+        if (ruleName === 'PrimaryExpression' && (result.type !== 'PrimaryExpression')) {
+            return true;  // It's been converted to a specific type
+        }
+        
         return informationOnlyNodes.includes(ruleName) && this.hasSemanticValue(result);
     }
 
@@ -583,7 +696,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     visitForStatement(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitConstructionBody(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitRangeExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitComparisonExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitAdditiveExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitMultiplicativeExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
