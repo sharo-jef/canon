@@ -50,255 +50,271 @@ children:
         multiple: false
         required: true
         dataType: d
-  - type: StructDefinition
+  - type: Declaration
     children:
-      - type: TypeReference
-        typeName: int
-    name: d
-  - type: StructDefinition
+      - type: StructDefinition
+        children:
+          - type: TypeReference
+            typeName: int
+        name: d
+  - type: Declaration
     children:
-      - type: StructContent
+      - type: StructDefinition
         children:
-          - type: StructMember
+          - type: StructContent
             children:
-              - type: TypeReference
-                typeName: string
-            name: datam1
-            required: true
-            dataType: string
-      - type: StructContent
-        children:
-          - type: StructMember
+              - type: StructMember
+                children:
+                  - type: TypeReference
+                    typeName: string
+                name: datam1
+                required: true
+                dataType: string
+          - type: StructContent
             children:
-              - type: TypeReference
-                typeName: string
-            name: datam2
-            required: false
-            dataType: string
-    name: data
-  - type: StructDefinition
+              - type: StructMember
+                children:
+                  - type: TypeReference
+                    typeName: string
+                name: datam2
+                required: false
+                dataType: string
+        name: data
+  - type: Declaration
     children:
-      - type: StructContent
+      - type: StructDefinition
         children:
-          - type: MixinDeclaration
-            mixinType: data
-      - type: StructContent
-        children:
-          - type: StructMember
+          - type: StructContent
             children:
-              - type: TypeReference
-                typeName: string
-            name: name
-            required: true
-            dataType: string
-    name: data2
-  - type: FunctionDefinition
-    name: data2
-    isDeclare: false
-    returnType: data2
-    parameters:
-      - name: name
-        type: string
-    functionBody:
-      type: FunctionBody
-      children:
-        - type: ExpressionStatement
+              - type: MixinDeclaration
+                mixinType: data
+          - type: StructContent
+            children:
+              - type: StructMember
+                children:
+                  - type: TypeReference
+                    typeName: string
+                name: name
+                required: true
+                dataType: string
+        name: data2
+  - type: Declaration
+    children:
+      - type: FunctionDefinition
+        name: data2
+        isDeclare: false
+        returnType: data2
+        parameters:
+          - name: name
+            type: string
+        functionBody:
+          type: FunctionBody
           children:
-            - type: FunctionCall
-              functionName: apply
-              hasArguments: false
-              argumentCount: 0
-        - type: Assignment
-          children:
-            - type: PrimaryExpression
-          target: this.name
-  - type: FunctionDefinition
-    name: generateData3
-    isDeclare: false
-    returnType: data2
-    parameters: []
-    functionBody:
-      type: FunctionBody
-      children:
-        - type: ReturnStatement
-          children:
-            - type: PrimaryExpression
+            - type: ExpressionStatement
               children:
                 - type: FunctionCall
+                  functionName: apply
+                  hasArguments: false
+                  argumentCount: 0
+            - type: Assignment
+              children:
+                - type: PrimaryExpression
+              target: this.name
+  - type: Declaration
+    children:
+      - type: FunctionDefinition
+        name: generateData3
+        isDeclare: false
+        returnType: data2
+        parameters: []
+        functionBody:
+          type: FunctionBody
+          children:
+            - type: ReturnStatement
+              children:
+                - type: PrimaryExpression
                   children:
-                    - type: ArgumentList
+                    - type: FunctionCall
+                      children:
+                        - type: ArgumentList
+                          children:
+                            - type: PrimaryExpression
+                              children:
+                                - type: Literal
+                                  literalType: string
+                                  value: generated
+                        - type: ConstructionBody
+                          children:
+                            - type: Assignment
+                              children:
+                                - type: PrimaryExpression
+                                  children:
+                                    - type: Literal
+                                      literalType: string
+                                      value: generated1
+                              target: datam1
+                            - type: Assignment
+                              children:
+                                - type: PrimaryExpression
+                                  children:
+                                    - type: Literal
+                                      literalType: string
+                                      value: generated2
+                              target: datam2
+                      functionName: data2
+                      hasArguments: true
+                      argumentCount: 1
+                      isObjectConstruction: true
+                      hasBody: true
+  - type: Declaration
+    children:
+      - type: StructDefinition
+        children:
+          - type: StructContent
+            children:
+              - type: StructMember
+                children:
+                  - type: Annotation
+                    name: description
+                    value: The major version number.
+                  - type: TypeReference
+                    typeName: int
+                name: major
+                required: true
+                dataType: int
+          - type: StructContent
+            children:
+              - type: StructMember
+                children:
+                  - type: Annotation
+                    name: description
+                    value: The minor version number.
+                  - type: TypeReference
+                    typeName: int
+                name: minor
+                required: true
+                dataType: int
+          - type: StructContent
+            children:
+              - type: StructMember
+                children:
+                  - type: Annotation
+                    name: description
+                    value: The patch version number.
+                  - type: TypeReference
+                    typeName: int
+                name: patch
+                required: true
+                dataType: int
+          - type: StructContent
+            children:
+              - type: MethodDefinition
+                children:
+                  - type: Annotation
+                    name: description
+                    value: Get version as a string.
+                name: toString
+                returnType: string
+                parameters: []
+                functionBody:
+                  type: FunctionBody
+                  children:
+                    - type: ReturnStatement
                       children:
                         - type: PrimaryExpression
                           children:
-                            - type: Literal
-                              literalType: string
-                              value: generated
-                    - type: ConstructionBody
-                      children:
-                        - type: Assignment
-                          children:
-                            - type: PrimaryExpression
+                            - type: StringInterpolation
                               children:
-                                - type: Literal
-                                  literalType: string
-                                  value: generated1
-                          target: datam1
-                        - type: Assignment
-                          children:
-                            - type: PrimaryExpression
-                              children:
-                                - type: Literal
-                                  literalType: string
-                                  value: generated2
-                          target: datam2
-                  functionName: data2
-                  hasArguments: true
-                  argumentCount: 1
-                  isObjectConstruction: true
-                  hasBody: true
-  - type: StructDefinition
+                                - type: StringContent
+                                  children:
+                                    - type: InterpolationExpression
+                                      children:
+                                        - type: PrimaryExpression
+                                          children:
+                                            - type: MemberAccess
+                                              object: this
+                                              member: major
+                                              fullAccess: this.major
+                                    - type: InterpolationExpression
+                                      children:
+                                        - type: PrimaryExpression
+                                          children:
+                                            - type: MemberAccess
+                                              object: this
+                                              member: minor
+                                              fullAccess: this.minor
+                                    - type: InterpolationExpression
+                                      children:
+                                        - type: PrimaryExpression
+                                          children:
+                                            - type: MemberAccess
+                                              object: this
+                                              member: patch
+                                              fullAccess: this.patch
+        name: version
+  - type: Declaration
     children:
-      - type: StructContent
+      - type: FunctionDefinition
         children:
-          - type: StructMember
-            children:
-              - type: Annotation
-                name: description
-                value: The major version number.
-              - type: TypeReference
-                typeName: int
-            name: major
-            required: true
-            dataType: int
-      - type: StructContent
-        children:
-          - type: StructMember
-            children:
-              - type: Annotation
-                name: description
-                value: The minor version number.
-              - type: TypeReference
-                typeName: int
-            name: minor
-            required: true
-            dataType: int
-      - type: StructContent
-        children:
-          - type: StructMember
-            children:
-              - type: Annotation
-                name: description
-                value: The patch version number.
-              - type: TypeReference
-                typeName: int
-            name: patch
-            required: true
-            dataType: int
-      - type: StructContent
-        children:
-          - type: MethodDefinition
-            children:
-              - type: Annotation
-                name: description
-                value: Get version as a string.
-            name: toString
-            returnType: string
-            parameters: []
-            functionBody:
-              type: FunctionBody
-              children:
-                - type: ReturnStatement
-                  children:
-                    - type: PrimaryExpression
-                      children:
-                        - type: StringInterpolation
-                          children:
-                            - type: StringContent
-                              children:
-                                - type: InterpolationExpression
-                                  children:
-                                    - type: PrimaryExpression
-                                      children:
-                                        - type: MemberAccess
-                                          object: this
-                                          member: major
-                                          fullAccess: this.major
-                                - type: InterpolationExpression
-                                  children:
-                                    - type: PrimaryExpression
-                                      children:
-                                        - type: MemberAccess
-                                          object: this
-                                          member: minor
-                                          fullAccess: this.minor
-                                - type: InterpolationExpression
-                                  children:
-                                    - type: PrimaryExpression
-                                      children:
-                                        - type: MemberAccess
-                                          object: this
-                                          member: patch
-                                          fullAccess: this.patch
-    name: version
-  - type: FunctionDefinition
+          - type: Annotation
+            name: description
+            value: Returns the version of the configuration schema.
+        name: getVersion
+        isDeclare: true
+        returnType: version
+        parameters: []
+  - type: Declaration
     children:
-      - type: Annotation
-        name: description
-        value: Returns the version of the configuration schema.
-    name: getVersion
-    isDeclare: true
-    returnType: version
-    parameters: []
-  - type: FunctionDefinition
-    name: generateData4
-    isDeclare: false
-    returnType: data2
-    parameters:
-      - name: version
-        type: version
-    functionBody:
-      type: FunctionBody
-      children:
-        - type: ReturnStatement
+      - type: FunctionDefinition
+        name: generateData4
+        isDeclare: false
+        returnType: data2
+        parameters:
+          - name: version
+            type: version
+        functionBody:
+          type: FunctionBody
           children:
-            - type: PrimaryExpression
+            - type: ReturnStatement
               children:
-                - type: FunctionCall
+                - type: PrimaryExpression
                   children:
-                    - type: ArgumentList
+                    - type: FunctionCall
                       children:
-                        - type: PrimaryExpression
-                          children:
-                            - type: FunctionCall
-                              children:
-                                - type: MemberAccess
-                                  object: version
-                                  member: toString
-                                  fullAccess: version.toString
-                              isMethodCall: true
-                              functionName: version.toString
-                              hasArguments: false
-                              argumentCount: 0
-                    - type: ConstructionBody
-                      children:
-                        - type: Assignment
+                        - type: ArgumentList
                           children:
                             - type: PrimaryExpression
                               children:
-                                - type: Literal
-                                  literalType: string
-                                  value: generated1
-                          target: datam1
-                        - type: Assignment
+                                - type: FunctionCall
+                                  children:
+                                    - type: MemberAccess
+                                      object: version
+                                      member: toString
+                                      fullAccess: version.toString
+                                  isMethodCall: true
+                                  functionName: version.toString
+                                  hasArguments: false
+                                  argumentCount: 0
+                        - type: ConstructionBody
                           children:
-                            - type: PrimaryExpression
+                            - type: Assignment
                               children:
-                                - type: Literal
-                                  literalType: string
-                                  value: generated2
-                          target: datam2
-                  functionName: data2
-                  hasArguments: true
-                  argumentCount: 1
-                  isObjectConstruction: true
-                  hasBody: true
+                                - type: PrimaryExpression
+                                  children:
+                                    - type: Literal
+                                      literalType: string
+                                      value: generated1
+                              target: datam1
+                            - type: Assignment
+                              children:
+                                - type: PrimaryExpression
+                                  children:
+                                    - type: Literal
+                                      literalType: string
+                                      value: generated2
+                              target: datam2
+                      functionName: data2
+                      hasArguments: true
+                      argumentCount: 1
+                      isObjectConstruction: true
+                      hasBody: true

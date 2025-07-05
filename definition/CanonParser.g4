@@ -6,11 +6,10 @@ options {
 
 // Top-level structure
 program:
-	schemaDirective schemaDefinition? (
-		structDefinition
-		| functionDefinition
-		| statement
-	)* EOF;
+	schemaDirective? declaration* schemaDefinition? declaration* EOF;
+
+// Declaration is everything except schemaDefinition
+declaration: structDefinition | functionDefinition | statement;
 
 // Schema directive - required at the beginning
 schemaDirective: SCHEMA_DIRECTIVE STRING_LITERAL;
