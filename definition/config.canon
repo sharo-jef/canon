@@ -36,5 +36,6 @@ data2(name2) {
     // syntax: for (i in (<list> | <rangeExpression>)) {
     for (i in 1..100) {
         datam2 = name2 + '_loop_' + i
+        // datam2 = i % 2 == 0 ? 'even' : 'odd'  // 三項演算子
     }
 }

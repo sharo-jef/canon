@@ -32,7 +32,9 @@ struct data2 {
 
 // return を省略した場合は this を返す
 fun data2(name: string): data2 {
-    apply()  // 後置ラムダがあればそれを実行、なければ何もしない (this.apply() の this. を省略した形)
+    // 後置ラムダがあればそれを実行、なければ何もしない (this.apply() の this. を省略した形)
+    // 関数名と同名の struct が定義されていない場合は、エラーになる
+    apply()
     this.name = name
 }
 

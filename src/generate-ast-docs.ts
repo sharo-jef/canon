@@ -9,12 +9,20 @@ interface ASTNode {
     [key: string]: any;
 }
 
-function getChildNodes(node: ASTNode): ASTNode[] {
-    const children: ASTNode[] = [];
+interface ChildNodeInfo {
+    node: ASTNode;
+    propertyKey: string;
+    arrayIndex?: number;
+}
+
+function getChildNodes(node: ASTNode): ChildNodeInfo[] {
+    const children: ChildNodeInfo[] = [];
     
     // Standard children property
     if (node.children && Array.isArray(node.children)) {
-        children.push(...node.children);
+        node.children.forEach((child, index) => {
+            children.push({ node: child, propertyKey: 'children', arrayIndex: index });
+        });
     }
     
     // Common properties that contain child nodes
@@ -30,14 +38,14 @@ function getChildNodes(node: ASTNode): ASTNode[] {
         if (value) {
             if (Array.isArray(value)) {
                 // Array of nodes
-                for (const item of value) {
+                value.forEach((item, index) => {
                     if (item && typeof item === 'object' && item.type) {
-                        children.push(item);
+                        children.push({ node: item, propertyKey: prop, arrayIndex: index });
                     }
-                }
+                });
             } else if (typeof value === 'object' && value.type) {
                 // Single node
-                children.push(value);
+                children.push({ node: value, propertyKey: prop });
             }
         }
     }
@@ -45,16 +53,22 @@ function getChildNodes(node: ASTNode): ASTNode[] {
     return children;
 }
 
-function renderASTNode(node: ASTNode, depth = 0): string {
+function renderASTNode(node: ASTNode, depth = 0, propertyKey?: string, arrayIndex?: number): string {
     const nodeId = `ast-node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const childNodes = getChildNodes(node);
-    const hasChildren = childNodes.length > 0;
+    const childNodeInfos = getChildNodes(node);
+    const hasChildren = childNodeInfos.length > 0;
     const indentClass = depth > 0 ? `ml-${Math.min(depth * 2, 8)}` : '';
     
     let html = `<div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ${indentClass}" id="${nodeId}" onclick="toggleASTNode('${nodeId}')">`;
     
     // Minimal expand/collapse indicator
     html += `<span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">${hasChildren ? '▼' : ' '}</span>`;
+    
+    // Property key indicator (if this node is a child)
+    if (propertyKey && propertyKey !== 'children') {
+        const keyDisplay = arrayIndex !== undefined ? `${propertyKey}[${arrayIndex}]` : propertyKey;
+        html += `<span class="property-key text-xs text-purple-600 dark:text-purple-400 mr-1">${escapeHtml(keyDisplay)}:</span>`;
+    }
     
     // Node type - ultra minimal
     html += `<span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">${escapeHtml(node.type)}</span>`;
@@ -69,8 +83,8 @@ function renderASTNode(node: ASTNode, depth = 0): string {
     
     if (hasChildren) {
         html += `<div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="${nodeId}-children">`;
-        for (const child of childNodes) {
-            html += renderASTNode(child, depth + 1);
+        for (const childInfo of childNodeInfos) {
+            html += renderASTNode(childInfo.node, depth + 1, childInfo.propertyKey, childInfo.arrayIndex);
         }
         html += '</div>';
     }
