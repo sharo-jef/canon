@@ -22,9 +22,10 @@ program:
 
 // Configuration call (function call with optional trailing lambda for building config)
 configurationCall:
-	IDENTIFIER (LPAREN argumentList? RPAREN)? (
+	IDENTIFIER (LPAREN argumentList? RPAREN) (
 		LBRACE constructionBody RBRACE
-	)?;
+	)?
+	| IDENTIFIER LBRACE constructionBody RBRACE;
 
 // Schema import - schema "./path/to/schema.canon"
 schemaImport: SCHEMA STRING_LITERAL;

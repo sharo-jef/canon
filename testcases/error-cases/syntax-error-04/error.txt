@@ -5,6 +5,7 @@ error[E0002]: missing closing parenthesis
   |      -                ^ expected ')' here
   |      |
   |      opening parenthesis found here
+2 |     datam1 = value1
   |
   = note: parentheses must be properly matched in function calls
   = help: add the missing ')' before the opening brace '{'

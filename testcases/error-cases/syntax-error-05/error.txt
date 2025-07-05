@@ -1,0 +1,10 @@
+error[E0005]: unexpected token
+ --> input:2:0
+  |
+1 | data1
+2 | 
+  | ^
+  |
+  = note: unexpected token sequence
+  = note: the file ended unexpectedly
+  = help: check if you're missing closing braces, parentheses, or other delimiters

@@ -1,8 +1,10 @@
 error[E0001]: expected expression after '='
  --> input:3:14
   |
+2 |     datam1 = "value1"
 3 |     datam2 = // missing value - syntax error
   |              ^ expected an expression here
+4 | }
   |
   = note: assignment expressions require a value on the right side
   = help: try providing a value like: datam2 = "some_value"

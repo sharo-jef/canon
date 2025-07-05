@@ -57,6 +57,14 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
     ): SourceLocation {
         const lowerMsg = msg.toLowerCase();
         
+        // For incomplete configuration calls, point to the identifier instead of EOF
+        if (this.isIncompleteConfigurationCall(msg, offendingSymbol)) {
+            const identifierLocation = this.findIdentifierLocation();
+            if (identifierLocation) {
+                return identifierLocation;
+            }
+        }
+        
         // For "no viable alternative" errors with closing brace,
         // try to find the actual problem location (missing expression after =)
         if (lowerMsg.includes('no viable alternative') && 
@@ -170,6 +178,10 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
         }
         
         if (lowerMsg.includes('extraneous') || lowerMsg.includes('unexpected')) {
+            // Check if this is an incomplete configuration call (identifier followed by EOF)
+            if (this.isIncompleteConfigurationCall(msg, offendingSymbol)) {
+                return ErrorCode.E0006; // Incomplete configuration call
+            }
             return ErrorCode.E0005; // Unexpected token
         }
         
@@ -232,6 +244,8 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
                 return "expected '}' to close brace";
             case ErrorCode.E0004:
                 return "expected ']' to close bracket";
+            case ErrorCode.E0006:
+                return "incomplete configuration call";
             default:
                 // Clean up ANTLR's default messages
                 let cleanedMsg = msg
@@ -314,6 +328,12 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
                     }
                 }
                 break;
+                
+            case ErrorCode.E0006:
+                const identifierName = this.getIncompleteIdentifierName();
+                return error
+                    .withNote("configuration calls require either parentheses or a body")
+                    .withNote(`try adding parentheses: ${identifierName}() or a body: ${identifierName} {}`, 'help');
         }
         
         return error;
@@ -326,6 +346,99 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
         // This is a simplified check - in a real implementation,
         // you might want to look at the token stream to find the previous tokens
         return false; // Placeholder implementation
+    }
+
+    /**
+     * Checks if this is an incomplete configuration call (identifier followed by EOF)
+     */
+    private isIncompleteConfigurationCall(msg: string, offendingSymbol?: Token): boolean {
+        try {
+            // Check if the error is related to unexpected token at EOF
+            const lowerMsg = msg.toLowerCase();
+            if (!lowerMsg.includes('unexpected') && !lowerMsg.includes('extraneous')) {
+                return false;
+            }
+
+            // Read the source file to check what comes before EOF
+            const sourceContent = fs.readFileSync(this.filename, 'utf-8');
+            const lines = sourceContent.split(/\r?\n/);
+            
+            // Look for the last non-empty line
+            for (let i = lines.length - 1; i >= 0; i--) {
+                const line = lines[i].trim();
+                if (line === '') continue; // Skip empty lines
+                
+                // Check if the line is just an identifier (no parentheses or braces)
+                const identifierMatch = line.match(/^([a-zA-Z_][a-zA-Z0-9_]*)$/);
+                if (identifierMatch) {
+                    return true; // This is likely an incomplete configuration call
+                }
+                break; // Stop at the first non-empty line
+            }
+            
+            return false;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    /**
+     * Finds the location of the identifier in an incomplete configuration call
+     */
+    private findIdentifierLocation(): SourceLocation | null {
+        try {
+            const sourceContent = fs.readFileSync(this.filename, 'utf-8');
+            const lines = sourceContent.split(/\r?\n/);
+            
+            // Look for the last non-empty line with just an identifier
+            for (let i = lines.length - 1; i >= 0; i--) {
+                const line = lines[i].trim();
+                if (line === '') continue; // Skip empty lines
+                
+                // Check if the line is just an identifier
+                const identifierMatch = line.match(/^([a-zA-Z_][a-zA-Z0-9_]*)$/);
+                if (identifierMatch) {
+                    const originalLine = lines[i];
+                    const identifierStart = originalLine.indexOf(identifierMatch[1]);
+                    return {
+                        line: i + 1, // Convert to 1-based
+                        column: identifierStart + 1 // Convert to 1-based
+                    };
+                }
+                break; // Stop at the first non-empty line
+            }
+            
+            return null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    /**
+     * Gets the identifier name from an incomplete configuration call
+     */
+    private getIncompleteIdentifierName(): string {
+        try {
+            const sourceContent = fs.readFileSync(this.filename, 'utf-8');
+            const lines = sourceContent.split(/\r?\n/);
+            
+            // Look for the last non-empty line with just an identifier
+            for (let i = lines.length - 1; i >= 0; i--) {
+                const line = lines[i].trim();
+                if (line === '') continue; // Skip empty lines
+                
+                // Check if the line is just an identifier
+                const identifierMatch = line.match(/^([a-zA-Z_][a-zA-Z0-9_]*)$/);
+                if (identifierMatch) {
+                    return identifierMatch[1];
+                }
+                break; // Stop at the first non-empty line
+            }
+            
+            return "data1"; // Default fallback
+        } catch (error) {
+            return "data1"; // Default fallback
+        }
     }
 
     /**

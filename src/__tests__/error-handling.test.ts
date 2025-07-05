@@ -43,7 +43,7 @@ function parseCanonInput(input: string, inputFile: string): { success: boolean; 
             const formatter = new ErrorFormatter(input, inputFile, { 
                 ...DEFAULT_FORMATTER_OPTIONS, 
                 showColors: false, // Disable colors for testing
-                contextLines: 0 // No context lines to match expected output
+                contextLines: 1 // Show 1 line before and after for better context
             });
             const formattedErrors = formatter.formatErrors([...errors.getSortedErrors()]);
             return { success: false, errors: normalizeErrorOutput(formattedErrors, inputFile) };
@@ -60,10 +60,10 @@ function parseCanonInput(input: string, inputFile: string): { success: boolean; 
  * Load test case files
  */
 function loadTestCase(testCasePath: string) {
-    const inputPath = path.join(testCasePath, 'input');
-    const errorPath = path.join(testCasePath, 'error');
-    const outputPath = path.join(testCasePath, 'output');
-    const descriptionPath = path.join(testCasePath, 'description');
+    const inputPath = path.join(testCasePath, 'input.canon');
+    const errorPath = path.join(testCasePath, 'error.txt');
+    const outputPath = path.join(testCasePath, 'output.yml');
+    const descriptionPath = path.join(testCasePath, 'description.txt');
     
     const testCase: {
         name: string;
@@ -122,7 +122,7 @@ describe('Canon Error Handling', () => {
                     expect(testCase.input).toBeDefined();
                     expect(testCase.expectedError).toBeDefined();
                     
-                    const inputFile = path.join(testCasePath, 'input');
+                    const inputFile = path.join(testCasePath, 'input.canon');
                     const result = parseCanonInput(testCase.input!, inputFile);
                     
                     expect(result.success).toBe(false);
@@ -154,7 +154,7 @@ describe('Canon Error Handling', () => {
                 test(`${testCaseName}: ${testCase.description || 'No description'}`, () => {
                     expect(testCase.input).toBeDefined();
                     
-                    const inputFile = path.join(testCasePath, 'input');
+                    const inputFile = path.join(testCasePath, 'input.canon');
                     const result = parseCanonInput(testCase.input!, inputFile);
                     
                     expect(result.success).toBe(true);

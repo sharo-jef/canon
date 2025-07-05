@@ -8,11 +8,12 @@ export enum ErrorCode {
     E0003 = "E0003", // Missing closing brace
     E0004 = "E0004", // Missing closing bracket
     E0005 = "E0005", // Unexpected token
-    E0006 = "E0006", // Invalid identifier
-    E0007 = "E0007", // Invalid literal
-    E0008 = "E0008", // Invalid operator
-    E0009 = "E0009", // Missing semicolon
-    E0010 = "E0010", // Invalid assignment target
+    E0006 = "E0006", // Incomplete configuration call
+    E0007 = "E0007", // Invalid identifier
+    E0008 = "E0008", // Invalid literal
+    E0009 = "E0009", // Invalid operator
+    E0010 = "E0010", // Missing semicolon
+    E0011 = "E0011", // Invalid assignment target
 
     // Type Errors (E0100-E0199)
     E0100 = "E0100", // Type mismatch
@@ -48,11 +49,12 @@ export const ERROR_DESCRIPTIONS: Record<ErrorCode, string> = {
     [ErrorCode.E0003]: "missing closing brace",
     [ErrorCode.E0004]: "missing closing bracket",
     [ErrorCode.E0005]: "unexpected token",
-    [ErrorCode.E0006]: "invalid identifier",
-    [ErrorCode.E0007]: "invalid literal",
-    [ErrorCode.E0008]: "invalid operator",
-    [ErrorCode.E0009]: "missing semicolon",
-    [ErrorCode.E0010]: "invalid assignment target",
+    [ErrorCode.E0006]: "incomplete configuration call",
+    [ErrorCode.E0007]: "invalid identifier",
+    [ErrorCode.E0008]: "invalid literal",
+    [ErrorCode.E0009]: "invalid operator",
+    [ErrorCode.E0010]: "missing semicolon",
+    [ErrorCode.E0011]: "invalid assignment target",
 
     [ErrorCode.E0100]: "type mismatch",
     [ErrorCode.E0101]: "undefined variable",
