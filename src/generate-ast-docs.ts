@@ -9,9 +9,46 @@ interface ASTNode {
     [key: string]: any;
 }
 
+function getChildNodes(node: ASTNode): ASTNode[] {
+    const children: ASTNode[] = [];
+    
+    // Standard children property
+    if (node.children && Array.isArray(node.children)) {
+        children.push(...node.children);
+    }
+    
+    // Common properties that contain child nodes
+    const childProperties = [
+        'body', 'arguments', 'expression', 'target', 'functionName', 
+        'left', 'right', 'condition', 'thenBranch', 'elseBranch',
+        'object', 'member', 'variableName', 'iteratorVariable',
+        'parameters', 'returnType', 'dataType', 'mixinType', 'name'
+    ];
+    
+    for (const prop of childProperties) {
+        const value = node[prop];
+        if (value) {
+            if (Array.isArray(value)) {
+                // Array of nodes
+                for (const item of value) {
+                    if (item && typeof item === 'object' && item.type) {
+                        children.push(item);
+                    }
+                }
+            } else if (typeof value === 'object' && value.type) {
+                // Single node
+                children.push(value);
+            }
+        }
+    }
+    
+    return children;
+}
+
 function renderASTNode(node: ASTNode, depth = 0): string {
     const nodeId = `ast-node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const hasChildren = node.children && node.children.length > 0;
+    const childNodes = getChildNodes(node);
+    const hasChildren = childNodes.length > 0;
     const indentClass = depth > 0 ? `ml-${Math.min(depth * 2, 8)}` : '';
     
     let html = `<div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ${indentClass}" id="${nodeId}" onclick="toggleASTNode('${nodeId}')">`;
@@ -32,7 +69,7 @@ function renderASTNode(node: ASTNode, depth = 0): string {
     
     if (hasChildren) {
         html += `<div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="${nodeId}-children">`;
-        for (const child of node.children!) {
+        for (const child of childNodes) {
             html += renderASTNode(child, depth + 1);
         }
         html += '</div>';
@@ -58,9 +95,13 @@ function getNodeAdditionalInfo(node: ASTNode): string {
         info.push(`namespace: ${node.namespace}`);
     }
     
-    // Structure-related
+    // Structure-related - handle both string and object forms
     if (node.name) {
-        info.push(`name: ${node.name}`);
+        if (typeof node.name === 'object' && node.name.name) {
+            info.push(`name: ${node.name.name}`);
+        } else if (typeof node.name === 'string') {
+            info.push(`name: ${node.name}`);
+        }
     }
     
     if (node.structName) {
@@ -68,7 +109,11 @@ function getNodeAdditionalInfo(node: ASTNode): string {
     }
     
     if (node.mixinType) {
-        info.push(`mixin: ${node.mixinType}`);
+        if (typeof node.mixinType === 'object' && node.mixinType.typeName) {
+            info.push(`mixin: ${node.mixinType.typeName}`);
+        } else if (typeof node.mixinType === 'string') {
+            info.push(`mixin: ${node.mixinType}`);
+        }
     }
     
     if (node.fieldName) {
@@ -79,17 +124,51 @@ function getNodeAdditionalInfo(node: ASTNode): string {
         info.push(`method: ${node.methodName}`);
     }
     
-    // Type-related
+    // Type-related - handle both string and object forms
     if (node.typeName) {
         info.push(`type: ${node.typeName}`);
     }
     
     if (node.dataType) {
-        info.push(`dataType: ${node.dataType}`);
+        if (typeof node.dataType === 'object' && node.dataType.typeName) {
+            info.push(`dataType: ${node.dataType.typeName}`);
+        } else if (typeof node.dataType === 'string') {
+            info.push(`dataType: ${node.dataType}`);
+        }
     }
     
     if (node.returnType) {
-        info.push(`returnType: ${node.returnType}`);
+        if (typeof node.returnType === 'object' && node.returnType.typeName) {
+            info.push(`returnType: ${node.returnType.typeName}`);
+        } else if (typeof node.returnType === 'string') {
+            info.push(`returnType: ${node.returnType}`);
+        }
+    }
+    
+    // Iterator variable for ForStatement
+    if (node.iteratorVariable) {
+        if (typeof node.iteratorVariable === 'object' && node.iteratorVariable.name) {
+            info.push(`iterator: ${node.iteratorVariable.name}`);
+        } else if (typeof node.iteratorVariable === 'string') {
+            info.push(`iterator: ${node.iteratorVariable}`);
+        }
+    }
+    
+    // Variable names
+    if (node.variableName) {
+        if (typeof node.variableName === 'object' && node.variableName.name) {
+            info.push(`var: ${node.variableName.name}`);
+        } else if (typeof node.variableName === 'string') {
+            info.push(`var: ${node.variableName}`);
+        }
+    }
+    
+    if (node.variableType) {
+        info.push(`varType: ${node.variableType}`);
+    }
+    
+    if (node.isMutable !== undefined) {
+        info.push(`mutable: ${node.isMutable}`);
     }
     
     // Boolean flags
@@ -130,9 +209,18 @@ function getNodeAdditionalInfo(node: ASTNode): string {
         info.push(`literal: ${node.literalType}`);
     }
     
-    // Function-related
+    // Expression operators
+    if (node.operator) {
+        info.push(`op: ${node.operator}`);
+    }
+    
+    // Function-related - handle both string and object forms
     if (node.functionName) {
-        info.push(`function: ${node.functionName}`);
+        if (typeof node.functionName === 'object' && node.functionName.name) {
+            info.push(`function: ${node.functionName.name}`);
+        } else if (typeof node.functionName === 'string') {
+            info.push(`function: ${node.functionName}`);
+        }
     }
     
     if (node.argumentCount !== undefined) {
@@ -141,16 +229,30 @@ function getNodeAdditionalInfo(node: ASTNode): string {
     
     if (node.parameters && Array.isArray(node.parameters)) {
         if (node.parameters.length > 0) {
-            const paramNames = node.parameters.map(p => `${p.name}: ${p.type}`).join(', ');
+            const paramNames = node.parameters.map(p => {
+                const name = typeof p.name === 'object' ? p.name.name : p.name;
+                const type = typeof p.type === 'object' ? p.type.typeName : p.type;
+                return `${name}: ${type}`;
+            }).join(', ');
             info.push(`params: (${paramNames})`);
         } else {
             info.push('params: ()');
         }
     }
     
-    // Access-related
+    // Access-related - handle both string and object forms
     if (node.target) {
-        info.push(`target: ${node.target}`);
+        if (typeof node.target === 'object') {
+            if (node.target.type === 'Identifier' && node.target.name) {
+                info.push(`target: ${node.target.name}`);
+            } else if (node.target.type === 'MemberAccess' && node.target.fullAccess) {
+                info.push(`target: ${node.target.fullAccess}`);
+            } else {
+                info.push(`target: ${node.target.type}`);
+            }
+        } else if (typeof node.target === 'string') {
+            info.push(`target: ${node.target}`);
+        }
     }
     
     if (node.fullAccess) {
@@ -158,11 +260,19 @@ function getNodeAdditionalInfo(node: ASTNode): string {
     }
     
     if (node.object) {
-        info.push(`object: ${node.object}`);
+        if (typeof node.object === 'object' && node.object.type) {
+            info.push(`object: ${node.object.type}`);
+        } else if (typeof node.object === 'string') {
+            info.push(`object: ${node.object}`);
+        }
     }
     
     if (node.member) {
-        info.push(`member: ${node.member}`);
+        if (typeof node.member === 'object' && node.member.name) {
+            info.push(`member: ${node.member.name}`);
+        } else if (typeof node.member === 'string') {
+            info.push(`member: ${node.member}`);
+        }
     }
     
     return info.join(', ');
@@ -291,22 +401,56 @@ function generateASTHtml(ast: ASTNode): string {
             }
         }
         
+        function getChildNodesJS(node) {
+            const children = [];
+            
+            // Standard children property
+            if (node.children && Array.isArray(node.children)) {
+                children.push(...node.children);
+            }
+            
+            // Common properties that contain child nodes
+            const childProperties = [
+                'body', 'arguments', 'expression', 'target', 'functionName', 
+                'left', 'right', 'condition', 'thenBranch', 'elseBranch',
+                'object', 'member', 'variableName', 'iteratorVariable',
+                'parameters', 'returnType', 'dataType', 'mixinType', 'name'
+            ];
+            
+            for (const prop of childProperties) {
+                const value = node[prop];
+                if (value) {
+                    if (Array.isArray(value)) {
+                        // Array of nodes
+                        for (const item of value) {
+                            if (item && typeof item === 'object' && item.type) {
+                                children.push(item);
+                            }
+                        }
+                    } else if (typeof value === 'object' && value.type) {
+                        // Single node
+                        children.push(value);
+                    }
+                }
+            }
+            
+            return children;
+        }
+        
         function countNodes(node) {
             let count = 1;
-            if (node.children) {
-                for (const child of node.children) {
-                    count += countNodes(child);
-                }
+            const children = getChildNodesJS(node);
+            for (const child of children) {
+                count += countNodes(child);
             }
             return count;
         }
         
         function getNodeTypes(node, types = new Set()) {
             types.add(node.type);
-            if (node.children) {
-                for (const child of node.children) {
-                    getNodeTypes(child, types);
-                }
+            const children = getChildNodesJS(node);
+            for (const child of children) {
+                getNodeTypes(child, types);
             }
             return types;
         }
