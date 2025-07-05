@@ -4,7 +4,7 @@
 import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 
 import { ProgramContext } from "./CanonParser";
-import { DeclarationContext } from "./CanonParser";
+import { ConfigurationCallContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { SchemaDefinitionContext } from "./CanonParser";
 import { SchemaMemberContext } from "./CanonParser";
@@ -24,7 +24,6 @@ import { AssignmentContext } from "./CanonParser";
 import { ExpressionStatementContext } from "./CanonParser";
 import { ReturnStatementContext } from "./CanonParser";
 import { ForStatementContext } from "./CanonParser";
-import { ObjectConstructionContext } from "./CanonParser";
 import { ConstructionBodyContext } from "./CanonParser";
 import { ExpressionContext } from "./CanonParser";
 import { RangeExpressionContext } from "./CanonParser";
@@ -59,15 +58,15 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitProgram?: (ctx: ProgramContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `CanonParser.declaration`.
+	 * Enter a parse tree produced by `CanonParser.configurationCall`.
 	 * @param ctx the parse tree
 	 */
-	enterDeclaration?: (ctx: DeclarationContext) => void;
+	enterConfigurationCall?: (ctx: ConfigurationCallContext) => void;
 	/**
-	 * Exit a parse tree produced by `CanonParser.declaration`.
+	 * Exit a parse tree produced by `CanonParser.configurationCall`.
 	 * @param ctx the parse tree
 	 */
-	exitDeclaration?: (ctx: DeclarationContext) => void;
+	exitConfigurationCall?: (ctx: ConfigurationCallContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.schemaDirective`.
@@ -277,17 +276,6 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitForStatement?: (ctx: ForStatementContext) => void;
-
-	/**
-	 * Enter a parse tree produced by `CanonParser.objectConstruction`.
-	 * @param ctx the parse tree
-	 */
-	enterObjectConstruction?: (ctx: ObjectConstructionContext) => void;
-	/**
-	 * Exit a parse tree produced by `CanonParser.objectConstruction`.
-	 * @param ctx the parse tree
-	 */
-	exitObjectConstruction?: (ctx: ObjectConstructionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.constructionBody`.

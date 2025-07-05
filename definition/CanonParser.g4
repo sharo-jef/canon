@@ -6,10 +6,25 @@ options {
 
 // Top-level structure
 program:
-	schemaDirective? declaration* schemaDefinition? declaration* EOF;
+	schemaDirective? (
+		structDefinition
+		| functionDefinition
+		| variableDeclaration
+		| assignment
+		| configurationCall
+	)* schemaDefinition? (
+		structDefinition
+		| functionDefinition
+		| variableDeclaration
+		| assignment
+		| configurationCall
+	)* EOF;
 
-// Declaration is everything except schemaDefinition
-declaration: structDefinition | functionDefinition | statement;
+// Configuration call (function call with optional trailing lambda for building config)
+configurationCall:
+	IDENTIFIER (LPAREN argumentList? RPAREN)? (
+		LBRACE constructionBody RBRACE
+	)?;
 
 // Schema directive - required at the beginning
 schemaDirective: SCHEMA_DIRECTIVE STRING_LITERAL;
@@ -61,7 +76,7 @@ statement:
 	| expressionStatement
 	| returnStatement
 	| forStatement
-	| objectConstruction;
+	| configurationCall;
 
 variableDeclaration: (VAL | VAR) IDENTIFIER ASSIGN expression;
 assignment: (
@@ -74,15 +89,11 @@ returnStatement: RETURN expression?;
 forStatement:
 	FOR LPAREN IDENTIFIER IN expression RPAREN LBRACE statement* RBRACE;
 
-// Object construction
-objectConstruction:
-	IDENTIFIER (LPAREN argumentList? RPAREN)? (
-		LBRACE constructionBody RBRACE
-	)?;
 constructionBody: (
 		assignment
 		| variableDeclaration
 		| forStatement
+		| configurationCall
 	)*;
 
 // Expressions - optimized hierarchy

@@ -4,7 +4,7 @@
 import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
 import { ProgramContext } from "./CanonParser";
-import { DeclarationContext } from "./CanonParser";
+import { ConfigurationCallContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { SchemaDefinitionContext } from "./CanonParser";
 import { SchemaMemberContext } from "./CanonParser";
@@ -24,7 +24,6 @@ import { AssignmentContext } from "./CanonParser";
 import { ExpressionStatementContext } from "./CanonParser";
 import { ReturnStatementContext } from "./CanonParser";
 import { ForStatementContext } from "./CanonParser";
-import { ObjectConstructionContext } from "./CanonParser";
 import { ConstructionBodyContext } from "./CanonParser";
 import { ExpressionContext } from "./CanonParser";
 import { RangeExpressionContext } from "./CanonParser";
@@ -58,11 +57,11 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitProgram?: (ctx: ProgramContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.declaration`.
+	 * Visit a parse tree produced by `CanonParser.configurationCall`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitDeclaration?: (ctx: DeclarationContext) => Result;
+	visitConfigurationCall?: (ctx: ConfigurationCallContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.schemaDirective`.
@@ -196,13 +195,6 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitForStatement?: (ctx: ForStatementContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.objectConstruction`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitObjectConstruction?: (ctx: ObjectConstructionContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.constructionBody`.

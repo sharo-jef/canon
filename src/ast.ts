@@ -300,22 +300,48 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             }
         }
         
-        // Object construction
-        else if (ctx.constructor.name === 'ObjectConstructionContext') {
+        // Configuration call (was ObjectConstruction)
+        else if (ctx.constructor.name === 'ConfigurationCallContext') {
             const identifier = ctx.IDENTIFIER();
             if (identifier) {
-                result.constructorName = identifier.text;
+                result.functionName = identifier.text;  // 関数呼び出しと統一
             }
             
             const argumentList = ctx.argumentList();
             if (argumentList) {
                 result.hasArguments = true;
                 result.argumentCount = this.countArguments(argumentList);
+            } else {
+                result.hasArguments = false;
+                result.argumentCount = 0;
             }
             
             const constructionBody = ctx.constructionBody();
             if (constructionBody) {
                 result.hasBody = true;
+            } else {
+                result.hasBody = false;
+            }
+        }
+        
+        // Variable declaration
+        else if (ctx.constructor.name === 'VariableDeclarationContext') {
+            const valToken = ctx.VAL();
+            const varToken = ctx.VAR();
+            const identifier = ctx.IDENTIFIER();
+            
+            if (identifier) {
+                result.variableName = identifier.text;
+                result.variableType = valToken ? 'val' : 'var';
+                result.isMutable = !!varToken;
+            }
+        }
+        
+        // For statement
+        else if (ctx.constructor.name === 'ForStatementContext') {
+            const identifier = ctx.IDENTIFIER();
+            if (identifier) {
+                result.iteratorVariable = identifier.text;
             }
         }
         
@@ -493,25 +519,15 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         const importantNodes = [
             'StructMember', 'MixinDeclaration', 'MethodDefinition', 'Annotation',
             'FunctionCall', 'Assignment', 'ReturnStatement', 'VariableDeclaration',
-            'Literal', 'MemberAccess', 'StringInterpolation', 'ObjectConstruction',
+            'Literal', 'MemberAccess', 'StringInterpolation', 'ConfigurationCall',
             'ConstructionBody', 'StructContent', 'ExpressionStatement',
             'InterpolationExpression', 'TypeReference', 'Parameter',
             'ParameterList', 'ArgumentList', 'ForStatement', 'StringContent',
-            'FunctionBody'
+            'FunctionBody', 'Statement'
         ];
         
         if (importantNodes.includes(childNode.type)) {
             return true;
-        }
-        
-        // Statement は子が複数あるか、意味的価値がある場合のみ保持
-        if (['Statement'].includes(childNode.type)) {
-            // FunctionBody内のStatementは常に保持
-            if (parentRuleName === 'FunctionBody') {
-                return true;
-            }
-            return !!(childNode.children && childNode.children.length > 1) || 
-                   this.hasSemanticValue(childNode);
         }
         
         return true;
@@ -545,6 +561,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
     // Visitor methods implementation
     visitProgram(ctx: any): ASTNode { return this.visitChildren(ctx); }
+    visitConfigurationCall(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitSchemaDirective(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitSchemaDefinition(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitSchemaMember(ctx: any): ASTNode { return this.visitChildren(ctx); }
@@ -564,7 +581,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     visitExpressionStatement(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitReturnStatement(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitForStatement(ctx: any): ASTNode { return this.visitChildren(ctx); }
-    visitObjectConstruction(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitConstructionBody(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
     visitRangeExpression(ctx: any): ASTNode { return this.visitChildren(ctx); }
@@ -582,13 +598,13 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     visitAnnotation(ctx: any): ASTNode { return this.visitChildren(ctx); }
 }
 
-function parseSchemaCanonToAST(): void {
+function parseCanonToAST(filename: string): void {
     try {
-        // schema.canonファイルを読み込み
-        const schemaPath = path.join(__dirname, '..', 'definition', 'schema.canon');
-        const input = fs.readFileSync(schemaPath, 'utf-8');
+        // 指定されたファイルを読み込み
+        const canonPath = path.join(__dirname, '..', 'definition', filename);
+        const input = fs.readFileSync(canonPath, 'utf-8');
         
-        console.log('Parsing schema.canon to AST...\n');
+        console.log(`Parsing ${filename} to AST...\n`);
         
         // ANTLR4パーサーの設定
         const inputStream = CharStreams.fromString(input);
@@ -602,6 +618,11 @@ function parseSchemaCanonToAST(): void {
         // エラーがあった場合の処理
         if (parser.numberOfSyntaxErrors > 0) {
             console.error(`Syntax errors found: ${parser.numberOfSyntaxErrors}`);
+            console.error('Tokens:');
+            for (let i = 0; i < tokenStream.size; i++) {
+                const token = tokenStream.get(i);
+                console.log(`Token ${i}: type=${token.type}, text='${token.text}', line=${token.line}, column=${token.charPositionInLine}`);
+            }
             return;
         }
         
@@ -629,13 +650,23 @@ function parseSchemaCanonToAST(): void {
         console.log('\nAST parsing completed successfully!');
         
     } catch (error) {
-        console.error('Error parsing schema.canon to AST:', error);
+        console.error(`Error parsing ${filename} to AST:`, error);
     }
+}
+
+function parseSchemaCanonToAST(): void {
+    parseCanonToAST('schema.canon');
+}
+
+function parseConfigCanonToAST(): void {
+    parseCanonToAST('config.canon');
 }
 
 // メイン実行
 if (require.main === module) {
     parseSchemaCanonToAST();
+    console.log('\n' + '='.repeat(80) + '\n');
+    parseConfigCanonToAST();
 }
 
-export { parseSchemaCanonToAST, ASTBuilder, ASTNode };
+export { parseSchemaCanonToAST, parseConfigCanonToAST, parseCanonToAST, ASTBuilder, ASTNode };
