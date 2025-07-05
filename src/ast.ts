@@ -48,6 +48,22 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         return undefined;
     }
 
+    private createIdentifierWithLocation(name: string, sourceNode?: any): ASTNode {
+        const identifier: ASTNode = {
+            type: 'Identifier',
+            name: name
+        };
+        
+        if (sourceNode) {
+            const loc = this.getLocationInfo(sourceNode);
+            if (loc) {
+                identifier.loc = loc;
+            }
+        }
+        
+        return identifier;
+    }
+
     visitTerminal(node: TerminalNode): ASTNode {
         // 重要な情報を持つTerminalのみ、簡潔な形で返す
         const result: ASTNode = {
@@ -55,7 +71,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             text: node.text
         };
         
-        const loc = this.getLocationInfo(node.symbol);
+        const loc = this.getLocationInfo(node);
         if (loc) {
             result.loc = loc;
         }
@@ -105,7 +121,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         
         // Binary expressions that have been structured should not process children
         const binaryExpressions = ['BinaryExpression'];
-        if (binaryExpressions.includes(ruleName) && result.left && result.operator && result.right) {
+        if ((binaryExpressions.includes(ruleName) || result.type === 'BinaryExpression') && result.left && result.operator && result.right) {
             delete result.children;
             return result;
         }
@@ -219,10 +235,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const typeRef = ctx.typeReference();
             
             if (identifier) {
-                result.name = {
-                    type: 'Identifier',
-                    name: identifier.text
-                };
+                result.name = this.createIdentifierWithLocation(identifier.text, identifier);
                 result.multiple = !!multiply || !!plus; // * または + の場合は複数
                 // * は multiple: true, required: false
                 // + は multiple: true, required: true
@@ -247,10 +260,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         else if (ctx.constructor.name === 'StructDefinitionContext') {
             const identifier = ctx.IDENTIFIER();
             if (identifier) {
-                result.name = {
-                    type: 'Identifier',
-                    name: identifier.text
-                };
+                result.name = this.createIdentifierWithLocation(identifier.text, identifier);
             }
         }
         
@@ -272,10 +282,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const typeRef = ctx.typeReference();
             
             if (identifier) {
-                result.name = {
-                    type: 'Identifier',
-                    name: identifier.text
-                };
+                result.name = this.createIdentifierWithLocation(identifier.text, identifier);
                 result.required = !question; // ? があれば任意、なければ必須
                 if (typeRef) {
                     result.dataType = this.visit(typeRef);
@@ -290,10 +297,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const returnType = ctx.typeReference();
             
             if (identifier) {
-                result.name = {
-                    type: 'Identifier',
-                    name: identifier.text
-                };
+                result.name = this.createIdentifierWithLocation(identifier.text, identifier);
                 result.isDeclare = !!isDeclare;
                 if (returnType) {
                     result.returnType = this.visit(returnType);
@@ -321,10 +325,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const returnType = ctx.typeReference();
             
             if (identifier) {
-                result.name = {
-                    type: 'Identifier',
-                    name: identifier.text
-                };
+                result.name = this.createIdentifierWithLocation(identifier.text, identifier);
                 if (returnType) {
                     result.returnType = this.visit(returnType);
                 }
@@ -364,38 +365,23 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                         object: {
                             type: 'ThisReference'
                         },
-                        member: {
-                            type: 'Identifier',
-                            name: identifiers[0].text
-                        }
+                        member: this.createIdentifierWithLocation(identifiers[0].text, identifiers[0])
                     };
                 } else if (identifiers?.length >= 2) {
                     result.functionName = `${identifiers[0].text}.${identifiers[1].text}`;
                     result.target = {
                         type: 'MemberAccess',
-                        object: {
-                            type: 'Identifier',
-                            name: identifiers[0].text
-                        },
-                        member: {
-                            type: 'Identifier',
-                            name: identifiers[1].text
-                        }
+                        object: this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]),
+                        member: this.createIdentifierWithLocation(identifiers[1].text, identifiers[1])
                     };
                 }
             } else if (identifier) {
                 // 通常の関数呼び出し (e.g., data2(), apply())
                 // identifierは単一の要素またはTerminalNodeの場合がある
                 if (Array.isArray(identifier)) {
-                    result.functionName = {
-                        type: 'Identifier',
-                        name: identifier[0]?.text
-                    };
+                    result.functionName = this.createIdentifierWithLocation(identifier[0]?.text, identifier[0]);
                 } else {
-                    result.functionName = {
-                        type: 'Identifier',
-                        name: identifier.text
-                    };
+                    result.functionName = this.createIdentifierWithLocation(identifier.text, identifier);
                 }
             }
             
@@ -422,10 +408,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         else if (ctx.constructor.name === 'ConfigurationCallContext') {
             const identifier = ctx.IDENTIFIER();
             if (identifier) {
-                result.functionName = {
-                    type: 'Identifier',
-                    name: identifier.text
-                };
+                result.functionName = this.createIdentifierWithLocation(identifier.text, identifier);
             }
             
             const argumentList = ctx.argumentList();
@@ -452,10 +435,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const identifier = ctx.IDENTIFIER();
             
             if (identifier) {
-                result.variableName = {
-                    type: 'Identifier',
-                    name: identifier.text
-                };
+                result.variableName = this.createIdentifierWithLocation(identifier.text, identifier);
                 // Simplified: only use isMutable boolean
                 result.isMutable = !!varToken; // true for 'var', false for 'val'
             }
@@ -472,10 +452,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         else if (ctx.constructor.name === 'ForStatementContext') {
             const identifier = ctx.IDENTIFIER();
             if (identifier) {
-                result.iteratorVariable = {
-                    type: 'Identifier',
-                    name: identifier.text
-                };
+                result.iteratorVariable = this.createIdentifierWithLocation(identifier.text, identifier);
             }
             
             // 反復対象の式（範囲式など）
@@ -502,20 +479,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             if (identifier && lparen && rparen) {
                 // This is an apply() style function call
                 result.type = 'FunctionCall';
-                result.functionName = {
-                    type: 'Identifier',
-                    name: identifier.text
-                };
+                result.functionName = this.createIdentifierWithLocation(identifier.text, identifier);
                 result.arguments = [];
             } else if (identifier && !lparen && !rparen) {
                 // Simple identifier reference - create Identifier node
                 result.type = 'Identifier';
                 result.name = identifier.text;
+                // Add location from the identifier token
+                const loc = this.getLocationInfo(identifier);
+                if (loc) {
+                    result.loc = loc;
+                }
             }
             // For other cases (literals, complex expressions), let normal processing handle delegation
         }
         
-        // Assignment
         // Assignment - single expression, not children
         else if (ctx.constructor.name === 'AssignmentContext') {
             const identifiers = ctx.IDENTIFIER();
@@ -529,30 +507,18 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     object: {
                         type: 'ThisReference'
                     },
-                    member: {
-                        type: 'Identifier',
-                        name: identifiers[0].text
-                    }
+                    member: this.createIdentifierWithLocation(identifiers[0].text, identifiers[0])
                 };
             } else if (identifiers?.length >= 2) {
                 // object.property pattern
                 result.target = {
                     type: 'MemberAccess',
-                    object: {
-                        type: 'Identifier',
-                        name: identifiers[0].text
-                    },
-                    member: {
-                        type: 'Identifier',
-                        name: identifiers[1].text
-                    }
+                    object: this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]),
+                    member: this.createIdentifierWithLocation(identifiers[1].text, identifiers[1])
                 };
             } else if (identifiers?.[0]) {
                 // Simple identifier pattern
-                result.target = {
-                    type: 'Identifier',
-                    name: identifiers[0].text
-                };
+                result.target = this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]);
             } else {
                 // Fallback for unknown patterns
                 result.target = {
@@ -578,19 +544,10 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 result.object = {
                     type: 'ThisReference'
                 };
-                result.member = {
-                    type: 'Identifier',
-                    name: identifiers[0].text
-                };
+                result.member = this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]);
             } else if (identifiers?.length >= 2) {
-                result.object = {
-                    type: 'Identifier',
-                    name: identifiers[0].text
-                };
-                result.member = {
-                    type: 'Identifier',
-                    name: identifiers[1].text
-                };
+                result.object = this.createIdentifierWithLocation(identifiers[0].text, identifiers[0]);
+                result.member = this.createIdentifierWithLocation(identifiers[1].text, identifiers[1]);
             }
         }
         
@@ -634,10 +591,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const stringLiteral = ctx.STRING_LITERAL();
             
             if (identifier) {
-                result.name = {
-                    type: 'Identifier',
-                    name: identifier.text
-                };
+                result.name = this.createIdentifierWithLocation(identifier.text, identifier);
                 if (stringLiteral) {
                     // アノテーション値からクォートを除去
                     let value = stringLiteral.text;
@@ -690,6 +644,8 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     result.left = this.visit(leftChild);
                     result.operator = operatorChild.text; // RANGE (..)
                     result.right = this.visit(rightChild);
+                    // Don't include children for binary expressions
+                    delete result.children;
                 }
             }
         }
@@ -705,12 +661,20 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     
                     if (operatorChild && rightChild) {
                         const rightNode = this.visit(rightChild);
-                        currentLeft = {
+                        const binaryNode: ASTNode = {
                             type: 'BinaryExpression',
                             left: currentLeft,
                             operator: operatorChild.text,
                             right: rightNode
                         };
+                        
+                        // Add location information for the binary expression
+                        const loc = this.getLocationInfo(ctx as any);
+                        if (loc) {
+                            binaryNode.loc = loc;
+                        }
+                        
+                        currentLeft = binaryNode;
                     }
                 }
                 
@@ -730,12 +694,20 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     
                     if (operatorChild && rightChild) {
                         const rightNode = this.visit(rightChild);
-                        currentLeft = {
+                        const binaryNode: ASTNode = {
                             type: 'BinaryExpression',
                             left: currentLeft,
                             operator: operatorChild.text,
                             right: rightNode
                         };
+                        
+                        // Add location information for the binary expression
+                        const loc = this.getLocationInfo(ctx as any);
+                        if (loc) {
+                            binaryNode.loc = loc;
+                        }
+                        
+                        currentLeft = binaryNode;
                     }
                 }
                 
@@ -755,6 +727,8 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     result.left = this.visit(leftChild);
                     result.operator = operatorChild.text; // Comparison operators
                     result.right = this.visit(rightChild);
+                    // Don't include children for binary expressions
+                    delete result.children;
                 }
             }
         }
@@ -772,10 +746,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 
                 if (identifier && typeRef) {
                     parameters.push({
-                        name: {
-                            type: 'Identifier',
-                            name: identifier.text
-                        },
+                        name: this.createIdentifierWithLocation(identifier.text, identifier),
                         type: {
                             type: 'TypeReference',
                             typeName: typeRef.text

@@ -173,26 +173,6 @@ children:
         isMutable: false
         expression:
           type: BinaryExpression
-          children:
-            - type: Identifier
-              loc:
-                start:
-                  line: 16
-                  column: 17
-                end:
-                  line: 16
-                  column: 23
-              name: datam1
-            - type: Literal
-              loc:
-                start:
-                  line: 16
-                  column: 26
-                end:
-                  line: 16
-                  column: 30
-              literalType: string
-              value: _2
           loc:
             start:
               line: 16
@@ -452,26 +432,6 @@ children:
           name: datam2
         expression:
           type: BinaryExpression
-          children:
-            - type: Identifier
-              loc:
-                start:
-                  line: 32
-                  column: 13
-                end:
-                  line: 32
-                  column: 18
-              name: name2
-            - type: Literal
-              loc:
-                start:
-                  line: 32
-                  column: 21
-                end:
-                  line: 32
-                  column: 25
-              literalType: string
-              value: _1
           loc:
             start:
               line: 32
@@ -514,26 +474,6 @@ children:
           name: datam2
         expression:
           type: BinaryExpression
-          children:
-            - type: Identifier
-              loc:
-                start:
-                  line: 33
-                  column: 13
-                end:
-                  line: 33
-                  column: 18
-              name: name2
-            - type: Literal
-              loc:
-                start:
-                  line: 33
-                  column: 21
-                end:
-                  line: 33
-                  column: 25
-              literalType: string
-              value: _2
           loc:
             start:
               line: 33
@@ -580,26 +520,6 @@ children:
             name: datam2
         expression:
           type: BinaryExpression
-          children:
-            - type: Identifier
-              loc:
-                start:
-                  line: 34
-                  column: 18
-                end:
-                  line: 34
-                  column: 23
-              name: name2
-            - type: Literal
-              loc:
-                start:
-                  line: 34
-                  column: 26
-                end:
-                  line: 34
-                  column: 30
-              literalType: string
-              value: _3
           loc:
             start:
               line: 34
@@ -686,35 +606,6 @@ children:
               name: datam2
             expression:
               type: BinaryExpression
-              children:
-                - type: Identifier
-                  loc:
-                    start:
-                      line: 38
-                      column: 17
-                    end:
-                      line: 38
-                      column: 22
-                  name: name2
-                - type: Literal
-                  loc:
-                    start:
-                      line: 38
-                      column: 25
-                    end:
-                      line: 38
-                      column: 33
-                  literalType: string
-                  value: _loop_
-                - type: Identifier
-                  loc:
-                    start:
-                      line: 38
-                      column: 36
-                    end:
-                      line: 38
-                      column: 37
-                  name: i
               loc:
                 start:
                   line: 38
@@ -746,6 +637,13 @@ children:
                       column: 33
                   literalType: string
                   value: _loop_
+                loc:
+                  start:
+                    line: 38
+                    column: 17
+                  end:
+                    line: 38
+                    column: 37
               operator: +
               right:
                 type: Identifier
