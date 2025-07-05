@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run generate && npm run parse:hierarchy && npm run parse:ast && npm run generate:hierarchy-docs && npm run generate:ast-docs",
+    "start": "npm run generate && npm run parse:hierarchy && npm run parse:ast",
     "parse": "npm run parse:ast",
     "parse:hierarchy": "npx tsx src/hierarchy.ts && npm run generate:hierarchy-docs",
     "parse:ast": "npx tsx src/ast.ts && npm run generate:ast-docs",

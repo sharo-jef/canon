@@ -25,6 +25,12 @@ children:
           - type: SchemaMember
             details: 'data4+: data2'
             children: []
+          - type: SchemaMember
+            details: 'data5: d'
+            children: []
+      - type: StructDefinition
+        details: d
+        children: []
       - type: StructDefinition
         details: data
         children:

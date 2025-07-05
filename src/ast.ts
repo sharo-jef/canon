@@ -149,10 +149,20 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             
             if (identifier) {
                 result.name = identifier.text;
-                result.isMultiple = !!multiply;
-                result.isOptional = !!question;
-                // 修飾子がない場合は必須、? がある場合は任意
-                result.isRequired = !question;
+                result.multiple = !!multiply || !!plus; // * または + の場合は複数
+                // * は multiple: true, required: false
+                // + は multiple: true, required: true
+                // ? は multiple: false, required: false
+                // 修飾子なしは multiple: false, required: true
+                if (multiply) {
+                    result.required = false; // * は0個以上（任意）
+                } else if (plus) {
+                    result.required = true;  // + は1個以上必須
+                } else if (question) {
+                    result.required = false; // ? は任意
+                } else {
+                    result.required = true;  // 修飾子なしは必須
+                }
                 if (typeRef) {
                     result.dataType = typeRef.text;
                 }
@@ -183,7 +193,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             
             if (identifier) {
                 result.name = identifier.text;
-                result.isOptional = !!question;
+                result.required = !question; // ? があれば任意、なければ必須
                 if (typeRef) {
                     result.dataType = typeRef.text;
                 }

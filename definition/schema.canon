@@ -7,7 +7,10 @@ schema {
     data2*: data2
     data3?: data2
     data4+: data2
+    data5: d
 }
+
+struct d = int
 
 struct data {
     datam1: string

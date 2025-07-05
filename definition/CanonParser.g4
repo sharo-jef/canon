@@ -22,7 +22,8 @@ schemaMember:
 
 // Struct definition
 structDefinition:
-	STRUCT IDENTIFIER LBRACE structContent* RBRACE;
+	STRUCT IDENTIFIER LBRACE structContent* RBRACE
+	| STRUCT IDENTIFIER ASSIGN typeReference; // Type alias
 structContent:
 	mixinDeclaration
 	| structMember

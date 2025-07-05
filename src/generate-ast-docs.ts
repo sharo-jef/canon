@@ -93,16 +93,12 @@ function getNodeAdditionalInfo(node: ASTNode): string {
     }
     
     // Boolean flags
-    if (node.isOptional !== undefined) {
-        info.push(`optional: ${node.isOptional}`);
+    if (node.multiple !== undefined) {
+        info.push(`multiple: ${node.multiple}`);
     }
     
-    if (node.isMultiple !== undefined) {
-        info.push(`multiple: ${node.isMultiple}`);
-    }
-    
-    if (node.isRequired !== undefined) {
-        info.push(`required: ${node.isRequired}`);
+    if (node.required !== undefined) {
+        info.push(`required: ${node.required}`);
     }
     
     if (node.isDeclare !== undefined) {

@@ -388,30 +388,50 @@ export class CanonParser extends Parser {
 		this.enterRule(_localctx, 8, CanonParser.RULE_structDefinition);
 		let _la: number;
 		try {
-			this.enterOuterAlt(_localctx, 1);
-			{
-			this.state = 112;
-			this.match(CanonParser.STRUCT);
-			this.state = 113;
-			this.match(CanonParser.IDENTIFIER);
-			this.state = 114;
-			this.match(CanonParser.LBRACE);
-			this.state = 118;
+			this.state = 126;
 			this._errHandler.sync(this);
-			_la = this._input.LA(1);
-			while (_la === CanonParser.MIXIN || _la === CanonParser.AT || _la === CanonParser.IDENTIFIER) {
+			switch ( this.interpreter.adaptivePredict(this._input, 7, this._ctx) ) {
+			case 1:
+				this.enterOuterAlt(_localctx, 1);
 				{
-				{
-				this.state = 115;
-				this.structContent();
-				}
-				}
-				this.state = 120;
+				this.state = 112;
+				this.match(CanonParser.STRUCT);
+				this.state = 113;
+				this.match(CanonParser.IDENTIFIER);
+				this.state = 114;
+				this.match(CanonParser.LBRACE);
+				this.state = 118;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-			}
-			this.state = 121;
-			this.match(CanonParser.RBRACE);
+				while (_la === CanonParser.MIXIN || _la === CanonParser.AT || _la === CanonParser.IDENTIFIER) {
+					{
+					{
+					this.state = 115;
+					this.structContent();
+					}
+					}
+					this.state = 120;
+					this._errHandler.sync(this);
+					_la = this._input.LA(1);
+				}
+				this.state = 121;
+				this.match(CanonParser.RBRACE);
+				}
+				break;
+
+			case 2:
+				this.enterOuterAlt(_localctx, 2);
+				{
+				this.state = 122;
+				this.match(CanonParser.STRUCT);
+				this.state = 123;
+				this.match(CanonParser.IDENTIFIER);
+				this.state = 124;
+				this.match(CanonParser.ASSIGN);
+				this.state = 125;
+				this.typeReference();
+				}
+				break;
 			}
 		}
 		catch (re) {
@@ -433,13 +453,13 @@ export class CanonParser extends Parser {
 		let _localctx: StructContentContext = new StructContentContext(this._ctx, this.state);
 		this.enterRule(_localctx, 10, CanonParser.RULE_structContent);
 		try {
-			this.state = 126;
+			this.state = 131;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 7, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 8, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 123;
+				this.state = 128;
 				this.mixinDeclaration();
 				}
 				break;
@@ -447,7 +467,7 @@ export class CanonParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 124;
+				this.state = 129;
 				this.structMember();
 				}
 				break;
@@ -455,7 +475,7 @@ export class CanonParser extends Parser {
 			case 3:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 125;
+				this.state = 130;
 				this.methodDefinition();
 				}
 				break;
@@ -482,9 +502,9 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 128;
+			this.state = 133;
 			this.match(CanonParser.MIXIN);
-			this.state = 129;
+			this.state = 134;
 			this.match(CanonParser.IDENTIFIER);
 			}
 		}
@@ -510,35 +530,35 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 134;
+			this.state = 139;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === CanonParser.AT) {
 				{
 				{
-				this.state = 131;
+				this.state = 136;
 				this.annotation();
 				}
 				}
-				this.state = 136;
+				this.state = 141;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 137;
+			this.state = 142;
 			this.match(CanonParser.IDENTIFIER);
-			this.state = 139;
+			this.state = 144;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CanonParser.QUESTION) {
 				{
-				this.state = 138;
+				this.state = 143;
 				this.match(CanonParser.QUESTION);
 				}
 			}
 
-			this.state = 141;
+			this.state = 146;
 			this.match(CanonParser.COLON);
-			this.state = 142;
+			this.state = 147;
 			this.typeReference();
 			}
 		}
@@ -564,49 +584,49 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 147;
+			this.state = 152;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === CanonParser.AT) {
 				{
 				{
-				this.state = 144;
+				this.state = 149;
 				this.annotation();
 				}
 				}
-				this.state = 149;
+				this.state = 154;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 150;
+			this.state = 155;
 			this.match(CanonParser.IDENTIFIER);
-			this.state = 151;
+			this.state = 156;
 			this.match(CanonParser.LPAREN);
-			this.state = 153;
+			this.state = 158;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CanonParser.IDENTIFIER) {
 				{
-				this.state = 152;
+				this.state = 157;
 				this.parameterList();
 				}
 			}
 
-			this.state = 155;
+			this.state = 160;
 			this.match(CanonParser.RPAREN);
-			this.state = 158;
+			this.state = 163;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CanonParser.COLON) {
 				{
-				this.state = 156;
+				this.state = 161;
 				this.match(CanonParser.COLON);
-				this.state = 157;
+				this.state = 162;
 				this.typeReference();
 				}
 			}
 
-			this.state = 160;
+			this.state = 165;
 			this.functionBody();
 			}
 		}
@@ -630,57 +650,57 @@ export class CanonParser extends Parser {
 		this.enterRule(_localctx, 18, CanonParser.RULE_functionDefinition);
 		let _la: number;
 		try {
-			this.state = 201;
+			this.state = 206;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 20, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 21, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 165;
+				this.state = 170;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la === CanonParser.AT) {
 					{
 					{
-					this.state = 162;
+					this.state = 167;
 					this.annotation();
 					}
 					}
-					this.state = 167;
+					this.state = 172;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 168;
+				this.state = 173;
 				this.match(CanonParser.FUN);
-				this.state = 169;
+				this.state = 174;
 				this.match(CanonParser.IDENTIFIER);
-				this.state = 170;
+				this.state = 175;
 				this.match(CanonParser.LPAREN);
-				this.state = 172;
+				this.state = 177;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CanonParser.IDENTIFIER) {
 					{
-					this.state = 171;
+					this.state = 176;
 					this.parameterList();
 					}
 				}
 
-				this.state = 174;
+				this.state = 179;
 				this.match(CanonParser.RPAREN);
-				this.state = 177;
+				this.state = 182;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CanonParser.COLON) {
 					{
-					this.state = 175;
+					this.state = 180;
 					this.match(CanonParser.COLON);
-					this.state = 176;
+					this.state = 181;
 					this.typeReference();
 					}
 				}
 
-				this.state = 179;
+				this.state = 184;
 				this.functionBody();
 				}
 				break;
@@ -688,58 +708,58 @@ export class CanonParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 183;
+				this.state = 188;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la === CanonParser.AT) {
 					{
 					{
-					this.state = 180;
+					this.state = 185;
 					this.annotation();
 					}
 					}
-					this.state = 185;
+					this.state = 190;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 186;
-				this.match(CanonParser.DECLARE);
-				this.state = 187;
-				this.match(CanonParser.FUN);
-				this.state = 188;
-				this.match(CanonParser.IDENTIFIER);
-				this.state = 189;
-				this.match(CanonParser.LPAREN);
 				this.state = 191;
+				this.match(CanonParser.DECLARE);
+				this.state = 192;
+				this.match(CanonParser.FUN);
+				this.state = 193;
+				this.match(CanonParser.IDENTIFIER);
+				this.state = 194;
+				this.match(CanonParser.LPAREN);
+				this.state = 196;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CanonParser.IDENTIFIER) {
 					{
-					this.state = 190;
+					this.state = 195;
 					this.parameterList();
 					}
 				}
 
-				this.state = 193;
+				this.state = 198;
 				this.match(CanonParser.RPAREN);
-				this.state = 196;
+				this.state = 201;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CanonParser.COLON) {
 					{
-					this.state = 194;
+					this.state = 199;
 					this.match(CanonParser.COLON);
-					this.state = 195;
+					this.state = 200;
 					this.typeReference();
 					}
 				}
 
-				this.state = 199;
+				this.state = 204;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CanonParser.SEMICOLON) {
 					{
-					this.state = 198;
+					this.state = 203;
 					this.match(CanonParser.SEMICOLON);
 					}
 				}
@@ -770,23 +790,23 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 203;
+			this.state = 208;
 			this.match(CanonParser.LBRACE);
-			this.state = 207;
+			this.state = 212;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << CanonParser.VAL) | (1 << CanonParser.VAR) | (1 << CanonParser.RETURN) | (1 << CanonParser.FOR) | (1 << CanonParser.THIS))) !== 0) || ((((_la - 34)) & ~0x1F) === 0 && ((1 << (_la - 34)) & ((1 << (CanonParser.LPAREN - 34)) | (1 << (CanonParser.BACKTICK - 34)) | (1 << (CanonParser.STRING_LITERAL - 34)) | (1 << (CanonParser.INTEGER_LITERAL - 34)) | (1 << (CanonParser.IDENTIFIER - 34)))) !== 0)) {
 				{
 				{
-				this.state = 204;
+				this.state = 209;
 				this.statement();
 				}
 				}
-				this.state = 209;
+				this.state = 214;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 210;
+			this.state = 215;
 			this.match(CanonParser.RBRACE);
 			}
 		}
@@ -812,21 +832,21 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 212;
-			this.parameter();
 			this.state = 217;
+			this.parameter();
+			this.state = 222;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === CanonParser.COMMA) {
 				{
 				{
-				this.state = 213;
+				this.state = 218;
 				this.match(CanonParser.COMMA);
-				this.state = 214;
+				this.state = 219;
 				this.parameter();
 				}
 				}
-				this.state = 219;
+				this.state = 224;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -853,11 +873,11 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 220;
+			this.state = 225;
 			this.match(CanonParser.IDENTIFIER);
-			this.state = 221;
+			this.state = 226;
 			this.match(CanonParser.COLON);
-			this.state = 222;
+			this.state = 227;
 			this.typeReference();
 			}
 		}
@@ -883,7 +903,7 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 224;
+			this.state = 229;
 			_la = this._input.LA(1);
 			if (!(((((_la - 12)) & ~0x1F) === 0 && ((1 << (_la - 12)) & ((1 << (CanonParser.STRING_TYPE - 12)) | (1 << (CanonParser.INT_TYPE - 12)) | (1 << (CanonParser.IDENTIFIER - 12)))) !== 0))) {
 			this._errHandler.recoverInline(this);
@@ -916,13 +936,13 @@ export class CanonParser extends Parser {
 		let _localctx: StatementContext = new StatementContext(this._ctx, this.state);
 		this.enterRule(_localctx, 28, CanonParser.RULE_statement);
 		try {
-			this.state = 232;
+			this.state = 237;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 23, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 24, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 226;
+				this.state = 231;
 				this.variableDeclaration();
 				}
 				break;
@@ -930,7 +950,7 @@ export class CanonParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 227;
+				this.state = 232;
 				this.assignment();
 				}
 				break;
@@ -938,7 +958,7 @@ export class CanonParser extends Parser {
 			case 3:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 228;
+				this.state = 233;
 				this.expressionStatement();
 				}
 				break;
@@ -946,7 +966,7 @@ export class CanonParser extends Parser {
 			case 4:
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 229;
+				this.state = 234;
 				this.returnStatement();
 				}
 				break;
@@ -954,7 +974,7 @@ export class CanonParser extends Parser {
 			case 5:
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 230;
+				this.state = 235;
 				this.forStatement();
 				}
 				break;
@@ -962,7 +982,7 @@ export class CanonParser extends Parser {
 			case 6:
 				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 231;
+				this.state = 236;
 				this.objectConstruction();
 				}
 				break;
@@ -990,7 +1010,7 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 234;
+			this.state = 239;
 			_la = this._input.LA(1);
 			if (!(_la === CanonParser.VAL || _la === CanonParser.VAR)) {
 			this._errHandler.recoverInline(this);
@@ -1002,11 +1022,11 @@ export class CanonParser extends Parser {
 				this._errHandler.reportMatch(this);
 				this.consume();
 			}
-			this.state = 235;
+			this.state = 240;
 			this.match(CanonParser.IDENTIFIER);
-			this.state = 236;
+			this.state = 241;
 			this.match(CanonParser.ASSIGN);
-			this.state = 237;
+			this.state = 242;
 			this.expression();
 			}
 		}
@@ -1031,41 +1051,41 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 246;
+			this.state = 251;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 24, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 25, this._ctx) ) {
 			case 1:
 				{
-				this.state = 239;
+				this.state = 244;
 				this.match(CanonParser.IDENTIFIER);
 				}
 				break;
 
 			case 2:
 				{
-				this.state = 240;
+				this.state = 245;
 				this.match(CanonParser.THIS);
-				this.state = 241;
+				this.state = 246;
 				this.match(CanonParser.DOT);
-				this.state = 242;
+				this.state = 247;
 				this.match(CanonParser.IDENTIFIER);
 				}
 				break;
 
 			case 3:
 				{
-				this.state = 243;
+				this.state = 248;
 				this.match(CanonParser.IDENTIFIER);
-				this.state = 244;
+				this.state = 249;
 				this.match(CanonParser.DOT);
-				this.state = 245;
+				this.state = 250;
 				this.match(CanonParser.IDENTIFIER);
 				}
 				break;
 			}
-			this.state = 248;
+			this.state = 253;
 			this.match(CanonParser.ASSIGN);
-			this.state = 249;
+			this.state = 254;
 			this.expression();
 			}
 		}
@@ -1090,7 +1110,7 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 251;
+			this.state = 256;
 			this.expression();
 			}
 		}
@@ -1115,14 +1135,14 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 253;
+			this.state = 258;
 			this.match(CanonParser.RETURN);
-			this.state = 255;
+			this.state = 260;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 25, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 26, this._ctx) ) {
 			case 1:
 				{
-				this.state = 254;
+				this.state = 259;
 				this.expression();
 				}
 				break;
@@ -1151,35 +1171,35 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 257;
-			this.match(CanonParser.FOR);
-			this.state = 258;
-			this.match(CanonParser.LPAREN);
-			this.state = 259;
-			this.match(CanonParser.IDENTIFIER);
-			this.state = 260;
-			this.match(CanonParser.IN);
-			this.state = 261;
-			this.expression();
 			this.state = 262;
-			this.match(CanonParser.RPAREN);
+			this.match(CanonParser.FOR);
 			this.state = 263;
-			this.match(CanonParser.LBRACE);
+			this.match(CanonParser.LPAREN);
+			this.state = 264;
+			this.match(CanonParser.IDENTIFIER);
+			this.state = 265;
+			this.match(CanonParser.IN);
+			this.state = 266;
+			this.expression();
 			this.state = 267;
+			this.match(CanonParser.RPAREN);
+			this.state = 268;
+			this.match(CanonParser.LBRACE);
+			this.state = 272;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << CanonParser.VAL) | (1 << CanonParser.VAR) | (1 << CanonParser.RETURN) | (1 << CanonParser.FOR) | (1 << CanonParser.THIS))) !== 0) || ((((_la - 34)) & ~0x1F) === 0 && ((1 << (_la - 34)) & ((1 << (CanonParser.LPAREN - 34)) | (1 << (CanonParser.BACKTICK - 34)) | (1 << (CanonParser.STRING_LITERAL - 34)) | (1 << (CanonParser.INTEGER_LITERAL - 34)) | (1 << (CanonParser.IDENTIFIER - 34)))) !== 0)) {
 				{
 				{
-				this.state = 264;
+				this.state = 269;
 				this.statement();
 				}
 				}
-				this.state = 269;
+				this.state = 274;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 270;
+			this.state = 275;
 			this.match(CanonParser.RBRACE);
 			}
 		}
@@ -1205,40 +1225,40 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 272;
+			this.state = 277;
 			this.match(CanonParser.IDENTIFIER);
-			this.state = 278;
+			this.state = 283;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 28, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 29, this._ctx) ) {
 			case 1:
 				{
-				this.state = 273;
+				this.state = 278;
 				this.match(CanonParser.LPAREN);
-				this.state = 275;
+				this.state = 280;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CanonParser.THIS || ((((_la - 34)) & ~0x1F) === 0 && ((1 << (_la - 34)) & ((1 << (CanonParser.LPAREN - 34)) | (1 << (CanonParser.BACKTICK - 34)) | (1 << (CanonParser.STRING_LITERAL - 34)) | (1 << (CanonParser.INTEGER_LITERAL - 34)) | (1 << (CanonParser.IDENTIFIER - 34)))) !== 0)) {
 					{
-					this.state = 274;
+					this.state = 279;
 					this.argumentList();
 					}
 				}
 
-				this.state = 277;
+				this.state = 282;
 				this.match(CanonParser.RPAREN);
 				}
 				break;
 			}
-			this.state = 284;
+			this.state = 289;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CanonParser.LBRACE) {
 				{
-				this.state = 280;
+				this.state = 285;
 				this.match(CanonParser.LBRACE);
-				this.state = 281;
+				this.state = 286;
 				this.constructionBody();
-				this.state = 282;
+				this.state = 287;
 				this.match(CanonParser.RBRACE);
 				}
 			}
@@ -1267,31 +1287,31 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 291;
+			this.state = 296;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << CanonParser.VAL) | (1 << CanonParser.VAR) | (1 << CanonParser.FOR) | (1 << CanonParser.THIS))) !== 0) || _la === CanonParser.IDENTIFIER) {
 				{
-				this.state = 289;
+				this.state = 294;
 				this._errHandler.sync(this);
 				switch (this._input.LA(1)) {
 				case CanonParser.THIS:
 				case CanonParser.IDENTIFIER:
 					{
-					this.state = 286;
+					this.state = 291;
 					this.assignment();
 					}
 					break;
 				case CanonParser.VAL:
 				case CanonParser.VAR:
 					{
-					this.state = 287;
+					this.state = 292;
 					this.variableDeclaration();
 					}
 					break;
 				case CanonParser.FOR:
 					{
-					this.state = 288;
+					this.state = 293;
 					this.forStatement();
 					}
 					break;
@@ -1299,7 +1319,7 @@ export class CanonParser extends Parser {
 					throw new NoViableAltException(this);
 				}
 				}
-				this.state = 293;
+				this.state = 298;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -1326,7 +1346,7 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 294;
+			this.state = 299;
 			this.rangeExpression();
 			}
 		}
@@ -1352,21 +1372,21 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 296;
-			this.comparisonExpression();
 			this.state = 301;
+			this.comparisonExpression();
+			this.state = 306;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === CanonParser.RANGE) {
 				{
 				{
-				this.state = 297;
+				this.state = 302;
 				this.match(CanonParser.RANGE);
-				this.state = 298;
+				this.state = 303;
 				this.comparisonExpression();
 				}
 				}
-				this.state = 303;
+				this.state = 308;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -1394,15 +1414,15 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 304;
-			this.additiveExpression();
 			this.state = 309;
+			this.additiveExpression();
+			this.state = 314;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << CanonParser.EQUALS) | (1 << CanonParser.NOT_EQUALS) | (1 << CanonParser.LESS_THAN) | (1 << CanonParser.GREATER_THAN) | (1 << CanonParser.LESS_EQUALS) | (1 << CanonParser.GREATER_EQUALS))) !== 0)) {
 				{
 				{
-				this.state = 305;
+				this.state = 310;
 				_la = this._input.LA(1);
 				if (!((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << CanonParser.EQUALS) | (1 << CanonParser.NOT_EQUALS) | (1 << CanonParser.LESS_THAN) | (1 << CanonParser.GREATER_THAN) | (1 << CanonParser.LESS_EQUALS) | (1 << CanonParser.GREATER_EQUALS))) !== 0))) {
 				this._errHandler.recoverInline(this);
@@ -1414,11 +1434,11 @@ export class CanonParser extends Parser {
 					this._errHandler.reportMatch(this);
 					this.consume();
 				}
-				this.state = 306;
+				this.state = 311;
 				this.additiveExpression();
 				}
 				}
-				this.state = 311;
+				this.state = 316;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -1446,15 +1466,15 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 312;
-			this.multiplicativeExpression();
 			this.state = 317;
+			this.multiplicativeExpression();
+			this.state = 322;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === CanonParser.PLUS || _la === CanonParser.MINUS) {
 				{
 				{
-				this.state = 313;
+				this.state = 318;
 				_la = this._input.LA(1);
 				if (!(_la === CanonParser.PLUS || _la === CanonParser.MINUS)) {
 				this._errHandler.recoverInline(this);
@@ -1466,11 +1486,11 @@ export class CanonParser extends Parser {
 					this._errHandler.reportMatch(this);
 					this.consume();
 				}
-				this.state = 314;
+				this.state = 319;
 				this.multiplicativeExpression();
 				}
 				}
-				this.state = 319;
+				this.state = 324;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -1498,15 +1518,15 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 320;
-			this.primaryExpression();
 			this.state = 325;
+			this.primaryExpression();
+			this.state = 330;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === CanonParser.MULTIPLY || _la === CanonParser.DIVIDE) {
 				{
 				{
-				this.state = 321;
+				this.state = 326;
 				_la = this._input.LA(1);
 				if (!(_la === CanonParser.MULTIPLY || _la === CanonParser.DIVIDE)) {
 				this._errHandler.recoverInline(this);
@@ -1518,11 +1538,11 @@ export class CanonParser extends Parser {
 					this._errHandler.reportMatch(this);
 					this.consume();
 				}
-				this.state = 322;
+				this.state = 327;
 				this.primaryExpression();
 				}
 				}
-				this.state = 327;
+				this.state = 332;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -1547,13 +1567,13 @@ export class CanonParser extends Parser {
 		let _localctx: PrimaryExpressionContext = new PrimaryExpressionContext(this._ctx, this.state);
 		this.enterRule(_localctx, 54, CanonParser.RULE_primaryExpression);
 		try {
-			this.state = 340;
+			this.state = 345;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 36, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 37, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 328;
+				this.state = 333;
 				this.literal();
 				}
 				break;
@@ -1561,7 +1581,7 @@ export class CanonParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 329;
+				this.state = 334;
 				this.stringInterpolation();
 				}
 				break;
@@ -1569,11 +1589,11 @@ export class CanonParser extends Parser {
 			case 3:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 330;
+				this.state = 335;
 				this.match(CanonParser.IDENTIFIER);
-				this.state = 331;
+				this.state = 336;
 				this.match(CanonParser.LPAREN);
-				this.state = 332;
+				this.state = 337;
 				this.match(CanonParser.RPAREN);
 				}
 				break;
@@ -1581,7 +1601,7 @@ export class CanonParser extends Parser {
 			case 4:
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 333;
+				this.state = 338;
 				this.functionCall();
 				}
 				break;
@@ -1589,7 +1609,7 @@ export class CanonParser extends Parser {
 			case 5:
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 334;
+				this.state = 339;
 				this.memberAccess();
 				}
 				break;
@@ -1597,7 +1617,7 @@ export class CanonParser extends Parser {
 			case 6:
 				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 335;
+				this.state = 340;
 				this.match(CanonParser.IDENTIFIER);
 				}
 				break;
@@ -1605,11 +1625,11 @@ export class CanonParser extends Parser {
 			case 7:
 				this.enterOuterAlt(_localctx, 7);
 				{
-				this.state = 336;
+				this.state = 341;
 				this.match(CanonParser.LPAREN);
-				this.state = 337;
+				this.state = 342;
 				this.expression();
-				this.state = 338;
+				this.state = 343;
 				this.match(CanonParser.RPAREN);
 				}
 				break;
@@ -1635,38 +1655,38 @@ export class CanonParser extends Parser {
 		this.enterRule(_localctx, 56, CanonParser.RULE_functionCall);
 		let _la: number;
 		try {
-			this.state = 366;
+			this.state = 371;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 41, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 42, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 342;
+				this.state = 347;
 				this.match(CanonParser.IDENTIFIER);
-				this.state = 343;
+				this.state = 348;
 				this.match(CanonParser.LPAREN);
-				this.state = 345;
+				this.state = 350;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CanonParser.THIS || ((((_la - 34)) & ~0x1F) === 0 && ((1 << (_la - 34)) & ((1 << (CanonParser.LPAREN - 34)) | (1 << (CanonParser.BACKTICK - 34)) | (1 << (CanonParser.STRING_LITERAL - 34)) | (1 << (CanonParser.INTEGER_LITERAL - 34)) | (1 << (CanonParser.IDENTIFIER - 34)))) !== 0)) {
 					{
-					this.state = 344;
+					this.state = 349;
 					this.argumentList();
 					}
 				}
 
-				this.state = 347;
-				this.match(CanonParser.RPAREN);
 				this.state = 352;
+				this.match(CanonParser.RPAREN);
+				this.state = 357;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CanonParser.LBRACE) {
 					{
-					this.state = 348;
+					this.state = 353;
 					this.match(CanonParser.LBRACE);
-					this.state = 349;
+					this.state = 354;
 					this.constructionBody();
-					this.state = 350;
+					this.state = 355;
 					this.match(CanonParser.RBRACE);
 					}
 				}
@@ -1677,32 +1697,32 @@ export class CanonParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 354;
+				this.state = 359;
 				this.memberAccess();
-				this.state = 355;
+				this.state = 360;
 				this.match(CanonParser.LPAREN);
-				this.state = 357;
+				this.state = 362;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CanonParser.THIS || ((((_la - 34)) & ~0x1F) === 0 && ((1 << (_la - 34)) & ((1 << (CanonParser.LPAREN - 34)) | (1 << (CanonParser.BACKTICK - 34)) | (1 << (CanonParser.STRING_LITERAL - 34)) | (1 << (CanonParser.INTEGER_LITERAL - 34)) | (1 << (CanonParser.IDENTIFIER - 34)))) !== 0)) {
 					{
-					this.state = 356;
+					this.state = 361;
 					this.argumentList();
 					}
 				}
 
-				this.state = 359;
-				this.match(CanonParser.RPAREN);
 				this.state = 364;
+				this.match(CanonParser.RPAREN);
+				this.state = 369;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CanonParser.LBRACE) {
 					{
-					this.state = 360;
+					this.state = 365;
 					this.match(CanonParser.LBRACE);
-					this.state = 361;
+					this.state = 366;
 					this.constructionBody();
-					this.state = 362;
+					this.state = 367;
 					this.match(CanonParser.RBRACE);
 					}
 				}
@@ -1733,21 +1753,21 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 368;
-			this.expression();
 			this.state = 373;
+			this.expression();
+			this.state = 378;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === CanonParser.COMMA) {
 				{
 				{
-				this.state = 369;
+				this.state = 374;
 				this.match(CanonParser.COMMA);
-				this.state = 370;
+				this.state = 375;
 				this.expression();
 				}
 				}
-				this.state = 375;
+				this.state = 380;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -1772,18 +1792,18 @@ export class CanonParser extends Parser {
 		let _localctx: MemberAccessContext = new MemberAccessContext(this._ctx, this.state);
 		this.enterRule(_localctx, 60, CanonParser.RULE_memberAccess);
 		try {
-			this.state = 382;
+			this.state = 387;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case CanonParser.THIS:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				{
-				this.state = 376;
+				this.state = 381;
 				this.match(CanonParser.THIS);
-				this.state = 377;
+				this.state = 382;
 				this.match(CanonParser.DOT);
-				this.state = 378;
+				this.state = 383;
 				this.match(CanonParser.IDENTIFIER);
 				}
 				}
@@ -1792,11 +1812,11 @@ export class CanonParser extends Parser {
 				this.enterOuterAlt(_localctx, 2);
 				{
 				{
-				this.state = 379;
+				this.state = 384;
 				this.match(CanonParser.IDENTIFIER);
-				this.state = 380;
+				this.state = 385;
 				this.match(CanonParser.DOT);
-				this.state = 381;
+				this.state = 386;
 				this.match(CanonParser.IDENTIFIER);
 				}
 				}
@@ -1826,11 +1846,11 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 384;
+			this.state = 389;
 			this.match(CanonParser.BACKTICK);
-			this.state = 385;
+			this.state = 390;
 			this.stringContent();
-			this.state = 386;
+			this.state = 391;
 			this.match(CanonParser.BACKTICK);
 			}
 		}
@@ -1856,29 +1876,29 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 393;
+			this.state = 398;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (((((_la - 15)) & ~0x1F) === 0 && ((1 << (_la - 15)) & ((1 << (CanonParser.INTERPOLATION_START - 15)) | (1 << (CanonParser.DOT - 15)) | (1 << (CanonParser.IDENTIFIER - 15)))) !== 0)) {
 				{
-				this.state = 391;
+				this.state = 396;
 				this._errHandler.sync(this);
 				switch (this._input.LA(1)) {
 				case CanonParser.INTERPOLATION_START:
 					{
-					this.state = 388;
+					this.state = 393;
 					this.interpolationExpression();
 					}
 					break;
 				case CanonParser.DOT:
 					{
-					this.state = 389;
+					this.state = 394;
 					this.match(CanonParser.DOT);
 					}
 					break;
 				case CanonParser.IDENTIFIER:
 					{
-					this.state = 390;
+					this.state = 395;
 					this.match(CanonParser.IDENTIFIER);
 					}
 					break;
@@ -1886,7 +1906,7 @@ export class CanonParser extends Parser {
 					throw new NoViableAltException(this);
 				}
 				}
-				this.state = 395;
+				this.state = 400;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -1913,11 +1933,11 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 396;
+			this.state = 401;
 			this.match(CanonParser.INTERPOLATION_START);
-			this.state = 397;
+			this.state = 402;
 			this.expression();
-			this.state = 398;
+			this.state = 403;
 			this.match(CanonParser.RBRACE);
 			}
 		}
@@ -1943,7 +1963,7 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 400;
+			this.state = 405;
 			_la = this._input.LA(1);
 			if (!(_la === CanonParser.STRING_LITERAL || _la === CanonParser.INTEGER_LITERAL)) {
 			this._errHandler.recoverInline(this);
@@ -1979,34 +1999,34 @@ export class CanonParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 402;
+			this.state = 407;
 			this.match(CanonParser.AT);
-			this.state = 403;
+			this.state = 408;
 			this.match(CanonParser.IDENTIFIER);
-			this.state = 410;
+			this.state = 415;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case CanonParser.STRING_LITERAL:
 				{
-				this.state = 404;
+				this.state = 409;
 				this.match(CanonParser.STRING_LITERAL);
 				}
 				break;
 			case CanonParser.LPAREN:
 				{
-				this.state = 405;
+				this.state = 410;
 				this.match(CanonParser.LPAREN);
-				this.state = 407;
+				this.state = 412;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CanonParser.THIS || ((((_la - 34)) & ~0x1F) === 0 && ((1 << (_la - 34)) & ((1 << (CanonParser.LPAREN - 34)) | (1 << (CanonParser.BACKTICK - 34)) | (1 << (CanonParser.STRING_LITERAL - 34)) | (1 << (CanonParser.INTEGER_LITERAL - 34)) | (1 << (CanonParser.IDENTIFIER - 34)))) !== 0)) {
 					{
-					this.state = 406;
+					this.state = 411;
 					this.argumentList();
 					}
 				}
 
-				this.state = 409;
+				this.state = 414;
 				this.match(CanonParser.RPAREN);
 				}
 				break;
@@ -2036,7 +2056,7 @@ export class CanonParser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03/\u019F\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03/\u01A4\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07" +
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04" +
 		"\x0E\t\x0E\x04\x0F\t\x0F\x04\x10\t\x10\x04\x11\t\x11\x04\x12\t\x12\x04" +
@@ -2048,192 +2068,195 @@ export class CanonParser extends Parser {
 		"\x03\x03\x03\x04\x03\x04\x03\x04\x07\x04_\n\x04\f\x04\x0E\x04b\v\x04\x03" +
 		"\x04\x03\x04\x03\x05\x07\x05g\n\x05\f\x05\x0E\x05j\v\x05\x03\x05\x03\x05" +
 		"\x05\x05n\n\x05\x03\x05\x03\x05\x03\x05\x03\x06\x03\x06\x03\x06\x03\x06" +
-		"\x07\x06w\n\x06\f\x06\x0E\x06z\v\x06\x03\x06\x03\x06\x03\x07\x03\x07\x03" +
-		"\x07\x05\x07\x81\n\x07\x03\b\x03\b\x03\b\x03\t\x07\t\x87\n\t\f\t\x0E\t" +
-		"\x8A\v\t\x03\t\x03\t\x05\t\x8E\n\t\x03\t\x03\t\x03\t\x03\n\x07\n\x94\n" +
-		"\n\f\n\x0E\n\x97\v\n\x03\n\x03\n\x03\n\x05\n\x9C\n\n\x03\n\x03\n\x03\n" +
-		"\x05\n\xA1\n\n\x03\n\x03\n\x03\v\x07\v\xA6\n\v\f\v\x0E\v\xA9\v\v\x03\v" +
-		"\x03\v\x03\v\x03\v\x05\v\xAF\n\v\x03\v\x03\v\x03\v\x05\v\xB4\n\v\x03\v" +
-		"\x03\v\x07\v\xB8\n\v\f\v\x0E\v\xBB\v\v\x03\v\x03\v\x03\v\x03\v\x03\v\x05" +
-		"\v\xC2\n\v\x03\v\x03\v\x03\v\x05\v\xC7\n\v\x03\v\x05\v\xCA\n\v\x05\v\xCC" +
-		"\n\v\x03\f\x03\f\x07\f\xD0\n\f\f\f\x0E\f\xD3\v\f\x03\f\x03\f\x03\r\x03" +
-		"\r\x03\r\x07\r\xDA\n\r\f\r\x0E\r\xDD\v\r\x03\x0E\x03\x0E\x03\x0E\x03\x0E" +
-		"\x03\x0F\x03\x0F\x03\x10\x03\x10\x03\x10\x03\x10\x03\x10\x03\x10\x05\x10" +
-		"\xEB\n\x10\x03\x11\x03\x11\x03\x11\x03\x11\x03\x11\x03\x12\x03\x12\x03" +
-		"\x12\x03\x12\x03\x12\x03\x12\x03\x12\x05\x12\xF9\n\x12\x03\x12\x03\x12" +
-		"\x03\x12\x03\x13\x03\x13\x03\x14\x03\x14\x05\x14\u0102\n\x14\x03\x15\x03" +
-		"\x15\x03\x15\x03\x15\x03\x15\x03\x15\x03\x15\x03\x15\x07\x15\u010C\n\x15" +
-		"\f\x15\x0E\x15\u010F\v\x15\x03\x15\x03\x15\x03\x16\x03\x16\x03\x16\x05" +
-		"\x16\u0116\n\x16\x03\x16\x05\x16\u0119\n\x16\x03\x16\x03\x16\x03\x16\x03" +
-		"\x16\x05\x16\u011F\n\x16\x03\x17\x03\x17\x03\x17\x07\x17\u0124\n\x17\f" +
-		"\x17\x0E\x17\u0127\v\x17\x03\x18\x03\x18\x03\x19\x03\x19\x03\x19\x07\x19" +
-		"\u012E\n\x19\f\x19\x0E\x19\u0131\v\x19\x03\x1A\x03\x1A\x03\x1A\x07\x1A" +
-		"\u0136\n\x1A\f\x1A\x0E\x1A\u0139\v\x1A\x03\x1B\x03\x1B\x03\x1B\x07\x1B" +
-		"\u013E\n\x1B\f\x1B\x0E\x1B\u0141\v\x1B\x03\x1C\x03\x1C\x03\x1C\x07\x1C" +
-		"\u0146\n\x1C\f\x1C\x0E\x1C\u0149\v\x1C\x03\x1D\x03\x1D\x03\x1D\x03\x1D" +
-		"\x03\x1D\x03\x1D\x03\x1D\x03\x1D\x03\x1D\x03\x1D\x03\x1D\x03\x1D\x05\x1D" +
-		"\u0157\n\x1D\x03\x1E\x03\x1E\x03\x1E\x05\x1E\u015C\n\x1E\x03\x1E\x03\x1E" +
-		"\x03\x1E\x03\x1E\x03\x1E\x05\x1E\u0163\n\x1E\x03\x1E\x03\x1E\x03\x1E\x05" +
-		"\x1E\u0168\n\x1E\x03\x1E\x03\x1E\x03\x1E\x03\x1E\x03\x1E\x05\x1E\u016F" +
-		"\n\x1E\x05\x1E\u0171\n\x1E\x03\x1F\x03\x1F\x03\x1F\x07\x1F\u0176\n\x1F" +
-		"\f\x1F\x0E\x1F\u0179\v\x1F\x03 \x03 \x03 \x03 \x03 \x03 \x05 \u0181\n" +
-		" \x03!\x03!\x03!\x03!\x03\"\x03\"\x03\"\x07\"\u018A\n\"\f\"\x0E\"\u018D" +
-		"\v\"\x03#\x03#\x03#\x03#\x03$\x03$\x03%\x03%\x03%\x03%\x03%\x05%\u019A" +
-		"\n%\x03%\x05%\u019D\n%\x03%\x02\x02\x02&\x02\x02\x04\x02\x06\x02\b\x02" +
-		"\n\x02\f\x02\x0E\x02\x10\x02\x12\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x1C" +
-		"\x02\x1E\x02 \x02\"\x02$\x02&\x02(\x02*\x02,\x02.\x020\x022\x024\x026" +
-		"\x028\x02:\x02<\x02>\x02@\x02B\x02D\x02F\x02H\x02\x02\t\x05\x02\x12\x12" +
-		"\x14\x14\"\"\x04\x02\x0E\x0F--\x03\x02\b\t\x03\x02\x16\x1B\x03\x02\x12" +
-		"\x13\x03\x02\x14\x15\x03\x02+,\x02\u01B9\x02J\x03\x02\x02\x02\x04X\x03" +
-		"\x02\x02\x02\x06[\x03\x02\x02\x02\bh\x03\x02\x02\x02\nr\x03\x02\x02\x02" +
-		"\f\x80\x03\x02\x02\x02\x0E\x82\x03\x02\x02\x02\x10\x88\x03\x02\x02\x02" +
-		"\x12\x95\x03\x02\x02\x02\x14\xCB\x03\x02\x02\x02\x16\xCD\x03\x02\x02\x02" +
-		"\x18\xD6\x03\x02\x02\x02\x1A\xDE\x03\x02\x02\x02\x1C\xE2\x03\x02\x02\x02" +
-		"\x1E\xEA\x03\x02\x02\x02 \xEC\x03\x02\x02\x02\"\xF8\x03\x02\x02\x02$\xFD" +
-		"\x03\x02\x02\x02&\xFF\x03\x02\x02\x02(\u0103\x03\x02\x02\x02*\u0112\x03" +
-		"\x02\x02\x02,\u0125\x03\x02\x02\x02.\u0128\x03\x02\x02\x020\u012A\x03" +
-		"\x02\x02\x022\u0132\x03\x02\x02\x024\u013A\x03\x02\x02\x026\u0142\x03" +
-		"\x02\x02\x028\u0156\x03\x02\x02\x02:\u0170\x03\x02\x02\x02<\u0172\x03" +
-		"\x02\x02\x02>\u0180\x03\x02\x02\x02@\u0182\x03\x02\x02\x02B\u018B\x03" +
-		"\x02\x02\x02D\u018E\x03\x02\x02\x02F\u0192\x03\x02\x02\x02H\u0194\x03" +
-		"\x02\x02\x02JL\x05\x04\x03\x02KM\x05\x06\x04\x02LK\x03\x02\x02\x02LM\x03" +
-		"\x02\x02\x02MS\x03\x02\x02\x02NR\x05\n\x06\x02OR\x05\x14\v\x02PR\x05\x1E" +
-		"\x10\x02QN\x03\x02\x02\x02QO\x03\x02\x02\x02QP\x03\x02\x02\x02RU\x03\x02" +
-		"\x02\x02SQ\x03\x02\x02\x02ST\x03\x02\x02\x02TV\x03\x02\x02\x02US\x03\x02" +
-		"\x02\x02VW\x07\x02\x02\x03W\x03\x03\x02\x02\x02XY\x07\x10\x02\x02YZ\x07" +
-		"+\x02\x02Z\x05\x03\x02\x02\x02[\\\x07\x03\x02\x02\\`\x07&\x02\x02]_\x05" +
-		"\b\x05\x02^]\x03\x02\x02\x02_b\x03\x02\x02\x02`^\x03\x02\x02\x02`a\x03" +
-		"\x02\x02\x02ac\x03\x02\x02\x02b`\x03\x02\x02\x02cd\x07\'\x02\x02d\x07" +
-		"\x03\x02\x02\x02eg\x05H%\x02fe\x03\x02\x02\x02gj\x03\x02\x02\x02hf\x03" +
-		"\x02\x02\x02hi\x03\x02\x02\x02ik\x03\x02\x02\x02jh\x03\x02\x02\x02km\x07" +
-		"-\x02\x02ln\t\x02\x02\x02ml\x03\x02\x02\x02mn\x03\x02\x02\x02no\x03\x02" +
-		"\x02\x02op\x07!\x02\x02pq\x05\x1C\x0F\x02q\t\x03\x02\x02\x02rs\x07\x04" +
-		"\x02\x02st\x07-\x02\x02tx\x07&\x02\x02uw\x05\f\x07\x02vu\x03\x02\x02\x02" +
-		"wz\x03\x02\x02\x02xv\x03\x02\x02\x02xy\x03\x02\x02\x02y{\x03\x02\x02\x02" +
-		"zx\x03\x02\x02\x02{|\x07\'\x02\x02|\v\x03\x02\x02\x02}\x81\x05\x0E\b\x02" +
-		"~\x81\x05\x10\t\x02\x7F\x81\x05\x12\n\x02\x80}\x03\x02\x02\x02\x80~\x03" +
-		"\x02\x02\x02\x80\x7F\x03\x02\x02\x02\x81\r\x03\x02\x02\x02\x82\x83\x07" +
-		"\x05\x02\x02\x83\x84\x07-\x02\x02\x84\x0F\x03\x02\x02\x02\x85\x87\x05" +
-		"H%\x02\x86\x85\x03\x02\x02\x02\x87\x8A\x03\x02\x02\x02\x88\x86\x03\x02" +
-		"\x02\x02\x88\x89\x03\x02\x02\x02\x89\x8B\x03\x02\x02\x02\x8A\x88\x03\x02" +
-		"\x02\x02\x8B\x8D\x07-\x02\x02\x8C\x8E\x07\"\x02\x02\x8D\x8C\x03\x02\x02" +
-		"\x02\x8D\x8E\x03\x02\x02\x02\x8E\x8F\x03\x02\x02\x02\x8F\x90\x07!\x02" +
-		"\x02\x90\x91\x05\x1C\x0F\x02\x91\x11\x03\x02\x02\x02\x92\x94\x05H%\x02" +
-		"\x93\x92\x03\x02\x02\x02\x94\x97\x03\x02\x02\x02\x95\x93\x03\x02\x02\x02" +
-		"\x95\x96\x03\x02\x02\x02\x96\x98\x03\x02\x02\x02\x97\x95\x03\x02\x02\x02" +
-		"\x98\x99\x07-\x02\x02\x99\x9B\x07$\x02\x02\x9A\x9C\x05\x18\r\x02\x9B\x9A" +
-		"\x03\x02\x02\x02\x9B\x9C\x03\x02\x02\x02\x9C\x9D\x03\x02\x02\x02\x9D\xA0" +
-		"\x07%\x02\x02\x9E\x9F\x07!\x02\x02\x9F\xA1\x05\x1C\x0F\x02\xA0\x9E\x03" +
-		"\x02\x02\x02\xA0\xA1\x03\x02\x02\x02\xA1\xA2\x03\x02\x02\x02\xA2\xA3\x05" +
-		"\x16\f\x02\xA3\x13\x03\x02\x02\x02\xA4\xA6\x05H%\x02\xA5\xA4\x03\x02\x02" +
-		"\x02\xA6\xA9\x03\x02\x02\x02\xA7\xA5\x03\x02\x02\x02\xA7\xA8\x03\x02\x02" +
-		"\x02\xA8\xAA\x03\x02\x02\x02\xA9\xA7\x03\x02\x02\x02\xAA\xAB\x07\x06\x02" +
-		"\x02\xAB\xAC\x07-\x02\x02\xAC\xAE\x07$\x02\x02\xAD\xAF\x05\x18\r\x02\xAE" +
-		"\xAD\x03\x02\x02\x02\xAE\xAF\x03\x02\x02\x02\xAF\xB0\x03\x02\x02\x02\xB0" +
-		"\xB3\x07%\x02\x02\xB1\xB2\x07!\x02\x02\xB2\xB4\x05\x1C\x0F\x02\xB3\xB1" +
-		"\x03\x02\x02\x02\xB3\xB4\x03\x02\x02\x02\xB4\xB5\x03\x02\x02\x02\xB5\xCC" +
-		"\x05\x16\f\x02\xB6\xB8\x05H%\x02\xB7\xB6\x03\x02\x02\x02\xB8\xBB\x03\x02" +
-		"\x02\x02\xB9\xB7\x03\x02\x02\x02\xB9\xBA\x03\x02\x02\x02\xBA\xBC\x03\x02" +
-		"\x02\x02\xBB\xB9\x03\x02\x02\x02\xBC\xBD\x07\x07\x02\x02\xBD\xBE\x07\x06" +
-		"\x02\x02\xBE\xBF\x07-\x02\x02\xBF\xC1\x07$\x02\x02\xC0\xC2\x05\x18\r\x02" +
-		"\xC1\xC0\x03\x02\x02\x02\xC1\xC2\x03\x02\x02\x02\xC2\xC3\x03\x02\x02\x02" +
-		"\xC3\xC6\x07%\x02\x02\xC4\xC5\x07!\x02\x02\xC5\xC7\x05\x1C\x0F\x02\xC6" +
-		"\xC4\x03\x02\x02\x02\xC6\xC7\x03\x02\x02\x02\xC7\xC9\x03\x02\x02\x02\xC8" +
-		"\xCA\x07\x1F\x02\x02\xC9\xC8\x03\x02\x02\x02\xC9\xCA\x03\x02\x02\x02\xCA" +
-		"\xCC\x03\x02\x02\x02\xCB\xA7\x03\x02\x02\x02\xCB\xB9\x03\x02\x02\x02\xCC" +
-		"\x15\x03\x02\x02\x02\xCD\xD1\x07&\x02\x02\xCE\xD0\x05\x1E\x10\x02\xCF" +
-		"\xCE\x03\x02\x02\x02\xD0\xD3\x03\x02\x02\x02\xD1\xCF\x03\x02\x02\x02\xD1" +
-		"\xD2\x03\x02\x02\x02\xD2\xD4\x03\x02\x02\x02\xD3\xD1\x03\x02\x02\x02\xD4" +
-		"\xD5\x07\'\x02\x02\xD5\x17\x03\x02\x02\x02\xD6\xDB\x05\x1A\x0E\x02\xD7" +
-		"\xD8\x07 \x02\x02\xD8\xDA\x05\x1A\x0E\x02\xD9\xD7\x03\x02\x02\x02\xDA" +
-		"\xDD\x03\x02\x02\x02\xDB\xD9\x03\x02\x02\x02\xDB\xDC\x03\x02\x02\x02\xDC" +
-		"\x19\x03\x02\x02\x02\xDD\xDB\x03\x02\x02\x02\xDE\xDF\x07-\x02\x02\xDF" +
-		"\xE0\x07!\x02\x02\xE0\xE1\x05\x1C\x0F\x02\xE1\x1B\x03\x02\x02\x02\xE2" +
-		"\xE3\t\x03\x02\x02\xE3\x1D\x03\x02\x02\x02\xE4\xEB\x05 \x11\x02\xE5\xEB" +
-		"\x05\"\x12\x02\xE6\xEB\x05$\x13\x02\xE7\xEB\x05&\x14\x02\xE8\xEB\x05(" +
-		"\x15\x02\xE9\xEB\x05*\x16\x02\xEA\xE4\x03\x02\x02\x02\xEA\xE5\x03\x02" +
-		"\x02\x02\xEA\xE6\x03\x02\x02\x02\xEA\xE7\x03\x02\x02\x02\xEA\xE8\x03\x02" +
-		"\x02\x02\xEA\xE9\x03\x02\x02\x02\xEB\x1F\x03\x02\x02\x02\xEC\xED\t\x04" +
-		"\x02\x02\xED\xEE\x07-\x02\x02\xEE\xEF\x07\x1C\x02\x02\xEF\xF0\x05.\x18" +
-		"\x02\xF0!\x03\x02\x02\x02\xF1\xF9\x07-\x02\x02\xF2\xF3\x07\r\x02\x02\xF3" +
-		"\xF4\x07\x1E\x02\x02\xF4\xF9\x07-\x02\x02\xF5\xF6\x07-\x02\x02\xF6\xF7" +
-		"\x07\x1E\x02\x02\xF7\xF9\x07-\x02\x02\xF8\xF1\x03\x02\x02\x02\xF8\xF2" +
-		"\x03\x02\x02\x02\xF8\xF5\x03\x02\x02\x02\xF9\xFA\x03\x02\x02\x02\xFA\xFB" +
-		"\x07\x1C\x02\x02\xFB\xFC\x05.\x18\x02\xFC#\x03\x02\x02\x02\xFD\xFE\x05" +
-		".\x18\x02\xFE%\x03\x02\x02\x02\xFF\u0101\x07\n\x02\x02\u0100\u0102\x05" +
-		".\x18\x02\u0101\u0100\x03\x02\x02\x02\u0101\u0102\x03\x02\x02\x02\u0102" +
-		"\'\x03\x02\x02\x02\u0103\u0104\x07\v\x02\x02\u0104\u0105\x07$\x02\x02" +
-		"\u0105\u0106\x07-\x02\x02\u0106\u0107\x07\f\x02\x02\u0107\u0108\x05.\x18" +
-		"\x02\u0108\u0109\x07%\x02\x02\u0109\u010D\x07&\x02\x02\u010A\u010C\x05" +
-		"\x1E\x10\x02\u010B\u010A\x03\x02\x02\x02\u010C\u010F\x03\x02\x02\x02\u010D" +
-		"\u010B\x03\x02\x02\x02\u010D\u010E\x03\x02\x02\x02\u010E\u0110\x03\x02" +
-		"\x02\x02\u010F\u010D\x03\x02\x02\x02\u0110\u0111\x07\'\x02\x02\u0111)" +
-		"\x03\x02\x02\x02\u0112\u0118\x07-\x02\x02\u0113\u0115\x07$\x02\x02\u0114" +
-		"\u0116\x05<\x1F\x02\u0115\u0114\x03\x02\x02\x02\u0115\u0116\x03\x02\x02" +
-		"\x02\u0116\u0117\x03\x02\x02\x02\u0117\u0119\x07%\x02\x02\u0118\u0113" +
-		"\x03\x02\x02\x02\u0118\u0119\x03\x02\x02\x02\u0119\u011E\x03\x02\x02\x02" +
-		"\u011A\u011B\x07&\x02\x02\u011B\u011C\x05,\x17\x02\u011C\u011D\x07\'\x02" +
-		"\x02\u011D\u011F\x03\x02\x02\x02\u011E\u011A\x03\x02\x02\x02\u011E\u011F" +
-		"\x03\x02\x02\x02\u011F+\x03\x02\x02\x02\u0120\u0124\x05\"\x12\x02\u0121" +
-		"\u0124\x05 \x11\x02\u0122\u0124\x05(\x15\x02\u0123\u0120\x03\x02\x02\x02" +
-		"\u0123\u0121\x03\x02\x02\x02\u0123\u0122\x03\x02\x02\x02\u0124\u0127\x03" +
-		"\x02\x02\x02\u0125\u0123\x03\x02\x02\x02\u0125\u0126\x03\x02\x02\x02\u0126" +
-		"-\x03\x02\x02\x02\u0127\u0125\x03\x02\x02\x02\u0128\u0129\x050\x19\x02" +
-		"\u0129/\x03\x02\x02\x02\u012A\u012F\x052\x1A\x02\u012B\u012C\x07\x1D\x02" +
-		"\x02\u012C\u012E\x052\x1A\x02\u012D\u012B\x03\x02\x02\x02\u012E\u0131" +
-		"\x03\x02\x02\x02\u012F\u012D\x03\x02\x02\x02\u012F\u0130\x03\x02\x02\x02" +
-		"\u01301\x03\x02\x02\x02\u0131\u012F\x03\x02\x02\x02\u0132\u0137\x054\x1B" +
-		"\x02\u0133\u0134\t\x05\x02\x02\u0134\u0136\x054\x1B\x02\u0135\u0133\x03" +
-		"\x02\x02\x02\u0136\u0139\x03\x02\x02\x02\u0137\u0135\x03\x02\x02\x02\u0137" +
-		"\u0138\x03\x02\x02\x02\u01383\x03\x02\x02\x02\u0139\u0137\x03\x02\x02" +
-		"\x02\u013A\u013F\x056\x1C\x02\u013B\u013C\t\x06\x02\x02\u013C\u013E\x05" +
-		"6\x1C\x02\u013D\u013B\x03\x02\x02\x02\u013E\u0141\x03\x02\x02\x02\u013F" +
-		"\u013D\x03\x02\x02\x02\u013F\u0140\x03\x02\x02\x02\u01405\x03\x02\x02" +
-		"\x02\u0141\u013F\x03\x02\x02\x02\u0142\u0147\x058\x1D\x02\u0143\u0144" +
-		"\t\x07\x02\x02\u0144\u0146\x058\x1D\x02\u0145\u0143\x03\x02\x02\x02\u0146" +
-		"\u0149\x03\x02\x02\x02\u0147\u0145\x03\x02\x02\x02\u0147\u0148\x03\x02" +
-		"\x02\x02\u01487\x03\x02\x02\x02\u0149\u0147\x03\x02\x02\x02\u014A\u0157" +
-		"\x05F$\x02\u014B\u0157\x05@!\x02\u014C\u014D\x07-\x02\x02\u014D\u014E" +
-		"\x07$\x02\x02\u014E\u0157\x07%\x02\x02\u014F\u0157\x05:\x1E\x02\u0150" +
-		"\u0157\x05> \x02\u0151\u0157\x07-\x02\x02\u0152\u0153\x07$\x02\x02\u0153" +
-		"\u0154\x05.\x18\x02\u0154\u0155\x07%\x02\x02\u0155\u0157\x03\x02\x02\x02" +
-		"\u0156\u014A\x03\x02\x02\x02\u0156\u014B\x03\x02\x02\x02\u0156\u014C\x03" +
-		"\x02\x02\x02\u0156\u014F\x03\x02\x02\x02\u0156\u0150\x03\x02\x02\x02\u0156" +
-		"\u0151\x03\x02\x02\x02\u0156\u0152\x03\x02\x02\x02\u01579\x03\x02\x02" +
-		"\x02\u0158\u0159\x07-\x02\x02\u0159\u015B\x07$\x02\x02\u015A\u015C\x05" +
-		"<\x1F\x02\u015B\u015A\x03\x02\x02\x02\u015B\u015C\x03\x02\x02\x02\u015C" +
-		"\u015D\x03\x02\x02\x02\u015D\u0162\x07%\x02\x02\u015E\u015F\x07&\x02\x02" +
-		"\u015F\u0160\x05,\x17\x02\u0160\u0161\x07\'\x02\x02\u0161\u0163\x03\x02" +
-		"\x02\x02\u0162\u015E\x03\x02\x02\x02\u0162\u0163\x03\x02\x02\x02\u0163" +
-		"\u0171\x03\x02\x02\x02\u0164\u0165\x05> \x02\u0165\u0167\x07$\x02\x02" +
-		"\u0166\u0168\x05<\x1F\x02\u0167\u0166\x03\x02\x02\x02\u0167\u0168\x03" +
-		"\x02\x02\x02\u0168\u0169\x03\x02\x02\x02\u0169\u016E\x07%\x02\x02\u016A" +
-		"\u016B\x07&\x02\x02\u016B\u016C\x05,\x17\x02\u016C\u016D\x07\'\x02\x02" +
-		"\u016D\u016F\x03\x02\x02\x02\u016E\u016A\x03\x02\x02\x02\u016E\u016F\x03" +
-		"\x02\x02\x02\u016F\u0171\x03\x02\x02\x02\u0170\u0158\x03\x02\x02\x02\u0170" +
-		"\u0164\x03\x02\x02\x02\u0171;\x03\x02\x02\x02\u0172\u0177\x05.\x18\x02" +
-		"\u0173\u0174\x07 \x02\x02\u0174\u0176\x05.\x18\x02\u0175\u0173\x03\x02" +
-		"\x02\x02\u0176\u0179\x03\x02\x02\x02\u0177\u0175\x03\x02\x02\x02\u0177" +
-		"\u0178\x03\x02\x02\x02\u0178=\x03\x02\x02\x02\u0179\u0177\x03\x02\x02" +
-		"\x02\u017A\u017B\x07\r\x02\x02\u017B\u017C\x07\x1E\x02\x02\u017C\u0181" +
-		"\x07-\x02\x02\u017D\u017E\x07-\x02\x02\u017E\u017F\x07\x1E\x02\x02\u017F" +
-		"\u0181\x07-\x02\x02\u0180\u017A\x03\x02\x02\x02\u0180\u017D\x03\x02\x02" +
-		"\x02\u0181?\x03\x02\x02\x02\u0182\u0183\x07*\x02\x02\u0183\u0184\x05B" +
-		"\"\x02\u0184\u0185\x07*\x02\x02\u0185A\x03\x02\x02\x02\u0186\u018A\x05" +
-		"D#\x02\u0187\u018A\x07\x1E\x02\x02\u0188\u018A\x07-\x02\x02\u0189\u0186" +
-		"\x03\x02\x02\x02\u0189\u0187\x03\x02\x02\x02\u0189\u0188\x03\x02\x02\x02" +
-		"\u018A\u018D\x03\x02\x02\x02\u018B\u0189\x03\x02\x02\x02\u018B\u018C\x03" +
-		"\x02\x02\x02\u018CC\x03\x02\x02\x02\u018D\u018B\x03\x02\x02\x02\u018E" +
-		"\u018F\x07\x11\x02\x02\u018F\u0190\x05.\x18\x02\u0190\u0191\x07\'\x02" +
-		"\x02\u0191E\x03\x02\x02\x02\u0192\u0193\t\b\x02\x02\u0193G\x03\x02\x02" +
-		"\x02\u0194\u0195\x07#\x02\x02\u0195\u019C\x07-\x02\x02\u0196\u019D\x07" +
-		"+\x02\x02\u0197\u0199\x07$\x02\x02\u0198\u019A\x05<\x1F\x02\u0199\u0198" +
-		"\x03\x02\x02\x02\u0199\u019A\x03\x02\x02\x02\u019A\u019B\x03\x02\x02\x02" +
-		"\u019B\u019D\x07%\x02\x02\u019C\u0196\x03\x02\x02\x02\u019C\u0197\x03" +
-		"\x02\x02\x02\u019C\u019D\x03\x02\x02\x02\u019DI\x03\x02\x02\x022LQS`h" +
-		"mx\x80\x88\x8D\x95\x9B\xA0\xA7\xAE\xB3\xB9\xC1\xC6\xC9\xCB\xD1\xDB\xEA" +
-		"\xF8\u0101\u010D\u0115\u0118\u011E\u0123\u0125\u012F\u0137\u013F\u0147" +
-		"\u0156\u015B\u0162\u0167\u016E\u0170\u0177\u0180\u0189\u018B\u0199\u019C";
+		"\x07\x06w\n\x06\f\x06\x0E\x06z\v\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03" +
+		"\x06\x05\x06\x81\n\x06\x03\x07\x03\x07\x03\x07\x05\x07\x86\n\x07\x03\b" +
+		"\x03\b\x03\b\x03\t\x07\t\x8C\n\t\f\t\x0E\t\x8F\v\t\x03\t\x03\t\x05\t\x93" +
+		"\n\t\x03\t\x03\t\x03\t\x03\n\x07\n\x99\n\n\f\n\x0E\n\x9C\v\n\x03\n\x03" +
+		"\n\x03\n\x05\n\xA1\n\n\x03\n\x03\n\x03\n\x05\n\xA6\n\n\x03\n\x03\n\x03" +
+		"\v\x07\v\xAB\n\v\f\v\x0E\v\xAE\v\v\x03\v\x03\v\x03\v\x03\v\x05\v\xB4\n" +
+		"\v\x03\v\x03\v\x03\v\x05\v\xB9\n\v\x03\v\x03\v\x07\v\xBD\n\v\f\v\x0E\v" +
+		"\xC0\v\v\x03\v\x03\v\x03\v\x03\v\x03\v\x05\v\xC7\n\v\x03\v\x03\v\x03\v" +
+		"\x05\v\xCC\n\v\x03\v\x05\v\xCF\n\v\x05\v\xD1\n\v\x03\f\x03\f\x07\f\xD5" +
+		"\n\f\f\f\x0E\f\xD8\v\f\x03\f\x03\f\x03\r\x03\r\x03\r\x07\r\xDF\n\r\f\r" +
+		"\x0E\r\xE2\v\r\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0F\x03\x0F\x03\x10" +
+		"\x03\x10\x03\x10\x03\x10\x03\x10\x03\x10\x05\x10\xF0\n\x10\x03\x11\x03" +
+		"\x11\x03\x11\x03\x11\x03\x11\x03\x12\x03\x12\x03\x12\x03\x12\x03\x12\x03" +
+		"\x12\x03\x12\x05\x12\xFE\n\x12\x03\x12\x03\x12\x03\x12\x03\x13\x03\x13" +
+		"\x03\x14\x03\x14\x05\x14\u0107\n\x14\x03\x15\x03\x15\x03\x15\x03\x15\x03" +
+		"\x15\x03\x15\x03\x15\x03\x15\x07\x15\u0111\n\x15\f\x15\x0E\x15\u0114\v" +
+		"\x15\x03\x15\x03\x15\x03\x16\x03\x16\x03\x16\x05\x16\u011B\n\x16\x03\x16" +
+		"\x05\x16\u011E\n\x16\x03\x16\x03\x16\x03\x16\x03\x16\x05\x16\u0124\n\x16" +
+		"\x03\x17\x03\x17\x03\x17\x07\x17\u0129\n\x17\f\x17\x0E\x17\u012C\v\x17" +
+		"\x03\x18\x03\x18\x03\x19\x03\x19\x03\x19\x07\x19\u0133\n\x19\f\x19\x0E" +
+		"\x19\u0136\v\x19\x03\x1A\x03\x1A\x03\x1A\x07\x1A\u013B\n\x1A\f\x1A\x0E" +
+		"\x1A\u013E\v\x1A\x03\x1B\x03\x1B\x03\x1B\x07\x1B\u0143\n\x1B\f\x1B\x0E" +
+		"\x1B\u0146\v\x1B\x03\x1C\x03\x1C\x03\x1C\x07\x1C\u014B\n\x1C\f\x1C\x0E" +
+		"\x1C\u014E\v\x1C\x03\x1D\x03\x1D\x03\x1D\x03\x1D\x03\x1D\x03\x1D\x03\x1D" +
+		"\x03\x1D\x03\x1D\x03\x1D\x03\x1D\x03\x1D\x05\x1D\u015C\n\x1D\x03\x1E\x03" +
+		"\x1E\x03\x1E\x05\x1E\u0161\n\x1E\x03\x1E\x03\x1E\x03\x1E\x03\x1E\x03\x1E" +
+		"\x05\x1E\u0168\n\x1E\x03\x1E\x03\x1E\x03\x1E\x05\x1E\u016D\n\x1E\x03\x1E" +
+		"\x03\x1E\x03\x1E\x03\x1E\x03\x1E\x05\x1E\u0174\n\x1E\x05\x1E\u0176\n\x1E" +
+		"\x03\x1F\x03\x1F\x03\x1F\x07\x1F\u017B\n\x1F\f\x1F\x0E\x1F\u017E\v\x1F" +
+		"\x03 \x03 \x03 \x03 \x03 \x03 \x05 \u0186\n \x03!\x03!\x03!\x03!\x03\"" +
+		"\x03\"\x03\"\x07\"\u018F\n\"\f\"\x0E\"\u0192\v\"\x03#\x03#\x03#\x03#\x03" +
+		"$\x03$\x03%\x03%\x03%\x03%\x03%\x05%\u019F\n%\x03%\x05%\u01A2\n%\x03%" +
+		"\x02\x02\x02&\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02\x0E\x02\x10\x02" +
+		"\x12\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x1C\x02\x1E\x02 \x02\"\x02$\x02" +
+		"&\x02(\x02*\x02,\x02.\x020\x022\x024\x026\x028\x02:\x02<\x02>\x02@\x02" +
+		"B\x02D\x02F\x02H\x02\x02\t\x05\x02\x12\x12\x14\x14\"\"\x04\x02\x0E\x0F" +
+		"--\x03\x02\b\t\x03\x02\x16\x1B\x03\x02\x12\x13\x03\x02\x14\x15\x03\x02" +
+		"+,\x02\u01BF\x02J\x03\x02\x02\x02\x04X\x03\x02\x02\x02\x06[\x03\x02\x02" +
+		"\x02\bh\x03\x02\x02\x02\n\x80\x03\x02\x02\x02\f\x85\x03\x02\x02\x02\x0E" +
+		"\x87\x03\x02\x02\x02\x10\x8D\x03\x02\x02\x02\x12\x9A\x03\x02\x02\x02\x14" +
+		"\xD0\x03\x02\x02\x02\x16\xD2\x03\x02\x02\x02\x18\xDB\x03\x02\x02\x02\x1A" +
+		"\xE3\x03\x02\x02\x02\x1C\xE7\x03\x02\x02\x02\x1E\xEF\x03\x02\x02\x02 " +
+		"\xF1\x03\x02\x02\x02\"\xFD\x03\x02\x02\x02$\u0102\x03\x02\x02\x02&\u0104" +
+		"\x03\x02\x02\x02(\u0108\x03\x02\x02\x02*\u0117\x03\x02\x02\x02,\u012A" +
+		"\x03\x02\x02\x02.\u012D\x03\x02\x02\x020\u012F\x03\x02\x02\x022\u0137" +
+		"\x03\x02\x02\x024\u013F\x03\x02\x02\x026\u0147\x03\x02\x02\x028\u015B" +
+		"\x03\x02\x02\x02:\u0175\x03\x02\x02\x02<\u0177\x03\x02\x02\x02>\u0185" +
+		"\x03\x02\x02\x02@\u0187\x03\x02\x02\x02B\u0190\x03\x02\x02\x02D\u0193" +
+		"\x03\x02\x02\x02F\u0197\x03\x02\x02\x02H\u0199\x03\x02\x02\x02JL\x05\x04" +
+		"\x03\x02KM\x05\x06\x04\x02LK\x03\x02\x02\x02LM\x03\x02\x02\x02MS\x03\x02" +
+		"\x02\x02NR\x05\n\x06\x02OR\x05\x14\v\x02PR\x05\x1E\x10\x02QN\x03\x02\x02" +
+		"\x02QO\x03\x02\x02\x02QP\x03\x02\x02\x02RU\x03\x02\x02\x02SQ\x03\x02\x02" +
+		"\x02ST\x03\x02\x02\x02TV\x03\x02\x02\x02US\x03\x02\x02\x02VW\x07\x02\x02" +
+		"\x03W\x03\x03\x02\x02\x02XY\x07\x10\x02\x02YZ\x07+\x02\x02Z\x05\x03\x02" +
+		"\x02\x02[\\\x07\x03\x02\x02\\`\x07&\x02\x02]_\x05\b\x05\x02^]\x03\x02" +
+		"\x02\x02_b\x03\x02\x02\x02`^\x03\x02\x02\x02`a\x03\x02\x02\x02ac\x03\x02" +
+		"\x02\x02b`\x03\x02\x02\x02cd\x07\'\x02\x02d\x07\x03\x02\x02\x02eg\x05" +
+		"H%\x02fe\x03\x02\x02\x02gj\x03\x02\x02\x02hf\x03\x02\x02\x02hi\x03\x02" +
+		"\x02\x02ik\x03\x02\x02\x02jh\x03\x02\x02\x02km\x07-\x02\x02ln\t\x02\x02" +
+		"\x02ml\x03\x02\x02\x02mn\x03\x02\x02\x02no\x03\x02\x02\x02op\x07!\x02" +
+		"\x02pq\x05\x1C\x0F\x02q\t\x03\x02\x02\x02rs\x07\x04\x02\x02st\x07-\x02" +
+		"\x02tx\x07&\x02\x02uw\x05\f\x07\x02vu\x03\x02\x02\x02wz\x03\x02\x02\x02" +
+		"xv\x03\x02\x02\x02xy\x03\x02\x02\x02y{\x03\x02\x02\x02zx\x03\x02\x02\x02" +
+		"{\x81\x07\'\x02\x02|}\x07\x04\x02\x02}~\x07-\x02\x02~\x7F\x07\x1C\x02" +
+		"\x02\x7F\x81\x05\x1C\x0F\x02\x80r\x03\x02\x02\x02\x80|\x03\x02\x02\x02" +
+		"\x81\v\x03\x02\x02\x02\x82\x86\x05\x0E\b\x02\x83\x86\x05\x10\t\x02\x84" +
+		"\x86\x05\x12\n\x02\x85\x82\x03\x02\x02\x02\x85\x83\x03\x02\x02\x02\x85" +
+		"\x84\x03\x02\x02\x02\x86\r\x03\x02\x02\x02\x87\x88\x07\x05\x02\x02\x88" +
+		"\x89\x07-\x02\x02\x89\x0F\x03\x02\x02\x02\x8A\x8C\x05H%\x02\x8B\x8A\x03" +
+		"\x02\x02\x02\x8C\x8F\x03\x02\x02\x02\x8D\x8B\x03\x02\x02\x02\x8D\x8E\x03" +
+		"\x02\x02\x02\x8E\x90\x03\x02\x02\x02\x8F\x8D\x03\x02\x02\x02\x90\x92\x07" +
+		"-\x02\x02\x91\x93\x07\"\x02\x02\x92\x91\x03\x02\x02\x02\x92\x93\x03\x02" +
+		"\x02\x02\x93\x94\x03\x02\x02\x02\x94\x95\x07!\x02\x02\x95\x96\x05\x1C" +
+		"\x0F\x02\x96\x11\x03\x02\x02\x02\x97\x99\x05H%\x02\x98\x97\x03\x02\x02" +
+		"\x02\x99\x9C\x03\x02\x02\x02\x9A\x98\x03\x02\x02\x02\x9A\x9B\x03\x02\x02" +
+		"\x02\x9B\x9D\x03\x02\x02\x02\x9C\x9A\x03\x02\x02\x02\x9D\x9E\x07-\x02" +
+		"\x02\x9E\xA0\x07$\x02\x02\x9F\xA1\x05\x18\r\x02\xA0\x9F\x03\x02\x02\x02" +
+		"\xA0\xA1\x03\x02\x02\x02\xA1\xA2\x03\x02\x02\x02\xA2\xA5\x07%\x02\x02" +
+		"\xA3\xA4\x07!\x02\x02\xA4\xA6\x05\x1C\x0F\x02\xA5\xA3\x03\x02\x02\x02" +
+		"\xA5\xA6\x03\x02\x02\x02\xA6\xA7\x03\x02\x02\x02\xA7\xA8\x05\x16\f\x02" +
+		"\xA8\x13\x03\x02\x02\x02\xA9\xAB\x05H%\x02\xAA\xA9\x03\x02\x02\x02\xAB" +
+		"\xAE\x03\x02\x02\x02\xAC\xAA\x03\x02\x02\x02\xAC\xAD\x03\x02\x02\x02\xAD" +
+		"\xAF\x03\x02\x02\x02\xAE\xAC\x03\x02\x02\x02\xAF\xB0\x07\x06\x02\x02\xB0" +
+		"\xB1\x07-\x02\x02\xB1\xB3\x07$\x02\x02\xB2\xB4\x05\x18\r\x02\xB3\xB2\x03" +
+		"\x02\x02\x02\xB3\xB4\x03\x02\x02\x02\xB4\xB5\x03\x02\x02\x02\xB5\xB8\x07" +
+		"%\x02\x02\xB6\xB7\x07!\x02\x02\xB7\xB9\x05\x1C\x0F\x02\xB8\xB6\x03\x02" +
+		"\x02\x02\xB8\xB9\x03\x02\x02\x02\xB9\xBA\x03\x02\x02\x02\xBA\xD1\x05\x16" +
+		"\f\x02\xBB\xBD\x05H%\x02\xBC\xBB\x03\x02\x02\x02\xBD\xC0\x03\x02\x02\x02" +
+		"\xBE\xBC\x03\x02\x02\x02\xBE\xBF\x03\x02\x02\x02\xBF\xC1\x03\x02\x02\x02" +
+		"\xC0\xBE\x03\x02\x02\x02\xC1\xC2\x07\x07\x02\x02\xC2\xC3\x07\x06\x02\x02" +
+		"\xC3\xC4\x07-\x02\x02\xC4\xC6\x07$\x02\x02\xC5\xC7\x05\x18\r\x02\xC6\xC5" +
+		"\x03\x02\x02\x02\xC6\xC7\x03\x02\x02\x02\xC7\xC8\x03\x02\x02\x02\xC8\xCB" +
+		"\x07%\x02\x02\xC9\xCA\x07!\x02\x02\xCA\xCC\x05\x1C\x0F\x02\xCB\xC9\x03" +
+		"\x02\x02\x02\xCB\xCC\x03\x02\x02\x02\xCC\xCE\x03\x02\x02\x02\xCD\xCF\x07" +
+		"\x1F\x02\x02\xCE\xCD\x03\x02\x02\x02\xCE\xCF\x03\x02\x02\x02\xCF\xD1\x03" +
+		"\x02\x02\x02\xD0\xAC\x03\x02\x02\x02\xD0\xBE\x03\x02\x02\x02\xD1\x15\x03" +
+		"\x02\x02\x02\xD2\xD6\x07&\x02\x02\xD3\xD5\x05\x1E\x10\x02\xD4\xD3\x03" +
+		"\x02\x02\x02\xD5\xD8\x03\x02\x02\x02\xD6\xD4\x03\x02\x02\x02\xD6\xD7\x03" +
+		"\x02\x02\x02\xD7\xD9\x03\x02\x02\x02\xD8\xD6\x03\x02\x02\x02\xD9\xDA\x07" +
+		"\'\x02\x02\xDA\x17\x03\x02\x02\x02\xDB\xE0\x05\x1A\x0E\x02\xDC\xDD\x07" +
+		" \x02\x02\xDD\xDF\x05\x1A\x0E\x02\xDE\xDC\x03\x02\x02\x02\xDF\xE2\x03" +
+		"\x02\x02\x02\xE0\xDE\x03\x02\x02\x02\xE0\xE1\x03\x02\x02\x02\xE1\x19\x03" +
+		"\x02\x02\x02\xE2\xE0\x03\x02\x02\x02\xE3\xE4\x07-\x02\x02\xE4\xE5\x07" +
+		"!\x02\x02\xE5\xE6\x05\x1C\x0F\x02\xE6\x1B\x03\x02\x02\x02\xE7\xE8\t\x03" +
+		"\x02\x02\xE8\x1D\x03\x02\x02\x02\xE9\xF0\x05 \x11\x02\xEA\xF0\x05\"\x12" +
+		"\x02\xEB\xF0\x05$\x13\x02\xEC\xF0\x05&\x14\x02\xED\xF0\x05(\x15\x02\xEE" +
+		"\xF0\x05*\x16\x02\xEF\xE9\x03\x02\x02\x02\xEF\xEA\x03\x02\x02\x02\xEF" +
+		"\xEB\x03\x02\x02\x02\xEF\xEC\x03\x02\x02\x02\xEF\xED\x03\x02\x02\x02\xEF" +
+		"\xEE\x03\x02\x02\x02\xF0\x1F\x03\x02\x02\x02\xF1\xF2\t\x04\x02\x02\xF2" +
+		"\xF3\x07-\x02\x02\xF3\xF4\x07\x1C\x02\x02\xF4\xF5\x05.\x18\x02\xF5!\x03" +
+		"\x02\x02\x02\xF6\xFE\x07-\x02\x02\xF7\xF8\x07\r\x02\x02\xF8\xF9\x07\x1E" +
+		"\x02\x02\xF9\xFE\x07-\x02\x02\xFA\xFB\x07-\x02\x02\xFB\xFC\x07\x1E\x02" +
+		"\x02\xFC\xFE\x07-\x02\x02\xFD\xF6\x03\x02\x02\x02\xFD\xF7\x03\x02\x02" +
+		"\x02\xFD\xFA\x03\x02\x02\x02\xFE\xFF\x03\x02\x02\x02\xFF\u0100\x07\x1C" +
+		"\x02\x02\u0100\u0101\x05.\x18\x02\u0101#\x03\x02\x02\x02\u0102\u0103\x05" +
+		".\x18\x02\u0103%\x03\x02\x02\x02\u0104\u0106\x07\n\x02\x02\u0105\u0107" +
+		"\x05.\x18\x02\u0106\u0105\x03\x02\x02\x02\u0106\u0107\x03\x02\x02\x02" +
+		"\u0107\'\x03\x02\x02\x02\u0108\u0109\x07\v\x02\x02\u0109\u010A\x07$\x02" +
+		"\x02\u010A\u010B\x07-\x02\x02\u010B\u010C\x07\f\x02\x02\u010C\u010D\x05" +
+		".\x18\x02\u010D\u010E\x07%\x02\x02\u010E\u0112\x07&\x02\x02\u010F\u0111" +
+		"\x05\x1E\x10\x02\u0110\u010F\x03\x02\x02\x02\u0111\u0114\x03\x02\x02\x02" +
+		"\u0112\u0110\x03\x02\x02\x02\u0112\u0113\x03\x02\x02\x02\u0113\u0115\x03" +
+		"\x02\x02\x02\u0114\u0112\x03\x02\x02\x02\u0115\u0116\x07\'\x02\x02\u0116" +
+		")\x03\x02\x02\x02\u0117\u011D\x07-\x02\x02\u0118\u011A\x07$\x02\x02\u0119" +
+		"\u011B\x05<\x1F\x02\u011A\u0119\x03\x02\x02\x02\u011A\u011B\x03\x02\x02" +
+		"\x02\u011B\u011C\x03\x02\x02\x02\u011C\u011E\x07%\x02\x02\u011D\u0118" +
+		"\x03\x02\x02\x02\u011D\u011E\x03\x02\x02\x02\u011E\u0123\x03\x02\x02\x02" +
+		"\u011F\u0120\x07&\x02\x02\u0120\u0121\x05,\x17\x02\u0121\u0122\x07\'\x02" +
+		"\x02\u0122\u0124\x03\x02\x02\x02\u0123\u011F\x03\x02\x02\x02\u0123\u0124" +
+		"\x03\x02\x02\x02\u0124+\x03\x02\x02\x02\u0125\u0129\x05\"\x12\x02\u0126" +
+		"\u0129\x05 \x11\x02\u0127\u0129\x05(\x15\x02\u0128\u0125\x03\x02\x02\x02" +
+		"\u0128\u0126\x03\x02\x02\x02\u0128\u0127\x03\x02\x02\x02\u0129\u012C\x03" +
+		"\x02\x02\x02\u012A\u0128\x03\x02\x02\x02\u012A\u012B\x03\x02\x02\x02\u012B" +
+		"-\x03\x02\x02\x02\u012C\u012A\x03\x02\x02\x02\u012D\u012E\x050\x19\x02" +
+		"\u012E/\x03\x02\x02\x02\u012F\u0134\x052\x1A\x02\u0130\u0131\x07\x1D\x02" +
+		"\x02\u0131\u0133\x052\x1A\x02\u0132\u0130\x03\x02\x02\x02\u0133\u0136" +
+		"\x03\x02\x02\x02\u0134\u0132\x03\x02\x02\x02\u0134\u0135\x03\x02\x02\x02" +
+		"\u01351\x03\x02\x02\x02\u0136\u0134\x03\x02\x02\x02\u0137\u013C\x054\x1B" +
+		"\x02\u0138\u0139\t\x05\x02\x02\u0139\u013B\x054\x1B\x02\u013A\u0138\x03" +
+		"\x02\x02\x02\u013B\u013E\x03\x02\x02\x02\u013C\u013A\x03\x02\x02\x02\u013C" +
+		"\u013D\x03\x02\x02\x02\u013D3\x03\x02\x02\x02\u013E\u013C\x03\x02\x02" +
+		"\x02\u013F\u0144\x056\x1C\x02\u0140\u0141\t\x06\x02\x02\u0141\u0143\x05" +
+		"6\x1C\x02\u0142\u0140\x03\x02\x02\x02\u0143\u0146\x03\x02\x02\x02\u0144" +
+		"\u0142\x03\x02\x02\x02\u0144\u0145\x03\x02\x02\x02\u01455\x03\x02\x02" +
+		"\x02\u0146\u0144\x03\x02\x02\x02\u0147\u014C\x058\x1D\x02\u0148\u0149" +
+		"\t\x07\x02\x02\u0149\u014B\x058\x1D\x02\u014A\u0148\x03\x02\x02\x02\u014B" +
+		"\u014E\x03\x02\x02\x02\u014C\u014A\x03\x02\x02\x02\u014C\u014D\x03\x02" +
+		"\x02\x02\u014D7\x03\x02\x02\x02\u014E\u014C\x03\x02\x02\x02\u014F\u015C" +
+		"\x05F$\x02\u0150\u015C\x05@!\x02\u0151\u0152\x07-\x02\x02\u0152\u0153" +
+		"\x07$\x02\x02\u0153\u015C\x07%\x02\x02\u0154\u015C\x05:\x1E\x02\u0155" +
+		"\u015C\x05> \x02\u0156\u015C\x07-\x02\x02\u0157\u0158\x07$\x02\x02\u0158" +
+		"\u0159\x05.\x18\x02\u0159\u015A\x07%\x02\x02\u015A\u015C\x03\x02\x02\x02" +
+		"\u015B\u014F\x03\x02\x02\x02\u015B\u0150\x03\x02\x02\x02\u015B\u0151\x03" +
+		"\x02\x02\x02\u015B\u0154\x03\x02\x02\x02\u015B\u0155\x03\x02\x02\x02\u015B" +
+		"\u0156\x03\x02\x02\x02\u015B\u0157\x03\x02\x02\x02\u015C9\x03\x02\x02" +
+		"\x02\u015D\u015E\x07-\x02\x02\u015E\u0160\x07$\x02\x02\u015F\u0161\x05" +
+		"<\x1F\x02\u0160\u015F\x03\x02\x02\x02\u0160\u0161\x03\x02\x02\x02\u0161" +
+		"\u0162\x03\x02\x02\x02\u0162\u0167\x07%\x02\x02\u0163\u0164\x07&\x02\x02" +
+		"\u0164\u0165\x05,\x17\x02\u0165\u0166\x07\'\x02\x02\u0166\u0168\x03\x02" +
+		"\x02\x02\u0167\u0163\x03\x02\x02\x02\u0167\u0168\x03\x02\x02\x02\u0168" +
+		"\u0176\x03\x02\x02\x02\u0169\u016A\x05> \x02\u016A\u016C\x07$\x02\x02" +
+		"\u016B\u016D\x05<\x1F\x02\u016C\u016B\x03\x02\x02\x02\u016C\u016D\x03" +
+		"\x02\x02\x02\u016D\u016E\x03\x02\x02\x02\u016E\u0173\x07%\x02\x02\u016F" +
+		"\u0170\x07&\x02\x02\u0170\u0171\x05,\x17\x02\u0171\u0172\x07\'\x02\x02" +
+		"\u0172\u0174\x03\x02\x02\x02\u0173\u016F\x03\x02\x02\x02\u0173\u0174\x03" +
+		"\x02\x02\x02\u0174\u0176\x03\x02\x02\x02\u0175\u015D\x03\x02\x02\x02\u0175" +
+		"\u0169\x03\x02\x02\x02\u0176;\x03\x02\x02\x02\u0177\u017C\x05.\x18\x02" +
+		"\u0178\u0179\x07 \x02\x02\u0179\u017B\x05.\x18\x02\u017A\u0178\x03\x02" +
+		"\x02\x02\u017B\u017E\x03\x02\x02\x02\u017C\u017A\x03\x02\x02\x02\u017C" +
+		"\u017D\x03\x02\x02\x02\u017D=\x03\x02\x02\x02\u017E\u017C\x03\x02\x02" +
+		"\x02\u017F\u0180\x07\r\x02\x02\u0180\u0181\x07\x1E\x02\x02\u0181\u0186" +
+		"\x07-\x02\x02\u0182\u0183\x07-\x02\x02\u0183\u0184\x07\x1E\x02\x02\u0184" +
+		"\u0186\x07-\x02\x02\u0185\u017F\x03\x02\x02\x02\u0185\u0182\x03\x02\x02" +
+		"\x02\u0186?\x03\x02\x02\x02\u0187\u0188\x07*\x02\x02\u0188\u0189\x05B" +
+		"\"\x02\u0189\u018A\x07*\x02\x02\u018AA\x03\x02\x02\x02\u018B\u018F\x05" +
+		"D#\x02\u018C\u018F\x07\x1E\x02\x02\u018D\u018F\x07-\x02\x02\u018E\u018B" +
+		"\x03\x02\x02\x02\u018E\u018C\x03\x02\x02\x02\u018E\u018D\x03\x02\x02\x02" +
+		"\u018F\u0192\x03\x02\x02\x02\u0190\u018E\x03\x02\x02\x02\u0190\u0191\x03" +
+		"\x02\x02\x02\u0191C\x03\x02\x02\x02\u0192\u0190\x03\x02\x02\x02\u0193" +
+		"\u0194\x07\x11\x02\x02\u0194\u0195\x05.\x18\x02\u0195\u0196\x07\'\x02" +
+		"\x02\u0196E\x03\x02\x02\x02\u0197\u0198\t\b\x02\x02\u0198G\x03\x02\x02" +
+		"\x02\u0199\u019A\x07#\x02\x02\u019A\u01A1\x07-\x02\x02\u019B\u01A2\x07" +
+		"+\x02\x02\u019C\u019E\x07$\x02\x02\u019D\u019F\x05<\x1F\x02\u019E\u019D" +
+		"\x03\x02\x02\x02\u019E\u019F\x03\x02\x02\x02\u019F\u01A0\x03\x02\x02\x02" +
+		"\u01A0\u01A2\x07%\x02\x02\u01A1\u019B\x03\x02\x02\x02\u01A1\u019C\x03" +
+		"\x02\x02\x02\u01A1\u01A2\x03\x02\x02\x02\u01A2I\x03\x02\x02\x023LQS`h" +
+		"mx\x80\x85\x8D\x92\x9A\xA0\xA5\xAC\xB3\xB8\xBE\xC6\xCB\xCE\xD0\xD6\xE0" +
+		"\xEF\xFD\u0106\u0112\u011A\u011D\u0123\u0128\u012A\u0134\u013C\u0144\u014C" +
+		"\u015B\u0160\u0167\u016C\u0173\u0175\u017C\u0185\u018E\u0190\u019E\u01A1";
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
 		if (!CanonParser.__ATN) {
@@ -2429,8 +2452,8 @@ export class SchemaMemberContext extends ParserRuleContext {
 export class StructDefinitionContext extends ParserRuleContext {
 	public STRUCT(): TerminalNode { return this.getToken(CanonParser.STRUCT, 0); }
 	public IDENTIFIER(): TerminalNode { return this.getToken(CanonParser.IDENTIFIER, 0); }
-	public LBRACE(): TerminalNode { return this.getToken(CanonParser.LBRACE, 0); }
-	public RBRACE(): TerminalNode { return this.getToken(CanonParser.RBRACE, 0); }
+	public LBRACE(): TerminalNode | undefined { return this.tryGetToken(CanonParser.LBRACE, 0); }
+	public RBRACE(): TerminalNode | undefined { return this.tryGetToken(CanonParser.RBRACE, 0); }
 	public structContent(): StructContentContext[];
 	public structContent(i: number): StructContentContext;
 	public structContent(i?: number): StructContentContext | StructContentContext[] {
@@ -2439,6 +2462,10 @@ export class StructDefinitionContext extends ParserRuleContext {
 		} else {
 			return this.getRuleContext(i, StructContentContext);
 		}
+	}
+	public ASSIGN(): TerminalNode | undefined { return this.tryGetToken(CanonParser.ASSIGN, 0); }
+	public typeReference(): TypeReferenceContext | undefined {
+		return this.tryGetRuleContext(0, TypeReferenceContext);
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);

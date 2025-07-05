@@ -12,9 +12,8 @@ children:
           - type: TypeReference
             typeName: data
         name: data1
-        isMultiple: false
-        isOptional: false
-        isRequired: true
+        multiple: false
+        required: true
         dataType: data
       - type: SchemaMember
         children:
@@ -24,28 +23,38 @@ children:
           - type: TypeReference
             typeName: data2
         name: data2
-        isMultiple: true
-        isOptional: false
-        isRequired: true
+        multiple: true
+        required: false
         dataType: data2
       - type: SchemaMember
         children:
           - type: TypeReference
             typeName: data2
         name: data3
-        isMultiple: false
-        isOptional: true
-        isRequired: false
+        multiple: false
+        required: false
         dataType: data2
       - type: SchemaMember
         children:
           - type: TypeReference
             typeName: data2
         name: data4
-        isMultiple: false
-        isOptional: false
-        isRequired: true
+        multiple: true
+        required: true
         dataType: data2
+      - type: SchemaMember
+        children:
+          - type: TypeReference
+            typeName: d
+        name: data5
+        multiple: false
+        required: true
+        dataType: d
+  - type: StructDefinition
+    children:
+      - type: TypeReference
+        typeName: int
+    name: d
   - type: StructDefinition
     children:
       - type: StructContent
@@ -55,7 +64,7 @@ children:
               - type: TypeReference
                 typeName: string
             name: datam1
-            isOptional: false
+            required: true
             dataType: string
       - type: StructContent
         children:
@@ -64,7 +73,7 @@ children:
               - type: TypeReference
                 typeName: string
             name: datam2
-            isOptional: true
+            required: false
             dataType: string
     name: data
   - type: StructDefinition
@@ -80,7 +89,7 @@ children:
               - type: TypeReference
                 typeName: string
             name: name
-            isOptional: false
+            required: true
             dataType: string
     name: data2
   - type: FunctionDefinition
@@ -159,7 +168,7 @@ children:
               - type: TypeReference
                 typeName: int
             name: major
-            isOptional: false
+            required: true
             dataType: int
       - type: StructContent
         children:
@@ -171,7 +180,7 @@ children:
               - type: TypeReference
                 typeName: int
             name: minor
-            isOptional: false
+            required: true
             dataType: int
       - type: StructContent
         children:
@@ -183,7 +192,7 @@ children:
               - type: TypeReference
                 typeName: int
             name: patch
-            isOptional: false
+            required: true
             dataType: int
       - type: StructContent
         children:
