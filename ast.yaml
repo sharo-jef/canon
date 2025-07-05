@@ -3,7 +3,9 @@ children:
   - type: SchemaDirective
     schema: ./schema.canon
   - type: ConfigurationCall
-    functionName: data1
+    functionName:
+      type: Identifier
+      name: data1
     hasArguments: false
     argumentCount: 0
     arguments: []
@@ -18,7 +20,9 @@ children:
           literalType: string
           value: datam1
   - type: ConfigurationCall
-    functionName: data2
+    functionName:
+      type: Identifier
+      name: data2
     hasArguments: true
     argumentCount: 1
     arguments:
@@ -36,7 +40,9 @@ children:
           literalType: string
           value: hoge1
   - type: ConfigurationCall
-    functionName: data2
+    functionName:
+      type: Identifier
+      name: data2
     hasArguments: true
     argumentCount: 1
     arguments:
@@ -66,7 +72,9 @@ children:
           type: Identifier
           name: datam2
       - type: VariableDeclaration
-        variableName: datam2
+        variableName:
+          type: Identifier
+          name: datam2
         variableType: val
         isMutable: false
         expression:
@@ -94,7 +102,9 @@ children:
       name: data2
     expression:
       type: FunctionCall
-      functionName: generateData4
+      functionName:
+        type: Identifier
+        name: generateData4
       hasArguments: true
       argumentCount: 1
       arguments:
@@ -105,7 +115,9 @@ children:
       hasBody: false
       body: []
   - type: VariableDeclaration
-    variableName: name
+    variableName:
+      type: Identifier
+      name: name
     variableType: val
     isMutable: false
     expression:
@@ -113,7 +125,9 @@ children:
       literalType: string
       value: data5
   - type: ConfigurationCall
-    functionName: data2
+    functionName:
+      type: Identifier
+      name: data2
     hasArguments: true
     argumentCount: 1
     arguments:
@@ -138,7 +152,9 @@ children:
           literalType: string
           value: datam2
   - type: VariableDeclaration
-    variableName: name2
+    variableName:
+      type: Identifier
+      name: name2
     variableType: var
     isMutable: true
     expression:
@@ -146,7 +162,9 @@ children:
       literalType: string
       value: data6
   - type: ConfigurationCall
-    functionName: data2
+    functionName:
+      type: Identifier
+      name: data2
     hasArguments: true
     argumentCount: 1
     arguments:
@@ -210,29 +228,34 @@ children:
             literalType: string
             value: _3
       - type: ForStatement
-        children:
-          - type: RangeExpression
-            left:
-              type: Literal
-              literalType: integer
-              value: 1
-            operator: ..
-            right:
-              type: Literal
-              literalType: integer
-              value: 100
-          - type: Assignment
-            target:
-              type: Identifier
-              name: datam2
-            expression:
-              type: AdditiveExpression
-              left:
-                type: Identifier
-                name: name2
-              operator: +
-              right:
-                type: Literal
-                literalType: string
-                value: _loop_
-        iteratorVariable: i
+        iteratorVariable:
+          type: Identifier
+          name: i
+        iterable:
+          type: RangeExpression
+          left:
+            type: Literal
+            literalType: integer
+            value: 1
+          operator: ..
+          right:
+            type: Literal
+            literalType: integer
+            value: 100
+        body:
+          - type: Statement
+            children:
+              - type: Assignment
+                target:
+                  type: Identifier
+                  name: datam2
+                expression:
+                  type: AdditiveExpression
+                  left:
+                    type: Identifier
+                    name: name2
+                  operator: +
+                  right:
+                    type: Literal
+                    literalType: string
+                    value: _loop_

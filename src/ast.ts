@@ -172,7 +172,10 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const typeRef = ctx.typeReference();
             
             if (identifier) {
-                result.name = identifier.text;
+                result.name = {
+                    type: 'Identifier',
+                    name: identifier.text
+                };
                 result.multiple = !!multiply || !!plus; // * または + の場合は複数
                 // * は multiple: true, required: false
                 // + は multiple: true, required: true
@@ -188,7 +191,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     result.required = true;  // 修飾子なしは必須
                 }
                 if (typeRef) {
-                    result.dataType = typeRef.text;
+                    result.dataType = this.visit(typeRef);
                 }
             }
         }
@@ -197,7 +200,10 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         else if (ctx.constructor.name === 'StructDefinitionContext') {
             const identifier = ctx.IDENTIFIER();
             if (identifier) {
-                result.name = identifier.text;
+                result.name = {
+                    type: 'Identifier',
+                    name: identifier.text
+                };
             }
         }
         
@@ -205,7 +211,10 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         else if (ctx.constructor.name === 'MixinDeclarationContext') {
             const identifier = ctx.IDENTIFIER();
             if (identifier) {
-                result.mixinType = identifier.text;
+                result.mixinType = {
+                    type: 'TypeReference',
+                    typeName: identifier.text
+                };
             }
         }
         
@@ -216,10 +225,13 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const typeRef = ctx.typeReference();
             
             if (identifier) {
-                result.name = identifier.text;
+                result.name = {
+                    type: 'Identifier',
+                    name: identifier.text
+                };
                 result.required = !question; // ? があれば任意、なければ必須
                 if (typeRef) {
-                    result.dataType = typeRef.text;
+                    result.dataType = this.visit(typeRef);
                 }
             }
         }
@@ -231,10 +243,13 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const returnType = ctx.typeReference();
             
             if (identifier) {
-                result.name = identifier.text;
+                result.name = {
+                    type: 'Identifier',
+                    name: identifier.text
+                };
                 result.isDeclare = !!isDeclare;
                 if (returnType) {
-                    result.returnType = returnType.text;
+                    result.returnType = this.visit(returnType);
                 }
             }
             
@@ -259,9 +274,12 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const returnType = ctx.typeReference();
             
             if (identifier) {
-                result.name = identifier.text;
+                result.name = {
+                    type: 'Identifier',
+                    name: identifier.text
+                };
                 if (returnType) {
-                    result.returnType = returnType.text;
+                    result.returnType = this.visit(returnType);
                 }
             }
             
@@ -324,9 +342,15 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 // 通常の関数呼び出し (e.g., data2(), apply())
                 // identifierは単一の要素またはTerminalNodeの場合がある
                 if (Array.isArray(identifier)) {
-                    result.functionName = identifier[0]?.text;
+                    result.functionName = {
+                        type: 'Identifier',
+                        name: identifier[0]?.text
+                    };
                 } else {
-                    result.functionName = identifier.text;
+                    result.functionName = {
+                        type: 'Identifier',
+                        name: identifier.text
+                    };
                 }
             }
             
@@ -359,7 +383,10 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         else if (ctx.constructor.name === 'ConfigurationCallContext') {
             const identifier = ctx.IDENTIFIER();
             if (identifier) {
-                result.functionName = identifier.text;  // 関数呼び出しと統一
+                result.functionName = {
+                    type: 'Identifier',
+                    name: identifier.text
+                };
             }
             
             const argumentList = ctx.argumentList();
@@ -392,7 +419,10 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const identifier = ctx.IDENTIFIER();
             
             if (identifier) {
-                result.variableName = identifier.text;
+                result.variableName = {
+                    type: 'Identifier',
+                    name: identifier.text
+                };
                 result.variableType = valToken ? 'val' : 'var';
                 result.isMutable = !!varToken;
             }
@@ -409,7 +439,24 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         else if (ctx.constructor.name === 'ForStatementContext') {
             const identifier = ctx.IDENTIFIER();
             if (identifier) {
-                result.iteratorVariable = identifier.text;
+                result.iteratorVariable = {
+                    type: 'Identifier',
+                    name: identifier.text
+                };
+            }
+            
+            // 反復対象の式（範囲式など）
+            const expression = ctx.expression();
+            if (expression) {
+                result.iterable = this.visit(expression);
+            }
+            
+            // ループ本体の文
+            const statements = ctx.statement();
+            if (statements && statements.length > 0) {
+                result.body = statements.map(stmt => this.visit(stmt));
+            } else {
+                result.body = [];
             }
         }
         
@@ -556,7 +603,10 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             const stringLiteral = ctx.STRING_LITERAL();
             
             if (identifier) {
-                result.name = identifier.text;
+                result.name = {
+                    type: 'Identifier',
+                    name: identifier.text
+                };
                 if (stringLiteral) {
                     // アノテーション値からクォートを除去
                     let value = stringLiteral.text;
@@ -669,8 +719,14 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 
                 if (identifier && typeRef) {
                     parameters.push({
-                        name: identifier.text,
-                        type: typeRef.text
+                        name: {
+                            type: 'Identifier',
+                            name: identifier.text
+                        },
+                        type: {
+                            type: 'TypeReference',
+                            typeName: typeRef.text
+                        }
                     });
                 }
             }
@@ -789,7 +845,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             'TypeReference', 'Parameter', 'Annotation', 'Literal', 'MemberAccess',
             'VariableDeclaration', 'Assignment', 'AdditiveExpression', 
             'MultiplicativeExpression', 'ComparisonExpression', 'Expression',
-            'Identifier', 'ArgumentList', 'ConstructionBody'  // Added structural wrappers
+            'Identifier', 'ArgumentList', 'ConstructionBody', 'ForStatement'  // Added ForStatement
         ];
         
         // PrimaryExpression with specific type info should not have children
