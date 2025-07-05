@@ -243,19 +243,23 @@ children:
             literalType: integer
             value: 100
         body:
-          - type: Statement
-            children:
-              - type: Assignment
-                target:
+          - type: Assignment
+            target:
+              type: Identifier
+              name: datam2
+            expression:
+              type: AdditiveExpression
+              left:
+                type: AdditiveExpression
+                left:
                   type: Identifier
-                  name: datam2
-                expression:
-                  type: AdditiveExpression
-                  left:
-                    type: Identifier
-                    name: name2
-                  operator: +
-                  right:
-                    type: Literal
-                    literalType: string
-                    value: _loop_
+                  name: name2
+                operator: +
+                right:
+                  type: Literal
+                  literalType: string
+                  value: _loop_
+              operator: +
+              right:
+                type: Identifier
+                name: i

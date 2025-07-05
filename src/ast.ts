@@ -34,6 +34,14 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         const ruleNames = (node as any).constructor.name || 'UnknownRule';
         const ruleName = ruleNames.replace('Context', '');
         
+        // Statement は常に透過化（子ノードに委譲）
+        if (ruleName === 'Statement' && node.childCount === 1) {
+            const child = node.getChild(0);
+            if (child) {
+                return this.visit(child);
+            }
+        }
+        
         // 式の階層を簡略化: 単一の子ノードしか持たない式は省略
         if (this.isSimpleExpressionNode(node, ruleName)) {
             const child = node.getChild(0);
@@ -665,30 +673,51 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         
         else if (ctx.constructor.name === 'AdditiveExpressionContext') {
             if (ctx.childCount >= 3) {
-                // Binary operation: left operator right
-                const leftChild = ctx.getChild(0);
-                const operatorChild = ctx.getChild(1);
-                const rightChild = ctx.getChild(2);
+                // 左結合で複数の加算/減算を処理
+                let currentLeft = this.visit(ctx.getChild(0));
                 
-                if (leftChild && operatorChild && rightChild) {
-                    result.left = this.visit(leftChild);
-                    result.operator = operatorChild.text; // PLUS or MINUS
-                    result.right = this.visit(rightChild);
+                for (let i = 1; i < ctx.childCount; i += 2) {
+                    const operatorChild = ctx.getChild(i);
+                    const rightChild = ctx.getChild(i + 1);
+                    
+                    if (operatorChild && rightChild) {
+                        const rightNode = this.visit(rightChild);
+                        currentLeft = {
+                            type: 'AdditiveExpression',
+                            left: currentLeft,
+                            operator: operatorChild.text,
+                            right: rightNode
+                        };
+                    }
                 }
+                
+                // 最終結果をresultにコピー
+                Object.assign(result, currentLeft);
             }
         }
         
         else if (ctx.constructor.name === 'MultiplicativeExpressionContext') {
             if (ctx.childCount >= 3) {
-                const leftChild = ctx.getChild(0);
-                const operatorChild = ctx.getChild(1);
-                const rightChild = ctx.getChild(2);
+                // 左結合で複数の乗算/除算を処理
+                let currentLeft = this.visit(ctx.getChild(0));
                 
-                if (leftChild && operatorChild && rightChild) {
-                    result.left = this.visit(leftChild);
-                    result.operator = operatorChild.text; // MULTIPLY or DIVIDE
-                    result.right = this.visit(rightChild);
+                for (let i = 1; i < ctx.childCount; i += 2) {
+                    const operatorChild = ctx.getChild(i);
+                    const rightChild = ctx.getChild(i + 1);
+                    
+                    if (operatorChild && rightChild) {
+                        const rightNode = this.visit(rightChild);
+                        currentLeft = {
+                            type: 'MultiplicativeExpression',
+                            left: currentLeft,
+                            operator: operatorChild.text,
+                            right: rightNode
+                        };
+                    }
                 }
+                
+                // 最終結果をresultにコピー
+                Object.assign(result, currentLeft);
             }
         }
         
@@ -845,7 +874,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             'TypeReference', 'Parameter', 'Annotation', 'Literal', 'MemberAccess',
             'VariableDeclaration', 'Assignment', 'AdditiveExpression', 
             'MultiplicativeExpression', 'ComparisonExpression', 'Expression',
-            'Identifier', 'ArgumentList', 'ConstructionBody', 'ForStatement'  // Added ForStatement
+            'Identifier', 'ArgumentList', 'ConstructionBody', 'ForStatement'  // Removed Statement
         ];
         
         // PrimaryExpression with specific type info should not have children
