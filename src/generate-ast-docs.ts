@@ -58,12 +58,17 @@ function getNodeAdditionalInfo(node: ASTNode): string {
         info.push(`namespace: ${node.namespace}`);
     }
     
+    // Structure-related
+    if (node.name) {
+        info.push(`name: ${node.name}`);
+    }
+    
     if (node.structName) {
         info.push(`struct: ${node.structName}`);
     }
     
-    if (node.mixinName) {
-        info.push(`mixin: ${node.mixinName}`);
+    if (node.mixinType) {
+        info.push(`mixin: ${node.mixinType}`);
     }
     
     if (node.fieldName) {
@@ -74,8 +79,46 @@ function getNodeAdditionalInfo(node: ASTNode): string {
         info.push(`method: ${node.methodName}`);
     }
     
+    // Type-related
     if (node.typeName) {
         info.push(`type: ${node.typeName}`);
+    }
+    
+    if (node.dataType) {
+        info.push(`dataType: ${node.dataType}`);
+    }
+    
+    if (node.returnType) {
+        info.push(`returnType: ${node.returnType}`);
+    }
+    
+    // Boolean flags
+    if (node.isOptional !== undefined) {
+        info.push(`optional: ${node.isOptional}`);
+    }
+    
+    if (node.isMultiple !== undefined) {
+        info.push(`multiple: ${node.isMultiple}`);
+    }
+    
+    if (node.isDeclare !== undefined) {
+        info.push(`declare: ${node.isDeclare}`);
+    }
+    
+    if (node.isMethodCall !== undefined) {
+        info.push(`methodCall: ${node.isMethodCall}`);
+    }
+    
+    if (node.isObjectConstruction !== undefined) {
+        info.push(`objectConstruction: ${node.isObjectConstruction}`);
+    }
+    
+    if (node.hasArguments !== undefined) {
+        info.push(`hasArgs: ${node.hasArguments}`);
+    }
+    
+    if (node.hasBody !== undefined) {
+        info.push(`hasBody: ${node.hasBody}`);
     }
     
     // Value-related
@@ -90,6 +133,10 @@ function getNodeAdditionalInfo(node: ASTNode): string {
     // Function-related
     if (node.functionName) {
         info.push(`function: ${node.functionName}`);
+    }
+    
+    if (node.argumentCount !== undefined) {
+        info.push(`argCount: ${node.argumentCount}`);
     }
     
     if (node.parameters && Array.isArray(node.parameters)) {
@@ -108,6 +155,14 @@ function getNodeAdditionalInfo(node: ASTNode): string {
     
     if (node.fullAccess) {
         info.push(`access: ${node.fullAccess}`);
+    }
+    
+    if (node.object) {
+        info.push(`object: ${node.object}`);
+    }
+    
+    if (node.member) {
+        info.push(`member: ${node.member}`);
     }
     
     return info.join(', ');

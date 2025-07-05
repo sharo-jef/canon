@@ -206,6 +206,12 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             } else {
                 result.parameters = []; // 明示的に空の配列を設定
             }
+            
+            // FunctionBody を直接プロパティとして設定
+            const functionBody = ctx.functionBody();
+            if (functionBody) {
+                result.functionBody = this.visit(functionBody);
+            }
         }
         
         // Method definition
@@ -226,6 +232,12 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             } else {
                 result.parameters = []; // 明示的に空の配列を設定
             }
+            
+            // FunctionBody を直接プロパティとして設定
+            const functionBody = ctx.functionBody();
+            if (functionBody) {
+                result.functionBody = this.visit(functionBody);
+            }
         }
         
         // Function call
@@ -236,14 +248,33 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             if (memberAccess) {
                 // Member function call (e.g., version.toString())
                 result.isMethodCall = true;
-            } else if (identifier && identifier.length > 0) {
-                result.functionName = identifier[0].text;
+                // memberAccessの情報も抽出
+                const memberAccessCtx = memberAccess as any;
+                const identifiers = memberAccessCtx.IDENTIFIER();
+                const thisToken = memberAccessCtx.THIS();
+                
+                if (thisToken && identifiers?.[0]) {
+                    result.functionName = `this.${identifiers[0].text}`;
+                } else if (identifiers?.length >= 2) {
+                    result.functionName = `${identifiers[0].text}.${identifiers[1].text}`;
+                }
+            } else if (identifier) {
+                // 通常の関数呼び出し (e.g., data2(), apply())
+                // identifierは単一の要素またはTerminalNodeの場合がある
+                if (Array.isArray(identifier)) {
+                    result.functionName = identifier[0]?.text;
+                } else {
+                    result.functionName = identifier.text;
+                }
             }
             
             const argumentList = ctx.argumentList();
             if (argumentList) {
                 result.hasArguments = true;
                 result.argumentCount = this.countArguments(argumentList);
+            } else {
+                result.hasArguments = false;
+                result.argumentCount = 0;
             }
             
             const constructionBody = ctx.constructionBody();
@@ -431,25 +462,16 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     }
 
     private shouldIncludeNode(childNode: ASTNode, parentRuleName: string): boolean {
-        // Terminal ノードの場合、特定のコンテキストでのみ保持
+        // Terminal ノードは全て除外（重要な情報は親ノードでプロパティとして抽出済み）
         if (childNode.type === 'Terminal') {
-            // 意味のないトークンは除外
-            if (this.isMeaninglessToken(childNode.text)) {
+            return false;
+        }
+        
+        // FunctionDefinition と MethodDefinition の特定の子ノードは除外（プロパティとして直接設定済み）
+        if (['FunctionDefinition', 'MethodDefinition'].includes(parentRuleName)) {
+            if (['FunctionBody', 'ParameterList', 'TypeReference'].includes(childNode.type)) {
                 return false;
             }
-            
-            // 識別子や値に関するTerminalは、すでにプロパティとして保存されているので除外
-            const parentsThatExtractTerminals = [
-                'SchemaDirective', 'SchemaMember', 'StructDefinition', 'StructMember',
-                'MixinDeclaration', 'FunctionDefinition', 'MethodDefinition', 'Parameter',
-                'Assignment', 'MemberAccess', 'Literal', 'Annotation'
-            ];
-            
-            if (parentsThatExtractTerminals.includes(parentRuleName)) {
-                return false;
-            }
-            
-            return true;
         }
         
         // 重要な構文要素は保持
