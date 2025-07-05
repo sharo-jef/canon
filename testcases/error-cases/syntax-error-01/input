@@ -1,0 +1,4 @@
+data1 {
+    datam1 = "value1"
+    datam2 = // missing value - syntax error
+}

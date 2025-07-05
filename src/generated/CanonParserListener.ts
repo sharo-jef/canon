@@ -5,6 +5,7 @@ import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 
 import { ProgramContext } from "./CanonParser";
 import { ConfigurationCallContext } from "./CanonParser";
+import { SchemaImportContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { SchemaDefinitionContext } from "./CanonParser";
 import { SchemaMemberContext } from "./CanonParser";
@@ -66,6 +67,17 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitConfigurationCall?: (ctx: ConfigurationCallContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.schemaImport`.
+	 * @param ctx the parse tree
+	 */
+	enterSchemaImport?: (ctx: SchemaImportContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.schemaImport`.
+	 * @param ctx the parse tree
+	 */
+	exitSchemaImport?: (ctx: SchemaImportContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.schemaDirective`.

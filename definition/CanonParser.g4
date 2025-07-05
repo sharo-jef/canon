@@ -6,7 +6,7 @@ options {
 
 // Top-level structure
 program:
-	schemaDirective? (
+	schemaImport? (
 		structDefinition
 		| functionDefinition
 		| variableDeclaration
@@ -25,6 +25,9 @@ configurationCall:
 	IDENTIFIER (LPAREN argumentList? RPAREN)? (
 		LBRACE constructionBody RBRACE
 	)?;
+
+// Schema import - schema "./path/to/schema.canon"
+schemaImport: SCHEMA STRING_LITERAL;
 
 // Schema directive - required at the beginning
 schemaDirective: SCHEMA_DIRECTIVE STRING_LITERAL;

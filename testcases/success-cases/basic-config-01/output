@@ -1,0 +1,26 @@
+type: Program
+children:
+  - type: SchemaDirective
+    schema: ./schema.canon
+  - type: ConfigurationCall
+    functionName:
+      type: Identifier
+      name: data1
+    arguments: []
+    body:
+      - type: Assignment
+        target:
+          type: Identifier
+          name: datam1
+        expression:
+          type: Literal
+          literalType: string
+          value: value1
+      - type: Assignment
+        target:
+          type: Identifier
+          name: datam2
+        expression:
+          type: Literal
+          literalType: string
+          value: value2

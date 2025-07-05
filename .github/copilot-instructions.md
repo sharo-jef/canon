@@ -19,10 +19,10 @@
 - This repository provides testcases for the actual canon library.
 
   - Test cases have following files:
-    - input: input configuration written in the canon format
-    - output: expected output AST from the canon parser (if this is a successful test)
-    - error: expected error message from the canon parser (if this is a failure test)
-    - description: short description of the test case
+    - input.canon: input configuration written in the canon format
+    - output.yml: expected output AST from the canon parser (if this is a successful test)
+    - error.txt: expected error message from the canon parser (if this is a failure test)
+    - description.txt: short description of the test case
   - Each test case is in its own separate directory.
 
 - The testcases are located in the `testcases` directory.

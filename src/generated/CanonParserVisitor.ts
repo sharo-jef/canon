@@ -5,6 +5,7 @@ import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
 import { ProgramContext } from "./CanonParser";
 import { ConfigurationCallContext } from "./CanonParser";
+import { SchemaImportContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { SchemaDefinitionContext } from "./CanonParser";
 import { SchemaMemberContext } from "./CanonParser";
@@ -61,6 +62,13 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitConfigurationCall?: (ctx: ConfigurationCallContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.schemaImport`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitSchemaImport?: (ctx: SchemaImportContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.schemaDirective`.

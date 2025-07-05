@@ -1,0 +1,10 @@
+error[E0002]: missing closing parenthesis
+ --> input:1:22
+  |
+1 | data1(arg1, arg2      {
+  |      -                ^ expected ')' here
+  |      |
+  |      opening parenthesis found here
+  |
+  = note: parentheses must be properly matched in function calls
+  = help: add the missing ')' before the opening brace '{'

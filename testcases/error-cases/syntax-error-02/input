@@ -1,0 +1,3 @@
+data1("arg1", "arg2" {
+    datam1 = "value1"
+}

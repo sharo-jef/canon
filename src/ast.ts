@@ -8,6 +8,12 @@ import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor
 import { CanonParserVisitor } from './generated/CanonParserVisitor';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 import { RuleNode } from 'antlr4ts/tree/RuleNode';
+import { 
+    CanonErrorListener, 
+    ErrorFormatter, 
+    ErrorCollection, 
+    DEFAULT_FORMATTER_OPTIONS 
+} from './error';
 
 interface ASTLocation {
     start: { line: number; column: number };
@@ -950,17 +956,35 @@ function parseCanonToAST(filename: string): void {
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new CanonParser(tokenStream);
         
+        // カスタムエラーリスナーを設定
+        const errorListener = new CanonErrorListener(filename);
+        parser.removeErrorListeners(); // デフォルトのエラーリスナーを削除
+        parser.addErrorListener(errorListener);
+        
         // パースツリーを構築
         const tree = parser.program();
         
         // エラーがあった場合の処理
-        if (parser.numberOfSyntaxErrors > 0) {
-            console.error(`Syntax errors found: ${parser.numberOfSyntaxErrors}`);
-            console.error('Tokens:');
-            for (let i = 0; i < tokenStream.size; i++) {
-                const token = tokenStream.get(i);
-                console.log(`Token ${i}: type=${token.type}, text='${token.text}', line=${token.line}, column=${token.charPositionInLine}`);
+        if (errorListener.hasErrors()) {
+            const errors = errorListener.getErrors();
+            const formatter = new ErrorFormatter(input, filename, DEFAULT_FORMATTER_OPTIONS);
+            const formattedErrors = formatter.formatErrors([...errors.getSortedErrors()]);
+            
+            console.error('Canon compilation failed:\n');
+            console.error(formattedErrors);
+            
+            // デバッグ情報の表示（詳細モード）
+            if (process.env.CANON_DEBUG) {
+                console.error('\nDebug Information:');
+                console.error('==================');
+                console.error(`Total syntax errors: ${parser.numberOfSyntaxErrors}`);
+                console.error('Tokens:');
+                for (let i = 0; i < Math.min(tokenStream.size, 50); i++) {
+                    const token = tokenStream.get(i);
+                    console.error(`Token ${i}: type=${token.type}, text='${token.text}', line=${token.line}, column=${token.charPositionInLine}`);
+                }
             }
+            
             return;
         }
         

@@ -49,7 +49,7 @@ RBRACKET: ']';
 BACKTICK: '`';
 
 // Literals
-STRING_LITERAL: '\'' (~['\r\n] | '\\\'')* '\'';
+STRING_LITERAL: '"' (~["\r\n] | '\\"')* '"';
 INTEGER_LITERAL: [0-9]+;
 
 // Identifiers
