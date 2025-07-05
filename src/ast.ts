@@ -9,10 +9,16 @@ import { CanonParserVisitor } from './generated/CanonParserVisitor';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 import { RuleNode } from 'antlr4ts/tree/RuleNode';
 
+interface ASTLocation {
+    start: { line: number; column: number };
+    end: { line: number; column: number };
+}
+
 interface ASTNode {
     type: string;
     text?: string;
     children?: ASTNode[];
+    loc?: ASTLocation;
     [key: string]: any;
 }
 
@@ -22,12 +28,39 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         return { type: 'Unknown' };
     }
 
+    private getLocationInfo(node: any): ASTLocation | undefined {
+        try {
+            if (node && node.start && node.stop) {
+                return {
+                    start: {
+                        line: node.start.line,
+                        column: node.start.charPositionInLine
+                    },
+                    end: {
+                        line: node.stop.line,
+                        column: node.stop.charPositionInLine + (node.stop.text?.length || 0)
+                    }
+                };
+            }
+        } catch (error) {
+            // If location extraction fails, return undefined
+        }
+        return undefined;
+    }
+
     visitTerminal(node: TerminalNode): ASTNode {
         // 重要な情報を持つTerminalのみ、簡潔な形で返す
-        return {
+        const result: ASTNode = {
             type: 'Terminal',
             text: node.text
         };
+        
+        const loc = this.getLocationInfo(node.symbol);
+        if (loc) {
+            result.loc = loc;
+        }
+        
+        return result;
     }
 
     visitChildren(node: RuleNode): ASTNode {
@@ -55,6 +88,12 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
             children: []
         };
 
+        // Add location information
+        const loc = this.getLocationInfo(node as any);
+        if (loc) {
+            result.loc = loc;
+        }
+
         // 特定のルールに対して詳細情報を追加
         this.addRuleSpecificInfo(node, result);
 
@@ -65,7 +104,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         }
         
         // Binary expressions that have been structured should not process children
-        const binaryExpressions = ['AdditiveExpression', 'MultiplicativeExpression', 'ComparisonExpression', 'RangeExpression'];
+        const binaryExpressions = ['BinaryExpression'];
         if (binaryExpressions.includes(ruleName) && result.left && result.operator && result.right) {
             delete result.children;
             return result;
@@ -109,7 +148,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
     private isSimpleExpressionNode(node: RuleNode, ruleName: string): boolean {
         // 二項演算子のコンテキストの場合は透過処理しない
-        const binaryExpressions = ['AdditiveExpression', 'MultiplicativeExpression', 'ComparisonExpression', 'Expression'];
+        const binaryExpressions = ['BinaryExpression', 'AdditiveExpression', 'MultiplicativeExpression', 'ComparisonExpression', 'Expression'];
         if (binaryExpressions.includes(ruleName)) {
             // 3つ以上の子ノードがある場合は二項演算の可能性が高いので透過処理しない
             if (node.childCount >= 3) {
@@ -417,8 +456,8 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     type: 'Identifier',
                     name: identifier.text
                 };
-                result.variableType = valToken ? 'val' : 'var';
-                result.isMutable = !!varToken;
+                // Simplified: only use isMutable boolean
+                result.isMutable = !!varToken; // true for 'var', false for 'val'
             }
             
             // Get the expression directly, not as children
@@ -647,7 +686,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 const rightChild = ctx.getChild(2);
                 
                 if (leftChild && operatorChild && rightChild && operatorChild.text === '..') {
-                    result.type = 'RangeExpression';
+                    result.type = 'BinaryExpression';
                     result.left = this.visit(leftChild);
                     result.operator = operatorChild.text; // RANGE (..)
                     result.right = this.visit(rightChild);
@@ -667,7 +706,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     if (operatorChild && rightChild) {
                         const rightNode = this.visit(rightChild);
                         currentLeft = {
-                            type: 'AdditiveExpression',
+                            type: 'BinaryExpression',
                             left: currentLeft,
                             operator: operatorChild.text,
                             right: rightNode
@@ -692,7 +731,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                     if (operatorChild && rightChild) {
                         const rightNode = this.visit(rightChild);
                         currentLeft = {
-                            type: 'MultiplicativeExpression',
+                            type: 'BinaryExpression',
                             left: currentLeft,
                             operator: operatorChild.text,
                             right: rightNode
@@ -712,6 +751,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
                 const rightChild = ctx.getChild(2);
                 
                 if (leftChild && operatorChild && rightChild) {
+                    result.type = 'BinaryExpression';
                     result.left = this.visit(leftChild);
                     result.operator = operatorChild.text; // Comparison operators
                     result.right = this.visit(rightChild);
@@ -856,17 +896,35 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         // これらのノードは詳細情報のみで十分（子ノードは不要）
         const informationOnlyNodes = [
             'TypeReference', 'Parameter', 'Annotation', 'Literal', 'MemberAccess',
-            'VariableDeclaration', 'Assignment', 'AdditiveExpression', 
-            'MultiplicativeExpression', 'ComparisonExpression', 'Expression',
-            'Identifier', 'ArgumentList', 'ConstructionBody', 'ForStatement'  // Removed Statement
+            'VariableDeclaration', 'Assignment', 'BinaryExpression', 
+            'Expression', 'Identifier', 'ArgumentList', 'ConstructionBody', 'ForStatement'
         ];
         
-        // PrimaryExpression with specific type info should not have children
-        if (ruleName === 'PrimaryExpression' && (result.type !== 'PrimaryExpression')) {
-            return true;  // It's been converted to a specific type
+        if (informationOnlyNodes.includes(ruleName)) {
+            return true;
         }
         
-        return informationOnlyNodes.includes(ruleName) && this.hasSemanticValue(result);
+        // Assignment with structured target/expression
+        if (ruleName === 'Assignment' && result.target && result.expression) {
+            return true;
+        }
+        
+        // Variable declaration with structured variableName/expression  
+        if (ruleName === 'VariableDeclaration' && result.variableName && result.expression) {
+            return true;
+        }
+        
+        // Binary expressions with left/operator/right structure
+        if (ruleName === 'BinaryExpression' && result.left && result.operator && result.right) {
+            return true;
+        }
+        
+        // For statement with structured iteratorVariable/iterable/body
+        if (ruleName === 'ForStatement' && result.iteratorVariable && result.iterable && result.body) {
+            return true;
+        }
+        
+        return false;
     }
 
     // Visitor methods implementation
