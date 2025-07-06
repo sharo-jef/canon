@@ -36,7 +36,7 @@ struct Version {
         validation()
     }
     private validation() {
-        if (this.major == 0 && this.minor == 0 && this.patch == 0) error('Given version is not valid')  // 実装が進んでから `${}` を使った構文を追加する
+        if (this.major == 0 && this.minor == 0 && this.patch == 0) error('Given version is not valid')
     }
     major: int
     minor: int

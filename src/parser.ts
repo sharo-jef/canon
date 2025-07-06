@@ -791,7 +791,12 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitExpressionStatement(ctx: ExpressionStatementContext): ASTNode {
-    return this.visit(ctx.expression());
+    const expression = this.visit(ctx.expression());
+    return {
+      type: 'ExpressionStatement',
+      expression,
+      loc: this.getLocationInfo(ctx),
+    };
   }
 
   // Expression visitors

@@ -31,6 +31,7 @@ function getChildNodes(node: ASTNode): ChildNodeInfo[] {
     'lambdaBody', // CallExpression with lambda block
     'arguments', // CallExpression, etc.
     'value', // AssignmentStatement, PropertyDeclaration, etc.
+    'expression', // ExpressionStatement
     'callee', // CallExpression (function reference)
     'functionName', // CallExpression (function name as identifier)
     'left', // BinaryExpression
@@ -40,6 +41,7 @@ function getChildNodes(node: ASTNode): ChildNodeInfo[] {
     'property', // MemberAccessExpression
     'condition', // IfStatement
     'then', // IfStatement
+    'else', // IfExpression
     'typeRef', // PropertyDeclaration, Parameter, etc.
     'defaultValue', // PropertyDeclaration, RepeatedDeclaration
     'annotations', // Various declaration types
