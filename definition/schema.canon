@@ -11,7 +11,7 @@ schema {
     pipeline: Pipeline
 }
 
-@description('Plugin header struct')
+@description("Plugin header struct")
 struct PluginHeader {
     name: string
     description?: string
