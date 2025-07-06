@@ -48,7 +48,6 @@ npm run test:error-handling
 ### Error Codes Reference
 
 - **E0001-E0099**: Syntax Errors
-
   - E0001: Missing expression
   - E0002: Missing closing parenthesis
   - E0003: Missing closing brace
@@ -59,6 +58,24 @@ npm run test:error-handling
 - **E0300-E0399**: Configuration Errors
 
 ## Development
+
+### Code Quality Tools
+
+This project uses modern development tools to maintain code quality:
+
+- **ESLint**: TypeScript linting with custom rules for Canon development
+- **Prettier**: Automatic code formatting with consistent style
+- **TypeScript**: Static type checking with strict configuration
+- **Jest**: Unit testing framework with coverage reporting
+
+### Development Scripts
+
+- `npm run lint`: Run ESLint to check code quality
+- `npm run lint:fix`: Auto-fix ESLint issues where possible
+- `npm run format`: Format code with Prettier
+- `npm run format:check`: Check if code is properly formatted
+- `npm run typecheck`: Run TypeScript compiler for type checking
+- `npm run ci`: Run all checks (type check, lint, format, tests)
 
 ### Testing
 

@@ -3,306 +3,328 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 
 interface ASTNode {
-    type: string;
-    text?: string;
-    children?: ASTNode[];
-    [key: string]: any;
+  type: string;
+  text?: string;
+  children?: ASTNode[];
+  [key: string]: any;
 }
 
 interface ChildNodeInfo {
-    node: ASTNode;
-    propertyKey: string;
-    arrayIndex?: number;
+  node: ASTNode;
+  propertyKey: string;
+  arrayIndex?: number;
 }
 
 function getChildNodes(node: ASTNode): ChildNodeInfo[] {
-    const children: ChildNodeInfo[] = [];
-    
-    // Standard children property
-    if (node.children && Array.isArray(node.children)) {
-        node.children.forEach((child, index) => {
-            children.push({ node: child, propertyKey: 'children', arrayIndex: index });
+  const children: ChildNodeInfo[] = [];
+
+  // Standard children property
+  if (node.children && Array.isArray(node.children)) {
+    node.children.forEach((child, index) => {
+      children.push({ node: child, propertyKey: 'children', arrayIndex: index });
+    });
+  }
+
+  // Common properties that contain child nodes
+  const childProperties = [
+    'body',
+    'arguments',
+    'expression',
+    'target',
+    'functionName',
+    'left',
+    'right',
+    'condition',
+    'thenBranch',
+    'elseBranch',
+    'object',
+    'member',
+    'variableName',
+    'iteratorVariable',
+    'parameters',
+    'returnType',
+    'dataType',
+    'mixinType',
+    'name',
+  ];
+
+  for (const prop of childProperties) {
+    const value = node[prop];
+    if (value) {
+      if (Array.isArray(value)) {
+        // Array of nodes
+        value.forEach((item, index) => {
+          if (item && typeof item === 'object' && item.type) {
+            children.push({ node: item, propertyKey: prop, arrayIndex: index });
+          }
         });
+      } else if (typeof value === 'object' && value.type) {
+        // Single node
+        children.push({ node: value, propertyKey: prop });
+      }
     }
-    
-    // Common properties that contain child nodes
-    const childProperties = [
-        'body', 'arguments', 'expression', 'target', 'functionName', 
-        'left', 'right', 'condition', 'thenBranch', 'elseBranch',
-        'object', 'member', 'variableName', 'iteratorVariable',
-        'parameters', 'returnType', 'dataType', 'mixinType', 'name'
-    ];
-    
-    for (const prop of childProperties) {
-        const value = node[prop];
-        if (value) {
-            if (Array.isArray(value)) {
-                // Array of nodes
-                value.forEach((item, index) => {
-                    if (item && typeof item === 'object' && item.type) {
-                        children.push({ node: item, propertyKey: prop, arrayIndex: index });
-                    }
-                });
-            } else if (typeof value === 'object' && value.type) {
-                // Single node
-                children.push({ node: value, propertyKey: prop });
-            }
-        }
-    }
-    
-    return children;
+  }
+
+  return children;
 }
 
-function renderASTNode(node: ASTNode, depth = 0, propertyKey?: string, arrayIndex?: number): string {
-    const nodeId = `ast-node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const childNodeInfos = getChildNodes(node);
-    const hasChildren = childNodeInfos.length > 0;
-    const indentClass = depth > 0 ? `ml-${Math.min(depth * 2, 8)}` : '';
-    
-    let html = `<div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ${indentClass}" id="${nodeId}" onclick="toggleASTNode('${nodeId}')">`;
-    
-    // Minimal expand/collapse indicator
-    html += `<span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">${hasChildren ? '▼' : ' '}</span>`;
-    
-    // Property key indicator (if this node is a child)
-    if (propertyKey && propertyKey !== 'children') {
-        const keyDisplay = arrayIndex !== undefined ? `${propertyKey}[${arrayIndex}]` : propertyKey;
-        html += `<span class="property-key text-xs text-purple-600 dark:text-purple-400 mr-1">${escapeHtml(keyDisplay)}:</span>`;
+function renderASTNode(
+  node: ASTNode,
+  depth = 0,
+  propertyKey?: string,
+  arrayIndex?: number
+): string {
+  const nodeId = `ast-node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const childNodeInfos = getChildNodes(node);
+  const hasChildren = childNodeInfos.length > 0;
+  const indentClass = depth > 0 ? `ml-${Math.min(depth * 2, 8)}` : '';
+
+  let html = `<div class="ast-node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ${indentClass}" id="${nodeId}" onclick="toggleASTNode('${nodeId}')">`;
+
+  // Minimal expand/collapse indicator
+  html += `<span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">${hasChildren ? '▼' : ' '}</span>`;
+
+  // Property key indicator (if this node is a child)
+  if (propertyKey && propertyKey !== 'children') {
+    const keyDisplay = arrayIndex !== undefined ? `${propertyKey}[${arrayIndex}]` : propertyKey;
+    html += `<span class="property-key text-xs text-purple-600 dark:text-purple-400 mr-1">${escapeHtml(keyDisplay)}:</span>`;
+  }
+
+  // Node type - ultra minimal
+  html += `<span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">${escapeHtml(node.type)}</span>`;
+
+  // Additional information - minimal
+  const additionalInfo = getNodeAdditionalInfo(node);
+  if (additionalInfo) {
+    html += `<span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">${escapeHtml(additionalInfo)}</span>`;
+  }
+
+  html += '</div>';
+
+  if (hasChildren) {
+    html += `<div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="${nodeId}-children">`;
+    for (const childInfo of childNodeInfos) {
+      html += renderASTNode(childInfo.node, depth + 1, childInfo.propertyKey, childInfo.arrayIndex);
     }
-    
-    // Node type - ultra minimal
-    html += `<span class="node-type text-xs text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">${escapeHtml(node.type)}</span>`;
-    
-    // Additional information - minimal
-    const additionalInfo = getNodeAdditionalInfo(node);
-    if (additionalInfo) {
-        html += `<span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">${escapeHtml(additionalInfo)}</span>`;
-    }
-    
     html += '</div>';
-    
-    if (hasChildren) {
-        html += `<div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="${nodeId}-children">`;
-        for (const childInfo of childNodeInfos) {
-            html += renderASTNode(childInfo.node, depth + 1, childInfo.propertyKey, childInfo.arrayIndex);
-        }
-        html += '</div>';
-    }
-    
-    return html;
+  }
+
+  return html;
 }
 
 function getNodeAdditionalInfo(node: ASTNode): string {
-    const info: string[] = [];
-    
-    // Terminal nodes
-    if (node.type === 'Terminal' && node.text) {
-        return `"${node.text}"`;
+  const info: string[] = [];
+
+  // Terminal nodes
+  if (node.type === 'Terminal' && node.text) {
+    return `"${node.text}"`;
+  }
+
+  // Schema-related nodes
+  if (node.schema) {
+    info.push(`schema: ${node.schema}`);
+  }
+
+  if (node.namespace) {
+    info.push(`namespace: ${node.namespace}`);
+  }
+
+  // Structure-related - handle both string and object forms
+  if (node.name) {
+    if (typeof node.name === 'object' && node.name.name) {
+      info.push(`name: ${node.name.name}`);
+    } else if (typeof node.name === 'string') {
+      info.push(`name: ${node.name}`);
     }
-    
-    // Schema-related nodes
-    if (node.schema) {
-        info.push(`schema: ${node.schema}`);
+  }
+
+  if (node.structName) {
+    info.push(`struct: ${node.structName}`);
+  }
+
+  if (node.mixinType) {
+    if (typeof node.mixinType === 'object' && node.mixinType.typeName) {
+      info.push(`mixin: ${node.mixinType.typeName}`);
+    } else if (typeof node.mixinType === 'string') {
+      info.push(`mixin: ${node.mixinType}`);
     }
-    
-    if (node.namespace) {
-        info.push(`namespace: ${node.namespace}`);
+  }
+
+  if (node.fieldName) {
+    info.push(`field: ${node.fieldName}`);
+  }
+
+  if (node.methodName) {
+    info.push(`method: ${node.methodName}`);
+  }
+
+  // Type-related - handle both string and object forms
+  if (node.typeName) {
+    info.push(`type: ${node.typeName}`);
+  }
+
+  if (node.dataType) {
+    if (typeof node.dataType === 'object' && node.dataType.typeName) {
+      info.push(`dataType: ${node.dataType.typeName}`);
+    } else if (typeof node.dataType === 'string') {
+      info.push(`dataType: ${node.dataType}`);
     }
-    
-    // Structure-related - handle both string and object forms
-    if (node.name) {
-        if (typeof node.name === 'object' && node.name.name) {
-            info.push(`name: ${node.name.name}`);
-        } else if (typeof node.name === 'string') {
-            info.push(`name: ${node.name}`);
-        }
+  }
+
+  if (node.returnType) {
+    if (typeof node.returnType === 'object' && node.returnType.typeName) {
+      info.push(`returnType: ${node.returnType.typeName}`);
+    } else if (typeof node.returnType === 'string') {
+      info.push(`returnType: ${node.returnType}`);
     }
-    
-    if (node.structName) {
-        info.push(`struct: ${node.structName}`);
+  }
+
+  // Iterator variable for ForStatement
+  if (node.iteratorVariable) {
+    if (typeof node.iteratorVariable === 'object' && node.iteratorVariable.name) {
+      info.push(`iterator: ${node.iteratorVariable.name}`);
+    } else if (typeof node.iteratorVariable === 'string') {
+      info.push(`iterator: ${node.iteratorVariable}`);
     }
-    
-    if (node.mixinType) {
-        if (typeof node.mixinType === 'object' && node.mixinType.typeName) {
-            info.push(`mixin: ${node.mixinType.typeName}`);
-        } else if (typeof node.mixinType === 'string') {
-            info.push(`mixin: ${node.mixinType}`);
-        }
+  }
+
+  // Variable names
+  if (node.variableName) {
+    if (typeof node.variableName === 'object' && node.variableName.name) {
+      info.push(`var: ${node.variableName.name}`);
+    } else if (typeof node.variableName === 'string') {
+      info.push(`var: ${node.variableName}`);
     }
-    
-    if (node.fieldName) {
-        info.push(`field: ${node.fieldName}`);
+  }
+
+  if (node.variableType) {
+    info.push(`varType: ${node.variableType}`);
+  }
+
+  if (node.isMutable !== undefined) {
+    info.push(`mutable: ${node.isMutable}`);
+  }
+
+  // Boolean flags
+  if (node.multiple !== undefined) {
+    info.push(`multiple: ${node.multiple}`);
+  }
+
+  if (node.required !== undefined) {
+    info.push(`required: ${node.required}`);
+  }
+
+  if (node.isDeclare !== undefined) {
+    info.push(`declare: ${node.isDeclare}`);
+  }
+
+  if (node.isMethodCall !== undefined) {
+    info.push(`methodCall: ${node.isMethodCall}`);
+  }
+
+  if (node.isObjectConstruction !== undefined) {
+    info.push(`objectConstruction: ${node.isObjectConstruction}`);
+  }
+
+  if (node.hasArguments !== undefined) {
+    info.push(`hasArgs: ${node.hasArguments}`);
+  }
+
+  if (node.hasBody !== undefined) {
+    info.push(`hasBody: ${node.hasBody}`);
+  }
+
+  // Value-related
+  if (node.value !== undefined && node.value !== null) {
+    info.push(`value: ${JSON.stringify(node.value)}`);
+  }
+
+  if (node.literalType) {
+    info.push(`literal: ${node.literalType}`);
+  }
+
+  // Expression operators
+  if (node.operator) {
+    info.push(`op: ${node.operator}`);
+  }
+
+  // Function-related - handle both string and object forms
+  if (node.functionName) {
+    if (typeof node.functionName === 'object' && node.functionName.name) {
+      info.push(`function: ${node.functionName.name}`);
+    } else if (typeof node.functionName === 'string') {
+      info.push(`function: ${node.functionName}`);
     }
-    
-    if (node.methodName) {
-        info.push(`method: ${node.methodName}`);
+  }
+
+  if (node.argumentCount !== undefined) {
+    info.push(`argCount: ${node.argumentCount}`);
+  }
+
+  if (node.parameters && Array.isArray(node.parameters)) {
+    if (node.parameters.length > 0) {
+      const paramNames = node.parameters
+        .map((p) => {
+          const name = typeof p.name === 'object' ? p.name.name : p.name;
+          const type = typeof p.type === 'object' ? p.type.typeName : p.type;
+          return `${name}: ${type}`;
+        })
+        .join(', ');
+      info.push(`params: (${paramNames})`);
+    } else {
+      info.push('params: ()');
     }
-    
-    // Type-related - handle both string and object forms
-    if (node.typeName) {
-        info.push(`type: ${node.typeName}`);
+  }
+
+  // Access-related - handle both string and object forms
+  if (node.target) {
+    if (typeof node.target === 'object') {
+      if (node.target.type === 'Identifier' && node.target.name) {
+        info.push(`target: ${node.target.name}`);
+      } else if (node.target.type === 'MemberAccess' && node.target.fullAccess) {
+        info.push(`target: ${node.target.fullAccess}`);
+      } else {
+        info.push(`target: ${node.target.type}`);
+      }
+    } else if (typeof node.target === 'string') {
+      info.push(`target: ${node.target}`);
     }
-    
-    if (node.dataType) {
-        if (typeof node.dataType === 'object' && node.dataType.typeName) {
-            info.push(`dataType: ${node.dataType.typeName}`);
-        } else if (typeof node.dataType === 'string') {
-            info.push(`dataType: ${node.dataType}`);
-        }
+  }
+
+  if (node.fullAccess) {
+    info.push(`access: ${node.fullAccess}`);
+  }
+
+  if (node.object) {
+    if (typeof node.object === 'object' && node.object.type) {
+      info.push(`object: ${node.object.type}`);
+    } else if (typeof node.object === 'string') {
+      info.push(`object: ${node.object}`);
     }
-    
-    if (node.returnType) {
-        if (typeof node.returnType === 'object' && node.returnType.typeName) {
-            info.push(`returnType: ${node.returnType.typeName}`);
-        } else if (typeof node.returnType === 'string') {
-            info.push(`returnType: ${node.returnType}`);
-        }
+  }
+
+  if (node.member) {
+    if (typeof node.member === 'object' && node.member.name) {
+      info.push(`member: ${node.member.name}`);
+    } else if (typeof node.member === 'string') {
+      info.push(`member: ${node.member}`);
     }
-    
-    // Iterator variable for ForStatement
-    if (node.iteratorVariable) {
-        if (typeof node.iteratorVariable === 'object' && node.iteratorVariable.name) {
-            info.push(`iterator: ${node.iteratorVariable.name}`);
-        } else if (typeof node.iteratorVariable === 'string') {
-            info.push(`iterator: ${node.iteratorVariable}`);
-        }
-    }
-    
-    // Variable names
-    if (node.variableName) {
-        if (typeof node.variableName === 'object' && node.variableName.name) {
-            info.push(`var: ${node.variableName.name}`);
-        } else if (typeof node.variableName === 'string') {
-            info.push(`var: ${node.variableName}`);
-        }
-    }
-    
-    if (node.variableType) {
-        info.push(`varType: ${node.variableType}`);
-    }
-    
-    if (node.isMutable !== undefined) {
-        info.push(`mutable: ${node.isMutable}`);
-    }
-    
-    // Boolean flags
-    if (node.multiple !== undefined) {
-        info.push(`multiple: ${node.multiple}`);
-    }
-    
-    if (node.required !== undefined) {
-        info.push(`required: ${node.required}`);
-    }
-    
-    if (node.isDeclare !== undefined) {
-        info.push(`declare: ${node.isDeclare}`);
-    }
-    
-    if (node.isMethodCall !== undefined) {
-        info.push(`methodCall: ${node.isMethodCall}`);
-    }
-    
-    if (node.isObjectConstruction !== undefined) {
-        info.push(`objectConstruction: ${node.isObjectConstruction}`);
-    }
-    
-    if (node.hasArguments !== undefined) {
-        info.push(`hasArgs: ${node.hasArguments}`);
-    }
-    
-    if (node.hasBody !== undefined) {
-        info.push(`hasBody: ${node.hasBody}`);
-    }
-    
-    // Value-related
-    if (node.value !== undefined && node.value !== null) {
-        info.push(`value: ${JSON.stringify(node.value)}`);
-    }
-    
-    if (node.literalType) {
-        info.push(`literal: ${node.literalType}`);
-    }
-    
-    // Expression operators
-    if (node.operator) {
-        info.push(`op: ${node.operator}`);
-    }
-    
-    // Function-related - handle both string and object forms
-    if (node.functionName) {
-        if (typeof node.functionName === 'object' && node.functionName.name) {
-            info.push(`function: ${node.functionName.name}`);
-        } else if (typeof node.functionName === 'string') {
-            info.push(`function: ${node.functionName}`);
-        }
-    }
-    
-    if (node.argumentCount !== undefined) {
-        info.push(`argCount: ${node.argumentCount}`);
-    }
-    
-    if (node.parameters && Array.isArray(node.parameters)) {
-        if (node.parameters.length > 0) {
-            const paramNames = node.parameters.map(p => {
-                const name = typeof p.name === 'object' ? p.name.name : p.name;
-                const type = typeof p.type === 'object' ? p.type.typeName : p.type;
-                return `${name}: ${type}`;
-            }).join(', ');
-            info.push(`params: (${paramNames})`);
-        } else {
-            info.push('params: ()');
-        }
-    }
-    
-    // Access-related - handle both string and object forms
-    if (node.target) {
-        if (typeof node.target === 'object') {
-            if (node.target.type === 'Identifier' && node.target.name) {
-                info.push(`target: ${node.target.name}`);
-            } else if (node.target.type === 'MemberAccess' && node.target.fullAccess) {
-                info.push(`target: ${node.target.fullAccess}`);
-            } else {
-                info.push(`target: ${node.target.type}`);
-            }
-        } else if (typeof node.target === 'string') {
-            info.push(`target: ${node.target}`);
-        }
-    }
-    
-    if (node.fullAccess) {
-        info.push(`access: ${node.fullAccess}`);
-    }
-    
-    if (node.object) {
-        if (typeof node.object === 'object' && node.object.type) {
-            info.push(`object: ${node.object.type}`);
-        } else if (typeof node.object === 'string') {
-            info.push(`object: ${node.object}`);
-        }
-    }
-    
-    if (node.member) {
-        if (typeof node.member === 'object' && node.member.name) {
-            info.push(`member: ${node.member.name}`);
-        } else if (typeof node.member === 'string') {
-            info.push(`member: ${node.member}`);
-        }
-    }
-    
-    return info.join(', ');
+  }
+
+  return info.join(', ');
 }
 
 function escapeHtml(text: string): string {
-    return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function generateASTHtml(ast: ASTNode): string {
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -609,41 +631,40 @@ function generateASTHtml(ast: ASTNode): string {
 }
 
 function main() {
-    try {
-        console.log('🚀 Starting AST documentation generation...');
-        
-        // Read AST YAML file
-        const astYamlPath = path.join(process.cwd(), 'ast.yaml');
-        if (!fs.existsSync(astYamlPath)) {
-            console.error('AST YAML file not found. Please run "npm run parse:ast" first.');
-            process.exit(1);
-        }
+  try {
+    console.log('🚀 Starting AST documentation generation...');
 
-        const astContent = fs.readFileSync(astYamlPath, 'utf8');
-        const ast = yaml.load(astContent) as ASTNode;
-
-        // Generate HTML documentation
-        const html = generateASTHtml(ast);
-
-        // Ensure docs directory exists
-        const docsDir = path.join(process.cwd(), 'docs');
-        if (!fs.existsSync(docsDir)) {
-            fs.mkdirSync(docsDir, { recursive: true });
-        }
-
-        // Write HTML file
-        const outputPath = path.join(docsDir, 'index.html');
-        fs.writeFileSync(outputPath, html, 'utf8');
-
-        console.log('✅ AST documentation generated successfully!');
-        console.log(`📁 Output: ${outputPath}`);
-        
-    } catch (error) {
-        console.error('❌ Error generating AST documentation:', error);
-        process.exit(1);
+    // Read AST YAML file
+    const astYamlPath = path.join(process.cwd(), 'ast.yaml');
+    if (!fs.existsSync(astYamlPath)) {
+      console.error('AST YAML file not found. Please run "npm run parse:ast" first.');
+      process.exit(1);
     }
+
+    const astContent = fs.readFileSync(astYamlPath, 'utf8');
+    const ast = yaml.load(astContent) as ASTNode;
+
+    // Generate HTML documentation
+    const html = generateASTHtml(ast);
+
+    // Ensure docs directory exists
+    const docsDir = path.join(process.cwd(), 'docs');
+    if (!fs.existsSync(docsDir)) {
+      fs.mkdirSync(docsDir, { recursive: true });
+    }
+
+    // Write HTML file
+    const outputPath = path.join(docsDir, 'index.html');
+    fs.writeFileSync(outputPath, html, 'utf8');
+
+    console.log('✅ AST documentation generated successfully!');
+    console.log(`📁 Output: ${outputPath}`);
+  } catch (error) {
+    console.error('❌ Error generating AST documentation:', error);
+    process.exit(1);
+  }
 }
 
 if (require.main === module) {
-    main();
+  main();
 }

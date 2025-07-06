@@ -3,51 +3,51 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 
 interface HierarchyNode {
-    type: string;
-    details?: string;
-    children: HierarchyNode[];
+  type: string;
+  details?: string;
+  children: HierarchyNode[];
 }
 
 function renderNode(node: HierarchyNode, depth = 0): string {
-    const nodeId = `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const hasChildren = node.children && node.children.length > 0;
-    const indentClass = depth > 0 ? `ml-${Math.min(depth * 2, 8)}` : '';
-    
-    let html = `<div class="node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ${indentClass}" id="${nodeId}" onclick="toggleNode('${nodeId}')">`;
-    
-    // Minimal expand/collapse indicator
-    html += `<span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">${hasChildren ? '▼' : ' '}</span>`;
-    
-    // Node type - ultra minimal
-    html += `<span class="node-type text-xs text-green-700 dark:text-green-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">${escapeHtml(node.type)}</span>`;
-    
-    if (node.details) {
-        html += `<span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">${escapeHtml(node.details)}</span>`;
+  const nodeId = `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const hasChildren = node.children && node.children.length > 0;
+  const indentClass = depth > 0 ? `ml-${Math.min(depth * 2, 8)}` : '';
+
+  let html = `<div class="node group cursor-pointer py-0.5 px-1 hover:bg-gray-200 dark:hover:bg-gray-800 ${indentClass}" id="${nodeId}" onclick="toggleNode('${nodeId}')">`;
+
+  // Minimal expand/collapse indicator
+  html += `<span class="toggle inline-block w-3 text-xs text-gray-500 dark:text-gray-600">${hasChildren ? '▼' : ' '}</span>`;
+
+  // Node type - ultra minimal
+  html += `<span class="node-type text-xs text-green-700 dark:text-green-400 bg-gray-200 dark:bg-gray-800 px-1 py-0 mr-1">${escapeHtml(node.type)}</span>`;
+
+  if (node.details) {
+    html += `<span class="node-details text-xs text-gray-600 dark:text-gray-500 bg-gray-100 dark:bg-gray-850 px-1 py-0">${escapeHtml(node.details)}</span>`;
+  }
+  html += '</div>';
+
+  if (hasChildren) {
+    html += `<div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="${nodeId}-children">`;
+    for (const child of node.children) {
+      html += renderNode(child, depth + 1);
     }
     html += '</div>';
-    
-    if (hasChildren) {
-        html += `<div class="children border-l border-gray-300 dark:border-gray-700 pl-2 ml-1" id="${nodeId}-children">`;
-        for (const child of node.children) {
-            html += renderNode(child, depth + 1);
-        }
-        html += '</div>';
-    }
-    
-    return html;
+  }
+
+  return html;
 }
 
 function escapeHtml(text: string): string {
-    return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function generateHtml(hierarchy: HierarchyNode): string {
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -320,41 +320,40 @@ function generateHtml(hierarchy: HierarchyNode): string {
 }
 
 function main() {
-    try {
-        console.log('🚀 Starting hierarchy documentation generation...');
-        
-        // Read hierarchy YAML file
-        const hierarchyYamlPath = path.join(process.cwd(), 'hierarchy.yaml');
-        if (!fs.existsSync(hierarchyYamlPath)) {
-            console.error('Hierarchy YAML file not found. Please run "npm run parse:hierarchy" first.');
-            process.exit(1);
-        }
+  try {
+    console.log('🚀 Starting hierarchy documentation generation...');
 
-        const hierarchyContent = fs.readFileSync(hierarchyYamlPath, 'utf8');
-        const hierarchy = yaml.load(hierarchyContent) as HierarchyNode;
-
-        // Generate HTML documentation
-        const html = generateHtml(hierarchy);
-
-        // Ensure docs directory exists
-        const docsDir = path.join(process.cwd(), 'docs');
-        if (!fs.existsSync(docsDir)) {
-            fs.mkdirSync(docsDir, { recursive: true });
-        }
-
-        // Write HTML file
-        const outputPath = path.join(docsDir, 'hierarchy.html');
-        fs.writeFileSync(outputPath, html, 'utf8');
-
-        console.log('✅ Hierarchy documentation generated successfully!');
-        console.log(`📁 Output: ${outputPath}`);
-        
-    } catch (error) {
-        console.error('❌ Error generating hierarchy documentation:', error);
-        process.exit(1);
+    // Read hierarchy YAML file
+    const hierarchyYamlPath = path.join(process.cwd(), 'hierarchy.yaml');
+    if (!fs.existsSync(hierarchyYamlPath)) {
+      console.error('Hierarchy YAML file not found. Please run "npm run parse:hierarchy" first.');
+      process.exit(1);
     }
+
+    const hierarchyContent = fs.readFileSync(hierarchyYamlPath, 'utf8');
+    const hierarchy = yaml.load(hierarchyContent) as HierarchyNode;
+
+    // Generate HTML documentation
+    const html = generateHtml(hierarchy);
+
+    // Ensure docs directory exists
+    const docsDir = path.join(process.cwd(), 'docs');
+    if (!fs.existsSync(docsDir)) {
+      fs.mkdirSync(docsDir, { recursive: true });
+    }
+
+    // Write HTML file
+    const outputPath = path.join(docsDir, 'hierarchy.html');
+    fs.writeFileSync(outputPath, html, 'utf8');
+
+    console.log('✅ Hierarchy documentation generated successfully!');
+    console.log(`📁 Output: ${outputPath}`);
+  } catch (error) {
+    console.error('❌ Error generating hierarchy documentation:', error);
+    process.exit(1);
+  }
 }
 
 if (require.main === module) {
-    main();
+  main();
 }
