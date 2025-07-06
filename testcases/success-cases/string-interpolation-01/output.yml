@@ -1,0 +1,15 @@
+program:
+  variableDeclaration:
+    - type: val
+      identifier: name
+      expression:
+        literal: "Canon"
+  variableDeclaration:
+    - type: val
+      identifier: message
+      expression:
+        stringInterpolation:
+          - stringFragment: "Hello, "
+          - interpolationExpression:
+              identifier: name
+          - stringFragment: "!"

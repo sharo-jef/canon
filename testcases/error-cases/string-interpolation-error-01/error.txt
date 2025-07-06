@@ -1,0 +1,10 @@
+error[E0005]: unexpected token
+ --> input:3:0
+  |
+2 | val message = `Hello, ${name}!;
+3 | 
+  | ^
+  |
+  = note: extraneous input '<EOF>' expecting {INTERPOLATION_TEXT, '${', INTERPOLATION_DOLLAR, INTERPOLATION_END}
+  = note: the file ended unexpectedly
+  = help: check if you're missing closing braces, parentheses, or other delimiters

@@ -22,7 +22,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
     line: number,
     charPositionInLine: number,
     msg: string,
-    e: RecognitionException | undefined
+    _e: RecognitionException | undefined
   ): void {
     // Adjust location for better error reporting
     const adjustedLocation = this.adjustErrorLocation(
@@ -162,7 +162,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
     const lowerMsg = msg.toLowerCase();
 
     // Check for specific error patterns
-    if (lowerMsg.includes('missing') && lowerMsg.includes("')'")) {
+    if (lowerMsg.includes('missing') && (lowerMsg.includes("')'") || lowerMsg.includes('rparen'))) {
       return ErrorCode.E0002; // Missing closing parenthesis
     }
 

@@ -1,0 +1,1 @@
+Basic string interpolation with variable substitution

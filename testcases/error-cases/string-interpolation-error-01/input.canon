@@ -1,0 +1,2 @@
+val name = "Test";
+val message = `Hello, ${name}!;

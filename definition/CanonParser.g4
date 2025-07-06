@@ -6,19 +6,7 @@ options {
 
 // Top-level structure
 program:
-	schemaDirective? schemaImport? (
-		structDefinition
-		| functionDefinition
-		| variableDeclaration
-		| assignment
-		| configurationCall
-	)* schemaDefinition? (
-		structDefinition
-		| functionDefinition
-		| variableDeclaration
-		| assignment
-		| configurationCall
-	)* EOF;
+	statement* EOF;
 
 // Configuration call (function call with optional trailing lambda for building config)
 configurationCall:
@@ -75,21 +63,25 @@ typeReference: STRING_TYPE | INT_TYPE | IDENTIFIER;
 
 // Statements
 statement:
-	variableDeclaration
+	structDefinition
+	| functionDefinition
+	| variableDeclaration
 	| assignment
-	| expressionStatement
 	| returnStatement
 	| forStatement
-	| configurationCall;
+	| configurationCall
+	| schemaDirective
+	| schemaImport
+	| schemaDefinition;
 
-variableDeclaration: (VAL | VAR) IDENTIFIER ASSIGN expression;
+variableDeclaration: (VAL | VAR) IDENTIFIER ASSIGN expression SEMICOLON?;
 assignment: (
 		IDENTIFIER
 		| THIS DOT IDENTIFIER
 		| IDENTIFIER DOT IDENTIFIER
-	) ASSIGN expression;
-expressionStatement: expression;
-returnStatement: RETURN expression?;
+	) ASSIGN expression SEMICOLON?;
+expressionStatement: expression SEMICOLON?;
+returnStatement: RETURN expression? SEMICOLON?;
 forStatement:
 	FOR LPAREN IDENTIFIER IN expression RPAREN LBRACE statement* RBRACE;
 
@@ -144,9 +136,49 @@ argumentList: expression (COMMA expression)*;
 memberAccess: (THIS DOT IDENTIFIER)
 	| (IDENTIFIER DOT IDENTIFIER);
 
-stringInterpolation: BACKTICK stringContent BACKTICK;
-stringContent: (interpolationExpression | DOT | IDENTIFIER)*;
-interpolationExpression: INTERPOLATION_START expression RBRACE;
+stringInterpolation: BACKTICK interpolationContent* INTERPOLATION_END;
+
+interpolationContent:
+    INTERPOLATION_TEXT
+    | INTERPOLATION_DOLLAR
+    | interpolationExpression;
+
+interpolationExpression: INTERPOLATION_START exprModeExpression EXPR_RBRACE;
+
+// Expression rules for expression mode (inside ${...})
+exprModeExpression: exprModeComparison (RANGE exprModeComparison)*;
+
+exprModeComparison:
+	exprModeAdditive (
+		(
+			EXPR_EQUALS
+			| EXPR_NOT_EQUALS
+			| EXPR_LESS_THAN
+			| EXPR_GREATER_THAN
+			| EXPR_LESS_EQUALS
+			| EXPR_GREATER_EQUALS
+		) exprModeAdditive
+	)*;
+
+exprModeAdditive:
+	exprModeMultiplicative (
+		(EXPR_PLUS | EXPR_MINUS) exprModeMultiplicative
+	)*;
+
+exprModeMultiplicative:
+	exprModePrimary ((EXPR_MULTIPLY | EXPR_DIVIDE) exprModePrimary)*;
+
+exprModePrimary:
+	EXPR_STRING_LITERAL
+	| EXPR_INTEGER_LITERAL
+	| EXPR_IDENTIFIER EXPR_LPAREN EXPR_RPAREN // function call
+	| EXPR_IDENTIFIER EXPR_LPAREN exprModeArgumentList? EXPR_RPAREN // function call with args
+	| exprModeMemberAccess
+	| EXPR_IDENTIFIER
+	| EXPR_LPAREN exprModeExpression EXPR_RPAREN;
+
+exprModeMemberAccess: EXPR_IDENTIFIER EXPR_DOT EXPR_IDENTIFIER;
+exprModeArgumentList: exprModeExpression (EXPR_COMMA exprModeExpression)*;
 
 // Literals
 literal: STRING_LITERAL | INTEGER_LITERAL;

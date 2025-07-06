@@ -35,8 +35,15 @@ import { FunctionCallContext } from "./CanonParser";
 import { ArgumentListContext } from "./CanonParser";
 import { MemberAccessContext } from "./CanonParser";
 import { StringInterpolationContext } from "./CanonParser";
-import { StringContentContext } from "./CanonParser";
+import { InterpolationContentContext } from "./CanonParser";
 import { InterpolationExpressionContext } from "./CanonParser";
+import { ExprModeExpressionContext } from "./CanonParser";
+import { ExprModeComparisonContext } from "./CanonParser";
+import { ExprModeAdditiveContext } from "./CanonParser";
+import { ExprModeMultiplicativeContext } from "./CanonParser";
+import { ExprModePrimaryContext } from "./CanonParser";
+import { ExprModeMemberAccessContext } from "./CanonParser";
+import { ExprModeArgumentListContext } from "./CanonParser";
 import { LiteralContext } from "./CanonParser";
 import { AnnotationContext } from "./CanonParser";
 
@@ -274,11 +281,11 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitStringInterpolation?: (ctx: StringInterpolationContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.stringContent`.
+	 * Visit a parse tree produced by `CanonParser.interpolationContent`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitStringContent?: (ctx: StringContentContext) => Result;
+	visitInterpolationContent?: (ctx: InterpolationContentContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.interpolationExpression`.
@@ -286,6 +293,55 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitInterpolationExpression?: (ctx: InterpolationExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.exprModeExpression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitExprModeExpression?: (ctx: ExprModeExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.exprModeComparison`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitExprModeComparison?: (ctx: ExprModeComparisonContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.exprModeAdditive`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitExprModeAdditive?: (ctx: ExprModeAdditiveContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.exprModeMultiplicative`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitExprModeMultiplicative?: (ctx: ExprModeMultiplicativeContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.exprModePrimary`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitExprModePrimary?: (ctx: ExprModePrimaryContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.exprModeMemberAccess`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitExprModeMemberAccess?: (ctx: ExprModeMemberAccessContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.exprModeArgumentList`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitExprModeArgumentList?: (ctx: ExprModeArgumentListContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.literal`.

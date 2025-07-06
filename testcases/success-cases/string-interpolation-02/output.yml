@@ -1,0 +1,31 @@
+program:
+  variableDeclaration:
+    - type: val
+      identifier: x
+      expression:
+        literal: 10
+  variableDeclaration:
+    - type: val
+      identifier: y
+      expression:
+        literal: 5
+  variableDeclaration:
+    - type: val
+      identifier: result
+      expression:
+        stringInterpolation:
+          - stringFragment: "The sum of "
+          - interpolationExpression:
+              identifier: x
+          - stringFragment: " and "
+          - interpolationExpression:
+              identifier: y
+          - stringFragment: " is "
+          - interpolationExpression:
+              binaryExpression:
+                left: 
+                  identifier: x
+                operator: "+"
+                right:
+                  identifier: y
+          - stringFragment: "."

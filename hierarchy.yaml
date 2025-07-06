@@ -222,53 +222,19 @@ children:
                                                       - type: StringContent
                                                         children:
                                                           - type: InterpolationExpression
-                                                            children:
-                                                              - type: Expression
-                                                                children:
-                                                                  - type: ComparisonExpression
-                                                                    children:
-                                                                      - type: AdditiveExpression
-                                                                        children:
-                                                                          - type: MultiplicativeExpression
-                                                                            children:
-                                                                              - type: PrimaryExpression
-                                                                                details: contains memberAccess
-                                                                                children:
-                                                                                  - type: MemberAccess
-                                                                                    details: this.major
-                                                                                    children: []
+                                                            children: []
+                                                      - type: StringContent
+                                                        children: []
+                                                      - type: StringContent
+                                                        children:
                                                           - type: InterpolationExpression
-                                                            children:
-                                                              - type: Expression
-                                                                children:
-                                                                  - type: ComparisonExpression
-                                                                    children:
-                                                                      - type: AdditiveExpression
-                                                                        children:
-                                                                          - type: MultiplicativeExpression
-                                                                            children:
-                                                                              - type: PrimaryExpression
-                                                                                details: contains memberAccess
-                                                                                children:
-                                                                                  - type: MemberAccess
-                                                                                    details: this.minor
-                                                                                    children: []
+                                                            children: []
+                                                      - type: StringContent
+                                                        children: []
+                                                      - type: StringContent
+                                                        children:
                                                           - type: InterpolationExpression
-                                                            children:
-                                                              - type: Expression
-                                                                children:
-                                                                  - type: ComparisonExpression
-                                                                    children:
-                                                                      - type: AdditiveExpression
-                                                                        children:
-                                                                          - type: MultiplicativeExpression
-                                                                            children:
-                                                                              - type: PrimaryExpression
-                                                                                details: contains memberAccess
-                                                                                children:
-                                                                                  - type: MemberAccess
-                                                                                    details: this.patch
-                                                                                    children: []
+                                                            children: []
       - type: FunctionDefinition
         details: 'declare getVersion(): version'
         children:

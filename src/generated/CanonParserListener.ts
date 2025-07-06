@@ -35,8 +35,15 @@ import { FunctionCallContext } from "./CanonParser";
 import { ArgumentListContext } from "./CanonParser";
 import { MemberAccessContext } from "./CanonParser";
 import { StringInterpolationContext } from "./CanonParser";
-import { StringContentContext } from "./CanonParser";
+import { InterpolationContentContext } from "./CanonParser";
 import { InterpolationExpressionContext } from "./CanonParser";
+import { ExprModeExpressionContext } from "./CanonParser";
+import { ExprModeComparisonContext } from "./CanonParser";
+import { ExprModeAdditiveContext } from "./CanonParser";
+import { ExprModeMultiplicativeContext } from "./CanonParser";
+import { ExprModePrimaryContext } from "./CanonParser";
+import { ExprModeMemberAccessContext } from "./CanonParser";
+import { ExprModeArgumentListContext } from "./CanonParser";
 import { LiteralContext } from "./CanonParser";
 import { AnnotationContext } from "./CanonParser";
 
@@ -399,15 +406,15 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitStringInterpolation?: (ctx: StringInterpolationContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `CanonParser.stringContent`.
+	 * Enter a parse tree produced by `CanonParser.interpolationContent`.
 	 * @param ctx the parse tree
 	 */
-	enterStringContent?: (ctx: StringContentContext) => void;
+	enterInterpolationContent?: (ctx: InterpolationContentContext) => void;
 	/**
-	 * Exit a parse tree produced by `CanonParser.stringContent`.
+	 * Exit a parse tree produced by `CanonParser.interpolationContent`.
 	 * @param ctx the parse tree
 	 */
-	exitStringContent?: (ctx: StringContentContext) => void;
+	exitInterpolationContent?: (ctx: InterpolationContentContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.interpolationExpression`.
@@ -419,6 +426,83 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitInterpolationExpression?: (ctx: InterpolationExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.exprModeExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterExprModeExpression?: (ctx: ExprModeExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.exprModeExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitExprModeExpression?: (ctx: ExprModeExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.exprModeComparison`.
+	 * @param ctx the parse tree
+	 */
+	enterExprModeComparison?: (ctx: ExprModeComparisonContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.exprModeComparison`.
+	 * @param ctx the parse tree
+	 */
+	exitExprModeComparison?: (ctx: ExprModeComparisonContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.exprModeAdditive`.
+	 * @param ctx the parse tree
+	 */
+	enterExprModeAdditive?: (ctx: ExprModeAdditiveContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.exprModeAdditive`.
+	 * @param ctx the parse tree
+	 */
+	exitExprModeAdditive?: (ctx: ExprModeAdditiveContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.exprModeMultiplicative`.
+	 * @param ctx the parse tree
+	 */
+	enterExprModeMultiplicative?: (ctx: ExprModeMultiplicativeContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.exprModeMultiplicative`.
+	 * @param ctx the parse tree
+	 */
+	exitExprModeMultiplicative?: (ctx: ExprModeMultiplicativeContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.exprModePrimary`.
+	 * @param ctx the parse tree
+	 */
+	enterExprModePrimary?: (ctx: ExprModePrimaryContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.exprModePrimary`.
+	 * @param ctx the parse tree
+	 */
+	exitExprModePrimary?: (ctx: ExprModePrimaryContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.exprModeMemberAccess`.
+	 * @param ctx the parse tree
+	 */
+	enterExprModeMemberAccess?: (ctx: ExprModeMemberAccessContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.exprModeMemberAccess`.
+	 * @param ctx the parse tree
+	 */
+	exitExprModeMemberAccess?: (ctx: ExprModeMemberAccessContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.exprModeArgumentList`.
+	 * @param ctx the parse tree
+	 */
+	enterExprModeArgumentList?: (ctx: ExprModeArgumentListContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.exprModeArgumentList`.
+	 * @param ctx the parse tree
+	 */
+	exitExprModeArgumentList?: (ctx: ExprModeArgumentListContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.literal`.
