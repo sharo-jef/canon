@@ -3,6 +3,7 @@ import typescript from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 import prettier from 'eslint-plugin-prettier';
 import prettierConfig from 'eslint-config-prettier';
+import globals from 'globals';
 
 export default [
   js.configs.recommended,
@@ -13,6 +14,10 @@ export default [
       parserOptions: {
         ecmaVersion: 2022,
         sourceType: 'module',
+      },
+      globals: {
+        ...globals.node,
+        ...globals.es2022,
       },
     },
     plugins: {
