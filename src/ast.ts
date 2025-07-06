@@ -3,17 +3,37 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
 import { CanonLexer } from './generated/CanonLexer';
-import { CanonParser } from './generated/CanonParser';
+// Import specific Context types for type safety
+import {
+  CanonParser,
+  ProgramContext,
+  VariableDeclarationContext,
+  AssignmentContext,
+  LiteralContext,
+  MemberAccessContext,
+  FunctionCallContext,
+  TypeReferenceContext,
+  SchemaDirectiveContext,
+  AnnotationContext,
+  StructDefinitionContext,
+  SchemaMemberContext,
+  MixinDeclarationContext,
+  StructMemberContext,
+  FunctionDefinitionContext,
+  MethodDefinitionContext,
+  ConfigurationCallContext,
+  ForStatementContext,
+  ParameterContext,
+  ExpressionContext,
+  AdditiveExpressionContext,
+  MultiplicativeExpressionContext,
+  ComparisonExpressionContext,
+} from './generated/CanonParser';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { CanonParserVisitor } from './generated/CanonParserVisitor';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 import { RuleNode } from 'antlr4ts/tree/RuleNode';
-import {
-  CanonErrorListener,
-  ErrorFormatter,
-  ErrorCollection,
-  DEFAULT_FORMATTER_OPTIONS,
-} from './error';
+import { CanonErrorListener, ErrorFormatter, DEFAULT_FORMATTER_OPTIONS } from './error';
 
 interface ASTLocation {
   start: { line: number; column: number };
@@ -47,7 +67,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
           },
         };
       }
-    } catch (error) {
+    } catch {
       // If location extraction fails, return undefined
     }
     return undefined;
@@ -196,11 +216,11 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   // Visitor methods implementation
-  visitProgram(ctx: any): ASTNode {
+  visitProgram(ctx: ProgramContext): ASTNode {
     return this.visitChildren(ctx);
   }
 
-  visitVariableDeclaration(ctx: any): ASTNode {
+  visitVariableDeclaration(ctx: VariableDeclarationContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
     const expression = ctx.expression();
 
@@ -213,7 +233,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitAssignment(ctx: any): ASTNode {
+  visitAssignment(ctx: AssignmentContext): ASTNode {
     const identifiers = ctx.IDENTIFIER();
     const thisToken = ctx.THIS();
     const expression = ctx.expression();
@@ -254,7 +274,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitLiteral(ctx: any): ASTNode {
+  visitLiteral(ctx: LiteralContext): ASTNode {
     const stringLiteral = ctx.STRING_LITERAL();
     const integerLiteral = ctx.INTEGER_LITERAL();
 
@@ -280,7 +300,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitMemberAccess(ctx: any): ASTNode {
+  visitMemberAccess(ctx: MemberAccessContext): ASTNode {
     const identifiers = ctx.IDENTIFIER();
     const thisToken = ctx.THIS();
 
@@ -308,7 +328,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitFunctionCall(ctx: any): ASTNode {
+  visitFunctionCall(ctx: FunctionCallContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
     const memberAccess = ctx.memberAccess();
     const argumentList = ctx.argumentList();
@@ -374,7 +394,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     return result;
   }
 
-  visitTypeReference(ctx: any): ASTNode {
+  visitTypeReference(ctx: TypeReferenceContext): ASTNode {
     const stringType = ctx.STRING_TYPE();
     const intType = ctx.INT_TYPE();
     const identifier = ctx.IDENTIFIER();
@@ -397,7 +417,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitSchemaDirective(ctx: any): ASTNode {
+  visitSchemaDirective(ctx: SchemaDirectiveContext): ASTNode {
     const stringLiteral = ctx.STRING_LITERAL();
 
     return {
@@ -407,7 +427,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitAnnotation(ctx: any): ASTNode {
+  visitAnnotation(ctx: AnnotationContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
     const stringLiteral = ctx.STRING_LITERAL();
 
@@ -426,7 +446,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     return result;
   }
 
-  visitStructDefinition(ctx: any): ASTNode {
+  visitStructDefinition(ctx: StructDefinitionContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
 
     return {
@@ -436,7 +456,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitSchemaMember(ctx: any): ASTNode {
+  visitSchemaMember(ctx: SchemaMemberContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
     const multiply = ctx.MULTIPLY();
     const question = ctx.QUESTION();
@@ -474,7 +494,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     return result;
   }
 
-  visitMixinDeclaration(ctx: any): ASTNode {
+  visitMixinDeclaration(ctx: MixinDeclarationContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
 
     return {
@@ -489,7 +509,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitStructMember(ctx: any): ASTNode {
+  visitStructMember(ctx: StructMemberContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
     const question = ctx.QUESTION();
     const typeRef = ctx.typeReference();
@@ -503,7 +523,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitFunctionDefinition(ctx: any): ASTNode {
+  visitFunctionDefinition(ctx: FunctionDefinitionContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
     const isDeclare = ctx.DECLARE();
     const returnType = ctx.typeReference();
@@ -521,7 +541,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitMethodDefinition(ctx: any): ASTNode {
+  visitMethodDefinition(ctx: MethodDefinitionContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
     const returnType = ctx.typeReference();
     const parameterList = ctx.parameterList();
@@ -537,7 +557,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitConfigurationCall(ctx: any): ASTNode {
+  visitConfigurationCall(ctx: ConfigurationCallContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
     const argumentList = ctx.argumentList();
     const constructionBody = ctx.constructionBody();
@@ -553,7 +573,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitForStatement(ctx: any): ASTNode {
+  visitForStatement(ctx: ForStatementContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
     const expression = ctx.expression();
     const statements = ctx.statement();
@@ -570,7 +590,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitParameter(ctx: any): ASTNode {
+  visitParameter(ctx: ParameterContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
     const typeRef = ctx.typeReference();
 
@@ -582,7 +602,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitExpression(ctx: any): ASTNode {
+  visitExpression(ctx: ExpressionContext): ASTNode {
     if (ctx.childCount >= 3) {
       // Range expression: left .. right
       const leftChild = ctx.getChild(0);
@@ -603,7 +623,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     return this.visitChildren(ctx);
   }
 
-  visitAdditiveExpression(ctx: any): ASTNode {
+  visitAdditiveExpression(ctx: AdditiveExpressionContext): ASTNode {
     if (ctx.childCount >= 3) {
       // 左結合で複数の加算/減算を処理
       let currentLeft = this.visit(ctx.getChild(0));
@@ -630,7 +650,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     return this.visitChildren(ctx);
   }
 
-  visitMultiplicativeExpression(ctx: any): ASTNode {
+  visitMultiplicativeExpression(ctx: MultiplicativeExpressionContext): ASTNode {
     if (ctx.childCount >= 3) {
       // 左結合で複数の乗算/除算を処理
       let currentLeft = this.visit(ctx.getChild(0));
@@ -657,7 +677,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     return this.visitChildren(ctx);
   }
 
-  visitComparisonExpression(ctx: any): ASTNode {
+  visitComparisonExpression(ctx: ComparisonExpressionContext): ASTNode {
     if (ctx.childCount >= 3) {
       const leftChild = ctx.getChild(0);
       const operatorChild = ctx.getChild(1);
