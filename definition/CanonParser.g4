@@ -1,0 +1,143 @@
+parser grammar CanonParser;
+
+options {
+    tokenVocab = CanonLexer;
+}
+
+// Root rule
+program: (schemaDirective | useStatement | topLevelElement)* EOF;
+
+// Schema directive
+schemaDirective: SCHEMA_DIRECTIVE stringLiteral;
+
+// Use statement
+useStatement: USE IDENTIFIER;
+
+// Top-level elements
+topLevelElement:
+    schemaDeclaration
+    | structDeclaration
+    | unionDeclaration
+    | typeDeclaration
+    | objectInstantiation;
+
+// Schema declaration
+schemaDeclaration: annotation* SCHEMA block;
+
+// Struct declaration
+structDeclaration: annotation* STRUCT IDENTIFIER block;
+
+// Union declaration
+unionDeclaration: annotation* UNION IDENTIFIER ASSIGN unionType;
+
+// Type declaration (for future type constraints)
+typeDeclaration: annotation* TYPE IDENTIFIER ASSIGN type;
+
+// Union type
+unionType: type (PIPE type)*;
+
+// Type definitions
+type:
+    baseType (LBRACKET RBRACKET)*;
+
+baseType:
+    primitiveType
+    | IDENTIFIER;
+
+primitiveType: STRING_TYPE | INT_TYPE | BOOL_TYPE;
+
+// Block (used in schema, struct, object instantiation)
+block: LBRACE blockContent* RBRACE;
+
+blockContent:
+    propertyDeclaration
+    | assignmentStatement
+    | initDeclaration
+    | functionDeclaration
+    | getterDeclaration
+    | repeatedDeclaration
+    | objectInstantiation
+    | ifStatement
+    | expressionStatement;
+
+// Property declarations (in struct and schema)
+propertyDeclaration: annotation* (PRIVATE)? IDENTIFIER ((QUESTION)? COLON type (ASSIGN expression)?)?;
+
+// Assignment statements (covers both property assignments and variable assignments)
+assignmentStatement: (THIS DOT)? IDENTIFIER ASSIGN expression;
+
+// Init declarations
+initDeclaration: annotation* INIT (LPAREN parameterList? RPAREN)? block;
+
+// Function declarations
+functionDeclaration: annotation* (PRIVATE)? IDENTIFIER LPAREN parameterList? RPAREN block;
+
+// Getter declarations
+getterDeclaration: annotation* GET IDENTIFIER LPAREN RPAREN block;
+
+// Repeated declarations
+repeatedDeclaration: annotation* REPEATED IDENTIFIER COLON type (mappingBlock)? (ASSIGN expression)?;
+
+// Mapping block for repeated declarations
+mappingBlock: LBRACE mappingEntry* RBRACE;
+mappingEntry: IDENTIFIER ARROW IDENTIFIER;
+
+// Parameter list
+parameterList: parameter (COMMA parameter)*;
+parameter: (THIS DOT)? IDENTIFIER (COLON type)?;
+
+// Object instantiation
+objectInstantiation: IDENTIFIER (LPAREN argumentList? RPAREN)? block;
+
+// Argument list
+argumentList: expression (COMMA expression)*;
+
+// Statements
+ifStatement: IF LPAREN expression RPAREN expression;
+expressionStatement: expression;
+
+// Expressions
+expression:
+    primary                                                     #primaryExpression
+    | expression DOT IDENTIFIER                                 #memberAccessExpression
+    | expression LPAREN argumentList? RPAREN                    #functionCallExpression
+    | MINUS expression                                          #unaryMinusExpression
+    | NOT expression                                            #logicalNotExpression
+    | expression (MULTIPLY | DIVIDE | MODULO) expression       #multiplicativeExpression
+    | expression (PLUS | MINUS) expression                     #additiveExpression
+    | expression (LESS_THAN | GREATER_THAN | LESS_EQUALS | GREATER_EQUALS) expression #relationalExpression
+    | expression (EQUALS | NOT_EQUALS) expression              #equalityExpression
+    | expression (AND | LOGICAL_AND) expression                #logicalAndExpression
+    | expression (OR | LOGICAL_OR) expression                  #logicalOrExpression;
+
+// Primary expressions
+primary:
+    literal
+    | IDENTIFIER
+    | THIS
+    | LPAREN expression RPAREN
+    | objectInstantiation
+    | ERROR LPAREN stringLiteral RPAREN;
+
+// Literals
+literal:
+    stringLiteral
+    | INTEGER_LITERAL
+    | TRUE
+    | FALSE;
+
+// String literals (including template strings)
+stringLiteral:
+    STRING_LITERAL
+    | DOUBLE_STRING_LITERAL
+    | templateString;
+
+// Template string handling
+templateString: TEMPLATE_STRING_START templateStringContent* TEMPLATE_STRING_END;
+
+templateStringContent:
+    TEMPLATE_STRING_PART
+    | TEMPLATE_INTERPOLATION;
+
+// Annotations
+annotation: ANNOTATION (stringLiteral | LPAREN stringLiteral RPAREN)?;
