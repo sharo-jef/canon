@@ -153,9 +153,23 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitUseStatement(ctx: UseStatementContext): ASTNode {
+    const identifierToken = ctx.IDENTIFIER();
     return {
       type: 'UseStatement',
-      identifier: ctx.IDENTIFIER().text,
+      identifier: {
+        type: 'Identifier',
+        name: identifierToken.text,
+        loc: {
+          start: {
+            line: identifierToken.symbol.line,
+            column: identifierToken.symbol.charPositionInLine,
+          },
+          end: {
+            line: identifierToken.symbol.line,
+            column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+          },
+        },
+      },
       loc: this.getLocationInfo(ctx),
     };
   }
@@ -185,7 +199,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitStructDeclaration(ctx: StructDeclarationContext): ASTNode {
     const annotations = ctx.annotation().map((ann) => this.visit(ann));
-    const name = ctx.IDENTIFIER().text;
+    const identifierToken = ctx.IDENTIFIER();
+    const name = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
     const body = this.visit(ctx.block());
 
     return {
@@ -199,7 +227,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitUnionDeclaration(ctx: UnionDeclarationContext): ASTNode {
     const annotations = ctx.annotation().map((ann) => this.visit(ann));
-    const name = ctx.IDENTIFIER().text;
+    const identifierToken = ctx.IDENTIFIER();
+    const name = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
     const unionType = this.visit(ctx.unionType());
 
     return {
@@ -213,7 +255,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitTypeDeclaration(ctx: TypeDeclarationContext): ASTNode {
     const annotations = ctx.annotation().map((ann) => this.visit(ann));
-    const name = ctx.IDENTIFIER().text;
+    const identifierToken = ctx.IDENTIFIER();
+    const name = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
     const typeRef = this.visit(ctx.type());
 
     return {
@@ -255,9 +311,23 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     if (ctx.primitiveType()) {
       return this.visit(ctx.primitiveType()!);
     } else {
+      const identifierToken = ctx.IDENTIFIER()!;
       return {
         type: 'TypeReference',
-        name: ctx.IDENTIFIER()!.text,
+        name: {
+          type: 'Identifier',
+          name: identifierToken.text,
+          loc: {
+            start: {
+              line: identifierToken.symbol.line,
+              column: identifierToken.symbol.charPositionInLine,
+            },
+            end: {
+              line: identifierToken.symbol.line,
+              column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+            },
+          },
+        },
         loc: this.getLocationInfo(ctx),
       };
     }
@@ -305,7 +375,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   visitPropertyDeclaration(ctx: PropertyDeclarationContext): ASTNode {
     const annotations = ctx.annotation().map((ann) => this.visit(ann));
     const isPrivate = ctx.PRIVATE() !== undefined;
-    const name = ctx.IDENTIFIER().text;
+    const identifierToken = ctx.IDENTIFIER();
+    const name = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
     const isOptional = ctx.QUESTION() !== undefined;
 
     let typeRef: ASTNode | undefined;
@@ -313,10 +397,22 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       typeRef = this.visit(ctx.type()!);
     } else {
       // 型が省略されている場合、プロパティ名と同じ名前の TypeReference を生成
-      const identifierToken = ctx.IDENTIFIER();
       typeRef = {
         type: 'TypeReference',
-        name: name,
+        name: {
+          type: 'Identifier',
+          name: identifierToken.text,
+          loc: {
+            start: {
+              line: identifierToken.symbol.line,
+              column: identifierToken.symbol.charPositionInLine,
+            },
+            end: {
+              line: identifierToken.symbol.line,
+              column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+            },
+          },
+        },
         loc: {
           start: {
             line: identifierToken.symbol.line,
@@ -428,7 +524,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   visitFunctionDeclaration(ctx: FunctionDeclarationContext): ASTNode {
     const annotations = ctx.annotation().map((ann) => this.visit(ann));
     const isPrivate = ctx.PRIVATE() !== undefined;
-    const name = ctx.IDENTIFIER().text;
+    const identifierToken = ctx.IDENTIFIER();
+    const name = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
     const paramList = ctx.parameterList();
     const parameters = paramList
       ? this.visit(paramList)
@@ -448,7 +558,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitGetterDeclaration(ctx: GetterDeclarationContext): ASTNode {
     const annotations = ctx.annotation().map((ann) => this.visit(ann));
-    const name = ctx.IDENTIFIER().text;
+    const identifierToken = ctx.IDENTIFIER();
+    const name = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
     const body = this.visit(ctx.block());
 
     return {
@@ -462,7 +586,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitRepeatedDeclaration(ctx: RepeatedDeclarationContext): ASTNode {
     const annotations = ctx.annotation().map((ann) => this.visit(ann));
-    const name = ctx.IDENTIFIER().text;
+    const identifierToken = ctx.IDENTIFIER();
+    const name = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
     const typeRef = this.visit(ctx.type());
     const mappingBlock = ctx.mappingBlock();
     const mapping = mappingBlock ? this.visit(mappingBlock) : undefined;
@@ -491,8 +629,36 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitMappingEntry(ctx: MappingEntryContext): ASTNode {
-    const from = ctx.IDENTIFIER(0).text;
-    const to = ctx.IDENTIFIER(1).text;
+    const fromToken = ctx.IDENTIFIER(0);
+    const toToken = ctx.IDENTIFIER(1);
+    const from = {
+      type: 'Identifier',
+      name: fromToken.text,
+      loc: {
+        start: {
+          line: fromToken.symbol.line,
+          column: fromToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: fromToken.symbol.line,
+          column: fromToken.symbol.charPositionInLine + fromToken.text.length,
+        },
+      },
+    };
+    const to = {
+      type: 'Identifier',
+      name: toToken.text,
+      loc: {
+        start: {
+          line: toToken.symbol.line,
+          column: toToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: toToken.symbol.line,
+          column: toToken.symbol.charPositionInLine + toToken.text.length,
+        },
+      },
+    };
 
     return {
       type: 'MappingEntry',
@@ -514,7 +680,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitParameter(ctx: ParameterContext): ASTNode {
     const isThisParameter = ctx.THIS() !== undefined;
-    const name = ctx.IDENTIFIER().text;
+    const identifierToken = ctx.IDENTIFIER();
+    const name = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
     const typeCtx = ctx.type();
     const typeRef = typeCtx ? this.visit(typeCtx) : undefined;
 
@@ -528,7 +708,21 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitCallExpression(ctx: CallExpressionContext): ASTNode {
-    const name = ctx.IDENTIFIER().text;
+    const identifierToken = ctx.IDENTIFIER();
+    const name = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
     const argList = ctx.argumentList();
     const args = argList ? this.visit(argList) : { type: 'ArgumentList', arguments: [] };
     const block = ctx.block();
@@ -856,7 +1050,22 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitAnnotation(ctx: AnnotationContext): ASTNode {
-    const name = ctx.ANNOTATION().text.substring(1); // Remove '@' prefix
+    const annotationToken = ctx.ANNOTATION();
+    const nameText = annotationToken.text.substring(1); // Remove '@' prefix
+    const name = {
+      type: 'Identifier',
+      name: nameText,
+      loc: {
+        start: {
+          line: annotationToken.symbol.line,
+          column: annotationToken.symbol.charPositionInLine + 1, // +1 to skip '@'
+        },
+        end: {
+          line: annotationToken.symbol.line,
+          column: annotationToken.symbol.charPositionInLine + annotationToken.text.length,
+        },
+      },
+    };
     const arguments_: ASTNode[] = [];
 
     // Handle arguments list (e.g., @description('text', priority: 1))

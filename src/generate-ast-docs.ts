@@ -140,12 +140,20 @@ function getNodeAdditionalInfo(node: ASTNode): string {
   }
 
   // Names and identifiers
-  if (node.name && typeof node.name === 'string') {
-    info.push(`name: ${node.name}`);
+  if (node.name) {
+    if (typeof node.name === 'string') {
+      info.push(`name: ${node.name}`);
+    } else if (node.name.type === 'Identifier') {
+      info.push(`name: ${node.name.name}`);
+    }
   }
 
-  if (node.identifier && typeof node.identifier === 'string') {
-    info.push(`id: ${node.identifier}`);
+  if (node.identifier) {
+    if (typeof node.identifier === 'string') {
+      info.push(`id: ${node.identifier}`);
+    } else if (node.identifier.type === 'Identifier') {
+      info.push(`id: ${node.identifier.name}`);
+    }
   }
 
   if (node.typeName && typeof node.typeName === 'string') {
@@ -213,7 +221,8 @@ function getNodeAdditionalInfo(node: ASTNode): string {
 
   // Annotation specific
   if (node.type === 'Annotation' && node.name) {
-    info.push(`@${node.name}`);
+    const annotationName = node.name.type === 'Identifier' ? node.name.name : node.name;
+    info.push(`@${annotationName}`);
   }
 
   return info.join(', ');

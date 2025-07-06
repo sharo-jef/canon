@@ -4,10 +4,28 @@ body:
     annotations: []
     body:
       - type: PropertyDeclaration
-        name: PluginHeader
+        name:
+          type: Identifier
+          name: PluginHeader
+          loc:
+            start:
+              line: 10
+              column: 4
+            end:
+              line: 10
+              column: 16
         annotations:
           - type: Annotation
-            name: description
+            name:
+              type: Identifier
+              name: description
+              loc:
+                start:
+                  line: 9
+                  column: 5
+                end:
+                  line: 9
+                  column: 16
             arguments:
               - type: StringLiteral
                 value: A plugin header
@@ -30,7 +48,16 @@ body:
         isOptional: false
         typeRef:
           type: TypeReference
-          name: PluginHeader
+          name:
+            type: Identifier
+            name: PluginHeader
+            loc:
+              start:
+                line: 10
+                column: 4
+              end:
+                line: 10
+                column: 16
           loc:
             start:
               line: 10
@@ -46,13 +73,31 @@ body:
             line: 10
             column: 16
       - type: PropertyDeclaration
-        name: pipeline
+        name:
+          type: Identifier
+          name: pipeline
+          loc:
+            start:
+              line: 11
+              column: 4
+            end:
+              line: 11
+              column: 12
         annotations: []
         isPrivate: false
         isOptional: false
         typeRef:
           type: TypeReference
-          name: Pipeline
+          name:
+            type: Identifier
+            name: Pipeline
+            loc:
+              start:
+                line: 11
+                column: 14
+              end:
+                line: 11
+                column: 22
           loc:
             start:
               line: 11
@@ -75,10 +120,28 @@ body:
         line: 12
         column: 1
   - type: StructDeclaration
-    name: PluginHeader
+    name:
+      type: Identifier
+      name: PluginHeader
+      loc:
+        start:
+          line: 15
+          column: 7
+        end:
+          line: 15
+          column: 19
     annotations:
       - type: Annotation
-        name: description
+        name:
+          type: Identifier
+          name: description
+          loc:
+            start:
+              line: 14
+              column: 1
+            end:
+              line: 14
+              column: 12
         arguments:
           - type: StringLiteral
             value: Plugin header struct
@@ -99,7 +162,16 @@ body:
             column: 36
     body:
       - type: PropertyDeclaration
-        name: name
+        name:
+          type: Identifier
+          name: name
+          loc:
+            start:
+              line: 16
+              column: 4
+            end:
+              line: 16
+              column: 8
         annotations: []
         isPrivate: false
         isOptional: false
@@ -121,7 +193,16 @@ body:
             line: 16
             column: 16
       - type: PropertyDeclaration
-        name: description
+        name:
+          type: Identifier
+          name: description
+          loc:
+            start:
+              line: 17
+              column: 4
+            end:
+              line: 17
+              column: 15
         annotations: []
         isPrivate: false
         isOptional: true
@@ -143,13 +224,31 @@ body:
             line: 17
             column: 24
       - type: PropertyDeclaration
-        name: version
+        name:
+          type: Identifier
+          name: version
+          loc:
+            start:
+              line: 18
+              column: 4
+            end:
+              line: 18
+              column: 11
         annotations: []
         isPrivate: false
         isOptional: false
         typeRef:
           type: TypeReference
-          name: Version
+          name:
+            type: Identifier
+            name: Version
+            loc:
+              start:
+                line: 18
+                column: 13
+              end:
+                line: 18
+                column: 20
           loc:
             start:
               line: 18
@@ -159,7 +258,16 @@ body:
               column: 20
         defaultValue:
           type: CallExpression
-          name: Version
+          name:
+            type: Identifier
+            name: Version
+            loc:
+              start:
+                line: 18
+                column: 23
+              end:
+                line: 18
+                column: 30
           arguments: []
           lambdaBody:
             - type: AssignmentStatement
@@ -271,7 +379,16 @@ body:
         line: 23
         column: 1
   - type: StructDeclaration
-    name: Version
+    name:
+      type: Identifier
+      name: Version
+      loc:
+        start:
+          line: 25
+          column: 7
+        end:
+          line: 25
+          column: 14
     annotations: []
     body:
       - type: InitDeclaration
@@ -279,7 +396,16 @@ body:
         parameters: []
         body:
           - type: CallExpression
-            name: validation
+            name:
+              type: Identifier
+              name: validation
+              loc:
+                start:
+                  line: 27
+                  column: 8
+                end:
+                  line: 27
+                  column: 18
             arguments: []
             loc:
               start:
@@ -299,7 +425,16 @@ body:
         annotations: []
         parameters:
           - type: Parameter
-            name: major
+            name:
+              type: Identifier
+              name: major
+              loc:
+                start:
+                  line: 29
+                  column: 9
+                end:
+                  line: 29
+                  column: 14
             isThisParameter: false
             typeRef:
               type: PrimitiveType
@@ -425,7 +560,16 @@ body:
                 line: 32
                 column: 17
           - type: CallExpression
-            name: validation
+            name:
+              type: Identifier
+              name: validation
+              loc:
+                start:
+                  line: 33
+                  column: 8
+                end:
+                  line: 33
+                  column: 18
             arguments: []
             loc:
               start:
@@ -445,7 +589,16 @@ body:
         annotations: []
         parameters:
           - type: Parameter
-            name: major
+            name:
+              type: Identifier
+              name: major
+              loc:
+                start:
+                  line: 35
+                  column: 14
+                end:
+                  line: 35
+                  column: 19
             isThisParameter: true
             loc:
               start:
@@ -455,7 +608,16 @@ body:
                 line: 35
                 column: 19
           - type: Parameter
-            name: minor
+            name:
+              type: Identifier
+              name: minor
+              loc:
+                start:
+                  line: 35
+                  column: 26
+                end:
+                  line: 35
+                  column: 31
             isThisParameter: true
             loc:
               start:
@@ -465,7 +627,16 @@ body:
                 line: 35
                 column: 31
           - type: Parameter
-            name: patch
+            name:
+              type: Identifier
+              name: patch
+              loc:
+                start:
+                  line: 35
+                  column: 38
+                end:
+                  line: 35
+                  column: 43
             isThisParameter: true
             loc:
               start:
@@ -476,7 +647,16 @@ body:
                 column: 43
         body:
           - type: CallExpression
-            name: validation
+            name:
+              type: Identifier
+              name: validation
+              loc:
+                start:
+                  line: 36
+                  column: 8
+                end:
+                  line: 36
+                  column: 18
             arguments: []
             loc:
               start:
@@ -493,7 +673,16 @@ body:
             line: 37
             column: 5
       - type: FunctionDeclaration
-        name: validation
+        name:
+          type: Identifier
+          name: validation
+          loc:
+            start:
+              line: 38
+              column: 12
+            end:
+              line: 38
+              column: 22
         annotations: []
         isPrivate: true
         parameters: []
@@ -694,7 +883,16 @@ body:
             line: 40
             column: 5
       - type: PropertyDeclaration
-        name: major
+        name:
+          type: Identifier
+          name: major
+          loc:
+            start:
+              line: 41
+              column: 4
+            end:
+              line: 41
+              column: 9
         annotations: []
         isPrivate: false
         isOptional: false
@@ -716,7 +914,16 @@ body:
             line: 41
             column: 14
       - type: PropertyDeclaration
-        name: minor
+        name:
+          type: Identifier
+          name: minor
+          loc:
+            start:
+              line: 42
+              column: 4
+            end:
+              line: 42
+              column: 9
         annotations: []
         isPrivate: false
         isOptional: false
@@ -738,7 +945,16 @@ body:
             line: 42
             column: 14
       - type: PropertyDeclaration
-        name: patch
+        name:
+          type: Identifier
+          name: patch
+          loc:
+            start:
+              line: 43
+              column: 4
+            end:
+              line: 43
+              column: 9
         annotations: []
         isPrivate: false
         isOptional: false
@@ -760,7 +976,16 @@ body:
             line: 43
             column: 14
       - type: PropertyDeclaration
-        name: hoge
+        name:
+          type: Identifier
+          name: hoge
+          loc:
+            start:
+              line: 44
+              column: 12
+            end:
+              line: 44
+              column: 16
         annotations: []
         isPrivate: true
         isOptional: false
@@ -782,7 +1007,16 @@ body:
             line: 44
             column: 24
       - type: GetterDeclaration
-        name: toString
+        name:
+          type: Identifier
+          name: toString
+          loc:
+            start:
+              line: 45
+              column: 8
+            end:
+              line: 45
+              column: 16
         annotations: []
         body:
           - type: TemplateLiteral
@@ -854,17 +1088,44 @@ body:
         line: 48
         column: 1
   - type: StructDeclaration
-    name: Pipeline
+    name:
+      type: Identifier
+      name: Pipeline
+      loc:
+        start:
+          line: 50
+          column: 7
+        end:
+          line: 50
+          column: 15
     annotations: []
     body:
       - type: RepeatedDeclaration
-        name: steps
+        name:
+          type: Identifier
+          name: steps
+          loc:
+            start:
+              line: 51
+              column: 13
+            end:
+              line: 51
+              column: 18
         annotations: []
         typeRef:
           type: ArrayType
           elementType:
             type: TypeReference
-            name: Step
+            name:
+              type: Identifier
+              name: Step
+              loc:
+                start:
+                  line: 51
+                  column: 20
+                end:
+                  line: 51
+                  column: 24
             loc:
               start:
                 line: 51
@@ -884,8 +1145,26 @@ body:
           type: MappingBlock
           entries:
             - type: MappingEntry
-              from: build
-              to: BuildStep
+              from:
+                type: Identifier
+                name: build
+                loc:
+                  start:
+                    line: 52
+                    column: 8
+                  end:
+                    line: 52
+                    column: 13
+              to:
+                type: Identifier
+                name: BuildStep
+                loc:
+                  start:
+                    line: 52
+                    column: 17
+                  end:
+                    line: 52
+                    column: 26
               loc:
                 start:
                   line: 52
@@ -894,8 +1173,26 @@ body:
                   line: 52
                   column: 26
             - type: MappingEntry
-              from: test
-              to: TestStep
+              from:
+                type: Identifier
+                name: test
+                loc:
+                  start:
+                    line: 53
+                    column: 8
+                  end:
+                    line: 53
+                    column: 12
+              to:
+                type: Identifier
+                name: TestStep
+                loc:
+                  start:
+                    line: 53
+                    column: 16
+                  end:
+                    line: 53
+                    column: 24
               loc:
                 start:
                   line: 53
@@ -925,13 +1222,31 @@ body:
         line: 55
         column: 1
   - type: UnionDeclaration
-    name: Step
+    name:
+      type: Identifier
+      name: Step
+      loc:
+        start:
+          line: 56
+          column: 6
+        end:
+          line: 56
+          column: 10
     annotations: []
     unionType:
       type: UnionType
       types:
         - type: TypeReference
-          name: BuildStep
+          name:
+            type: Identifier
+            name: BuildStep
+            loc:
+              start:
+                line: 56
+                column: 13
+              end:
+                line: 56
+                column: 22
           loc:
             start:
               line: 56
@@ -940,7 +1255,16 @@ body:
               line: 56
               column: 22
         - type: TypeReference
-          name: TestStep
+          name:
+            type: Identifier
+            name: TestStep
+            loc:
+              start:
+                line: 56
+                column: 25
+              end:
+                line: 56
+                column: 33
           loc:
             start:
               line: 56
@@ -963,11 +1287,29 @@ body:
         line: 56
         column: 33
   - type: StructDeclaration
-    name: BuildStep
+    name:
+      type: Identifier
+      name: BuildStep
+      loc:
+        start:
+          line: 57
+          column: 7
+        end:
+          line: 57
+          column: 16
     annotations: []
     body:
       - type: PropertyDeclaration
-        name: command
+        name:
+          type: Identifier
+          name: command
+          loc:
+            start:
+              line: 58
+              column: 4
+            end:
+              line: 58
+              column: 11
         annotations: []
         isPrivate: false
         isOptional: false
@@ -996,11 +1338,29 @@ body:
         line: 59
         column: 1
   - type: StructDeclaration
-    name: TestStep
+    name:
+      type: Identifier
+      name: TestStep
+      loc:
+        start:
+          line: 60
+          column: 7
+        end:
+          line: 60
+          column: 15
     annotations: []
     body:
       - type: PropertyDeclaration
-        name: script
+        name:
+          type: Identifier
+          name: script
+          loc:
+            start:
+              line: 61
+              column: 4
+            end:
+              line: 61
+              column: 10
         annotations: []
         isPrivate: false
         isOptional: false
