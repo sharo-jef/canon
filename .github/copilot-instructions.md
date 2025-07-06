@@ -9,15 +9,15 @@
 # Instructions
 
 - Canon syntax is similar to Kotlin DSL.
-
 - Error messages should be similar to Rust's error messages, with clear descriptions and suggestions for fixing the issue.
+- Always perform logical reasoning and avoid jumping to conclusions. Use the sequentialthinking tool if necessary.
+- **DO NOT EDIT TESTCASES WITHOUT PERMISSION.**
 
 ## Testing
 
 - This repository is a reference implementation of the actual canon library.
 - This repository does not have any tests.
 - This repository provides testcases for the actual canon library.
-
   - Test cases have following files:
     - input.canon: input configuration written in the canon format
     - output.yml: expected output AST from the canon parser (if this is a successful test)
