@@ -159,13 +159,21 @@ body:
               column: 20
         defaultValue:
           type: CallExpression
-          functionName: Version
+          name: Version
           arguments: []
           lambdaBody:
             - type: AssignmentStatement
-              name: major
-              isThisAccess: false
-              value:
+              left:
+                type: Identifier
+                name: major
+                loc:
+                  start:
+                    line: 19
+                    column: 8
+                  end:
+                    line: 19
+                    column: 13
+              right:
                 type: IntegerLiteral
                 value: 0
                 raw: '0'
@@ -184,9 +192,17 @@ body:
                   line: 19
                   column: 17
             - type: AssignmentStatement
-              name: minor
-              isThisAccess: false
-              value:
+              left:
+                type: Identifier
+                name: minor
+                loc:
+                  start:
+                    line: 20
+                    column: 8
+                  end:
+                    line: 20
+                    column: 13
+              right:
                 type: IntegerLiteral
                 value: 0
                 raw: '0'
@@ -205,9 +221,17 @@ body:
                   line: 20
                   column: 17
             - type: AssignmentStatement
-              name: patch
-              isThisAccess: false
-              value:
+              left:
+                type: Identifier
+                name: patch
+                loc:
+                  start:
+                    line: 21
+                    column: 8
+                  end:
+                    line: 21
+                    column: 13
+              right:
                 type: IntegerLiteral
                 value: 1
                 raw: '1'
@@ -255,7 +279,7 @@ body:
         parameters: []
         body:
           - type: CallExpression
-            functionName: validation
+            name: validation
             arguments: []
             loc:
               start:
@@ -296,9 +320,36 @@ body:
                 column: 19
         body:
           - type: AssignmentStatement
-            name: major
-            isThisAccess: true
-            value:
+            left:
+              type: MemberAccessExpression
+              object:
+                type: ThisExpression
+                loc:
+                  start:
+                    line: 30
+                    column: 8
+                  end:
+                    line: 30
+                    column: 12
+              property:
+                type: Identifier
+                name: major
+                loc:
+                  start:
+                    line: 30
+                    column: 13
+                  end:
+                    line: 30
+                    column: 18
+              computed: false
+              loc:
+                start:
+                  line: 30
+                  column: 8
+                end:
+                  line: 30
+                  column: 26
+            right:
               type: Identifier
               name: major
               loc:
@@ -316,9 +367,17 @@ body:
                 line: 30
                 column: 26
           - type: AssignmentStatement
-            name: minor
-            isThisAccess: false
-            value:
+            left:
+              type: Identifier
+              name: minor
+              loc:
+                start:
+                  line: 31
+                  column: 8
+                end:
+                  line: 31
+                  column: 13
+            right:
               type: IntegerLiteral
               value: 0
               raw: '0'
@@ -337,9 +396,17 @@ body:
                 line: 31
                 column: 17
           - type: AssignmentStatement
-            name: patch
-            isThisAccess: false
-            value:
+            left:
+              type: Identifier
+              name: patch
+              loc:
+                start:
+                  line: 32
+                  column: 8
+                end:
+                  line: 32
+                  column: 13
+            right:
               type: IntegerLiteral
               value: 0
               raw: '0'
@@ -358,7 +425,7 @@ body:
                 line: 32
                 column: 17
           - type: CallExpression
-            functionName: validation
+            name: validation
             arguments: []
             loc:
               start:
@@ -409,7 +476,7 @@ body:
                 column: 43
         body:
           - type: CallExpression
-            functionName: validation
+            name: validation
             arguments: []
             loc:
               start:
@@ -452,7 +519,17 @@ body:
                         end:
                           line: 39
                           column: 16
-                    property: major
+                    property:
+                      type: Identifier
+                      name: major
+                      loc:
+                        start:
+                          line: 39
+                          column: 17
+                        end:
+                          line: 39
+                          column: 22
+                    computed: false
                     loc:
                       start:
                         line: 39
@@ -492,7 +569,17 @@ body:
                         end:
                           line: 39
                           column: 36
-                    property: minor
+                    property:
+                      type: Identifier
+                      name: minor
+                      loc:
+                        start:
+                          line: 39
+                          column: 37
+                        end:
+                          line: 39
+                          column: 42
+                    computed: false
                     loc:
                       start:
                         line: 39
@@ -539,7 +626,17 @@ body:
                       end:
                         line: 39
                         column: 56
-                  property: patch
+                  property:
+                    type: Identifier
+                    name: patch
+                    loc:
+                      start:
+                        line: 39
+                        column: 57
+                      end:
+                        line: 39
+                        column: 62
+                  computed: false
                   loc:
                     start:
                       line: 39

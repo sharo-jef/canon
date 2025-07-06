@@ -345,15 +345,65 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitAssignmentStatement(ctx: AssignmentStatementContext): ASTNode {
-    const isThisAccess = ctx.THIS() !== undefined;
-    const name = ctx.IDENTIFIER().text;
     const value = this.visit(ctx.expression());
+
+    let left: ASTNode;
+    if (ctx.THIS()) {
+      // this.identifier の場合はMemberAccessExpressionとして表現
+      left = {
+        type: 'MemberAccessExpression',
+        object: {
+          type: 'ThisExpression',
+          loc: {
+            start: {
+              line: ctx.THIS()!.symbol.line,
+              column: ctx.THIS()!.symbol.charPositionInLine,
+            },
+            end: {
+              line: ctx.THIS()!.symbol.line,
+              column: ctx.THIS()!.symbol.charPositionInLine + 4, // "this".length
+            },
+          },
+        },
+        property: {
+          type: 'Identifier',
+          name: ctx.IDENTIFIER().text,
+          loc: {
+            start: {
+              line: ctx.IDENTIFIER().symbol.line,
+              column: ctx.IDENTIFIER().symbol.charPositionInLine,
+            },
+            end: {
+              line: ctx.IDENTIFIER().symbol.line,
+              column: ctx.IDENTIFIER().symbol.charPositionInLine + ctx.IDENTIFIER().text.length,
+            },
+          },
+        },
+        computed: false,
+        loc: this.getLocationInfo(ctx),
+      };
+    } else {
+      // identifier の場合はIdentifierとして表現
+      left = {
+        type: 'Identifier',
+        name: ctx.IDENTIFIER().text,
+        loc: {
+          start: {
+            line: ctx.IDENTIFIER().symbol.line,
+            column: ctx.IDENTIFIER().symbol.charPositionInLine,
+          },
+          end: {
+            line: ctx.IDENTIFIER().symbol.line,
+            column: ctx.IDENTIFIER().symbol.charPositionInLine + ctx.IDENTIFIER().text.length,
+          },
+        },
+      };
+    }
 
     return {
       type: 'AssignmentStatement',
-      name,
-      isThisAccess,
-      value,
+      left,
+      right: value,
       loc: this.getLocationInfo(ctx),
     };
   }
@@ -478,7 +528,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitCallExpression(ctx: CallExpressionContext): ASTNode {
-    const functionName = ctx.IDENTIFIER().text;
+    const name = ctx.IDENTIFIER().text;
     const argList = ctx.argumentList();
     const args = argList ? this.visit(argList) : { type: 'ArgumentList', arguments: [] };
     const block = ctx.block();
@@ -486,7 +536,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
     return {
       type: 'CallExpression',
-      functionName,
+      name,
       arguments: args.arguments,
       lambdaBody: lambdaBody?.content,
       loc: this.getLocationInfo(ctx),
@@ -526,12 +576,26 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitMemberAccessExpression(ctx: MemberAccessExpressionContext): ASTNode {
     const object = this.visit(ctx.expression());
-    const property = ctx.IDENTIFIER().text;
+    const property = {
+      type: 'Identifier',
+      name: ctx.IDENTIFIER().text,
+      loc: {
+        start: {
+          line: ctx.IDENTIFIER().symbol.line,
+          column: ctx.IDENTIFIER().symbol.charPositionInLine,
+        },
+        end: {
+          line: ctx.IDENTIFIER().symbol.line,
+          column: ctx.IDENTIFIER().symbol.charPositionInLine + ctx.IDENTIFIER().text.length,
+        },
+      },
+    };
 
     return {
       type: 'MemberAccessExpression',
       object,
       property,
+      computed: false, // obj.prop の形式なので computed は false
       loc: this.getLocationInfo(ctx),
     };
   }
