@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
 import { CanonLexer } from './generated/CanonLexer';
-// Import specific Context types for type safety
 import {
   CanonParser,
   ProgramContext,
