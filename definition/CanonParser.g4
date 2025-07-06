@@ -6,7 +6,7 @@ options {
 
 // Top-level structure
 program:
-	schemaImport? (
+	schemaDirective? schemaImport? (
 		structDefinition
 		| functionDefinition
 		| variableDeclaration
