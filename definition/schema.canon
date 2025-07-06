@@ -26,6 +26,12 @@ struct Version {
     init {
         validation()
     }
+    init(major: int) {
+        this.major = major
+        minor = 0
+        patch = 0
+        validation()
+    }
     init(this.major, this.minor, this.patch) {
         validation()
     }

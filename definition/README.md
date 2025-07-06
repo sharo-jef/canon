@@ -7,10 +7,24 @@
 - プロパティは `name: type = value` の形式で宣言し、それは required である
   - optional なプロパティは `name?: type = value` の形式で宣言する
   - デフォルト値を設定しない場合は `name: type` もしくは `name?: type` の形式で宣言する
+  - 繰り返し可能なプロパティは `repeated name: type[] { ... } = value` の形式で宣言する
+    - `value` は省略可能 (デフォルト値は無いので、代入しなければエラーになる)
+    - `repeated` の `{ ... }` は省略可能で、省略した場合は `name() {}` のように呼び出す
+    - `repeated` の `{ ... }` は、通常のコードブロックとは異なり、 switch 文のように identifier と型のマッピングを定義し、以下の例では `a() {}` と呼び出せば `struct1` 型のインスタンスを生成し、 `b() {}` と呼び出せば `struct2` 型のインスタンスを生成すして `name` プロパティに追加される
+      ```
+      union unionType = struct1 | struct2
+      struct s {
+        repeated name: unionType[] {
+            a -> struct1
+            b -> struct2
+        }
+      }
+      ```
 
 ## 初期化
 
 - `struct` は複数の `init` を持つことができ、オブジェクトの生成方法を複数提供できる
+- `init` を省略した場合、 `init {}` と等価である
 - 初期化パスは独立しており、同時に複数実行されることはない
   - パラメータ付き初期化: `init(param1: type) { this.param1 = param1 }` という関数形式で定義する
     - オーバーロード可能
@@ -81,6 +95,8 @@
 
 ## アノテーション
 
+- アノテーションは `@` で始まり、要素の直前に記述する
+- 現時点ではユーザ定義のアノテーションはサポートされていない
 - `@description`: 直後の要素に対する説明を記述するためのアノテーション
 - `@jsonName`: JSON でのフィールド名を指定するためのアノテーション
 - `@jsonFlatten`: JSON でのフラット化を指定するためのアノテーション
