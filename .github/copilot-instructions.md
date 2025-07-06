@@ -11,6 +11,7 @@
 - Canon syntax is similar to Kotlin DSL.
 - Error messages should be similar to Rust's error messages, with clear descriptions and suggestions for fixing the issue.
 - Always perform logical reasoning and avoid jumping to conclusions. Use the sequentialthinking tool if necessary.
+- Always follow the best practices.
 - **DO NOT EDIT TESTCASES WITHOUT PERMISSION.**
 
 ## Testing
