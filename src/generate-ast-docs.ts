@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
+import { parseCanonFileToYamlFile } from './parser';
 
 interface ASTNode {
   type: string;
@@ -18,34 +19,35 @@ interface ChildNodeInfo {
 function getChildNodes(node: ASTNode): ChildNodeInfo[] {
   const children: ChildNodeInfo[] = [];
 
-  // Standard children property
+  // Standard children property (rarely used in our AST)
   if (node.children && Array.isArray(node.children)) {
     node.children.forEach((child, index) => {
       children.push({ node: child, propertyKey: 'children', arrayIndex: index });
     });
   }
 
-  // Common properties that contain child nodes
+  // Properties that contain child nodes based on our parser.ts AST structure
   const childProperties = [
-    'body',
-    'arguments',
-    'expression',
-    'target',
-    'functionName',
-    'left',
-    'right',
-    'condition',
-    'thenBranch',
-    'elseBranch',
-    'object',
-    'member',
-    'variableName',
-    'iteratorVariable',
-    'parameters',
-    'returnType',
-    'dataType',
-    'mixinType',
-    'name',
+    'body', // ObjectInstantiation, Block, etc.
+    'arguments', // FunctionCallExpression, etc.
+    'value', // AssignmentStatement, PropertyDeclaration, etc.
+    'callee', // FunctionCallExpression
+    'left', // BinaryExpression
+    'right', // BinaryExpression
+    'operand', // UnaryExpression
+    'object', // MemberAccessExpression
+    'condition', // IfStatement
+    'then', // IfStatement
+    'typeRef', // PropertyDeclaration, Parameter, etc.
+    'defaultValue', // PropertyDeclaration, RepeatedDeclaration
+    'annotations', // Various declaration types
+    'unionType', // UnionDeclaration
+    'types', // UnionType
+    'elementType', // ArrayType
+    'parameters', // Function-related nodes
+    'mapping', // RepeatedDeclaration
+    'entries', // MappingBlock
+    'parts', // TemplateLiteral
   ];
 
   for (const prop of childProperties) {
@@ -115,200 +117,93 @@ function renderASTNode(
 function getNodeAdditionalInfo(node: ASTNode): string {
   const info: string[] = [];
 
-  // Terminal nodes
-  if (node.type === 'Terminal' && node.text) {
-    return `"${node.text}"`;
-  }
-
-  // Schema-related nodes
-  if (node.schema) {
-    info.push(`schema: ${node.schema}`);
-  }
-
-  if (node.namespace) {
-    info.push(`namespace: ${node.namespace}`);
-  }
-
-  // Structure-related - handle both string and object forms
-  if (node.name) {
-    if (typeof node.name === 'object' && node.name.name) {
-      info.push(`name: ${node.name.name}`);
-    } else if (typeof node.name === 'string') {
-      info.push(`name: ${node.name}`);
+  // String and literal values - only show value directly for leaf nodes (strings/numbers/booleans)
+  if (node.value !== undefined && node.value !== null) {
+    // Only show value inline if it's a primitive type, not an object/node
+    if (
+      typeof node.value === 'string' ||
+      typeof node.value === 'number' ||
+      typeof node.value === 'boolean'
+    ) {
+      if (typeof node.value === 'string') {
+        info.push(`"${node.value}"`);
+      } else {
+        info.push(`${node.value}`);
+      }
     }
+    // If value is an object (like a child node), don't show it here - it will be shown as a child
   }
 
-  if (node.structName) {
-    info.push(`struct: ${node.structName}`);
+  if (node.raw !== undefined) {
+    info.push(`raw: ${node.raw}`);
   }
 
-  if (node.mixinType) {
-    if (typeof node.mixinType === 'object' && node.mixinType.typeName) {
-      info.push(`mixin: ${node.mixinType.typeName}`);
-    } else if (typeof node.mixinType === 'string') {
-      info.push(`mixin: ${node.mixinType}`);
-    }
+  // Names and identifiers
+  if (node.name && typeof node.name === 'string') {
+    info.push(`name: ${node.name}`);
   }
 
-  if (node.fieldName) {
-    info.push(`field: ${node.fieldName}`);
+  if (node.identifier && typeof node.identifier === 'string') {
+    info.push(`id: ${node.identifier}`);
   }
 
-  if (node.methodName) {
-    info.push(`method: ${node.methodName}`);
-  }
-
-  // Type-related - handle both string and object forms
-  if (node.typeName) {
+  if (node.typeName && typeof node.typeName === 'string') {
     info.push(`type: ${node.typeName}`);
   }
 
-  if (node.dataType) {
-    if (typeof node.dataType === 'object' && node.dataType.typeName) {
-      info.push(`dataType: ${node.dataType.typeName}`);
-    } else if (typeof node.dataType === 'string') {
-      info.push(`dataType: ${node.dataType}`);
-    }
+  if (node.path && typeof node.path === 'string') {
+    info.push(`path: ${node.path}`);
   }
 
-  if (node.returnType) {
-    if (typeof node.returnType === 'object' && node.returnType.typeName) {
-      info.push(`returnType: ${node.returnType.typeName}`);
-    } else if (typeof node.returnType === 'string') {
-      info.push(`returnType: ${node.returnType}`);
-    }
+  if (node.property && typeof node.property === 'string') {
+    info.push(`prop: ${node.property}`);
   }
 
-  // Iterator variable for ForStatement
-  if (node.iteratorVariable) {
-    if (typeof node.iteratorVariable === 'object' && node.iteratorVariable.name) {
-      info.push(`iterator: ${node.iteratorVariable.name}`);
-    } else if (typeof node.iteratorVariable === 'string') {
-      info.push(`iterator: ${node.iteratorVariable}`);
-    }
-  }
-
-  // Variable names
-  if (node.variableName) {
-    if (typeof node.variableName === 'object' && node.variableName.name) {
-      info.push(`var: ${node.variableName.name}`);
-    } else if (typeof node.variableName === 'string') {
-      info.push(`var: ${node.variableName}`);
-    }
-  }
-
-  if (node.variableType) {
-    info.push(`varType: ${node.variableType}`);
-  }
-
-  if (node.isMutable !== undefined) {
-    info.push(`mutable: ${node.isMutable}`);
-  }
-
-  // Boolean flags
-  if (node.multiple !== undefined) {
-    info.push(`multiple: ${node.multiple}`);
-  }
-
-  if (node.required !== undefined) {
-    info.push(`required: ${node.required}`);
-  }
-
-  if (node.isDeclare !== undefined) {
-    info.push(`declare: ${node.isDeclare}`);
-  }
-
-  if (node.isMethodCall !== undefined) {
-    info.push(`methodCall: ${node.isMethodCall}`);
-  }
-
-  if (node.isObjectConstruction !== undefined) {
-    info.push(`objectConstruction: ${node.isObjectConstruction}`);
-  }
-
-  if (node.hasArguments !== undefined) {
-    info.push(`hasArgs: ${node.hasArguments}`);
-  }
-
-  if (node.hasBody !== undefined) {
-    info.push(`hasBody: ${node.hasBody}`);
-  }
-
-  // Value-related
-  if (node.value !== undefined && node.value !== null) {
-    info.push(`value: ${JSON.stringify(node.value)}`);
-  }
-
-  if (node.literalType) {
-    info.push(`literal: ${node.literalType}`);
-  }
-
-  // Expression operators
-  if (node.operator) {
+  // Operators and expressions
+  if (node.operator && typeof node.operator === 'string') {
     info.push(`op: ${node.operator}`);
   }
 
-  // Function-related - handle both string and object forms
-  if (node.functionName) {
-    if (typeof node.functionName === 'object' && node.functionName.name) {
-      info.push(`function: ${node.functionName.name}`);
-    } else if (typeof node.functionName === 'string') {
-      info.push(`function: ${node.functionName}`);
-    }
+  // Boolean flags
+  if (node.isThisAccess !== undefined) {
+    info.push(`thisAccess: ${node.isThisAccess}`);
   }
 
-  if (node.argumentCount !== undefined) {
-    info.push(`argCount: ${node.argumentCount}`);
+  if (node.isPrivate !== undefined) {
+    info.push(`private: ${node.isPrivate}`);
   }
 
-  if (node.parameters && Array.isArray(node.parameters)) {
-    if (node.parameters.length > 0) {
-      const paramNames = node.parameters
-        .map((p) => {
-          const name = typeof p.name === 'object' ? p.name.name : p.name;
-          const type = typeof p.type === 'object' ? p.type.typeName : p.type;
-          return `${name}: ${type}`;
-        })
-        .join(', ');
-      info.push(`params: (${paramNames})`);
-    } else {
-      info.push('params: ()');
-    }
+  if (node.isOptional !== undefined) {
+    info.push(`optional: ${node.isOptional}`);
   }
 
-  // Access-related - handle both string and object forms
-  if (node.target) {
-    if (typeof node.target === 'object') {
-      if (node.target.type === 'Identifier' && node.target.name) {
-        info.push(`target: ${node.target.name}`);
-      } else if (node.target.type === 'MemberAccess' && node.target.fullAccess) {
-        info.push(`target: ${node.target.fullAccess}`);
-      } else {
-        info.push(`target: ${node.target.type}`);
-      }
-    } else if (typeof node.target === 'string') {
-      info.push(`target: ${node.target}`);
-    }
+  if (node.isThisParameter !== undefined) {
+    info.push(`thisParam: ${node.isThisParameter}`);
   }
 
-  if (node.fullAccess) {
-    info.push(`access: ${node.fullAccess}`);
+  // Dimensions for arrays
+  if (node.dimensions !== undefined) {
+    info.push(`dims: ${node.dimensions}`);
   }
 
-  if (node.object) {
-    if (typeof node.object === 'object' && node.object.type) {
-      info.push(`object: ${node.object.type}`);
-    } else if (typeof node.object === 'string') {
-      info.push(`object: ${node.object}`);
-    }
+  // Template string specific
+  if (node.type === 'TemplateInterpolation' && node.identifier) {
+    info.push(`$${node.identifier}`);
   }
 
-  if (node.member) {
-    if (typeof node.member === 'object' && node.member.name) {
-      info.push(`member: ${node.member.name}`);
-    } else if (typeof node.member === 'string') {
-      info.push(`member: ${node.member}`);
-    }
+  // Function call argument count
+  if (node.arguments && Array.isArray(node.arguments)) {
+    info.push(`args: ${node.arguments.length}`);
+  }
+
+  // Body content count
+  if (node.body && Array.isArray(node.body)) {
+    info.push(`body: ${node.body.length}`);
+  }
+
+  // Annotation specific
+  if (node.type === 'Annotation' && node.name) {
+    info.push(`@${node.name}`);
   }
 
   return info.join(', ');
@@ -622,8 +517,8 @@ function generateASTHtml(ast: ASTNode): string {
                 searchTimeout = setTimeout(searchNodes, 300);
             });
             
-            // Initially collapse some levels for better overview
-            setTimeout(() => expandToLevel(3), 100);
+            // Initially expand all nodes for full visibility
+            setTimeout(() => expandAll(), 100);
         });
     </script>
 </body>
@@ -634,11 +529,21 @@ function main() {
   try {
     console.log('🚀 Starting AST documentation generation...');
 
-    // Read AST YAML file
+    // Check if AST YAML file exists, if not, generate it
     const astYamlPath = path.join(process.cwd(), 'ast.yaml');
     if (!fs.existsSync(astYamlPath)) {
-      console.error('AST YAML file not found. Please run "npm run parse:ast" first.');
-      process.exit(1);
+      console.log('📄 AST YAML file not found. Generating from definition/config.canon...');
+
+      const inputPath = path.join(process.cwd(), 'definition', 'config.canon');
+
+      if (!fs.existsSync(inputPath)) {
+        console.error('❌ Input Canon file not found: definition/config.canon');
+        console.error('Please create the Canon file or run the parser manually.');
+        process.exit(1);
+      }
+
+      parseCanonFileToYamlFile(inputPath, astYamlPath);
+      console.log('✅ AST YAML file generated successfully!');
     }
 
     const astContent = fs.readFileSync(astYamlPath, 'utf8');

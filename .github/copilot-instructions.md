@@ -13,6 +13,10 @@
 - Always perform logical reasoning and avoid jumping to conclusions. Use the sequentialthinking tool if necessary.
 - Always follow the best practices.
 - **DO NOT EDIT TESTCASES WITHOUT PERMISSION.**
+- Do not use `tsx -e`
+- Use `tmp` directory for temporary files.
+  - If `tmp` directory does not exist in the project, create it.
+  - If `tmp` directory is empty when you clean up, delete it.
 
 ## Testing
 

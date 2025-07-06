@@ -843,3 +843,28 @@ export function parseCanonFileToYaml(filePath: string): string {
     sortKeys: false,
   });
 }
+
+/**
+ * Parse Canon file and write AST to YAML file
+ */
+export function parseCanonFileToYamlFile(
+  inputFilePath: string,
+  outputFilePath: string = 'ast.yaml'
+): void {
+  const yamlContent = parseCanonFileToYaml(inputFilePath);
+  fs.writeFileSync(outputFilePath, yamlContent, 'utf-8');
+  console.log(`✅ AST written to ${outputFilePath}`);
+}
+
+/**
+ * Parse Canon source and write AST to YAML file
+ */
+export function parseCanonToYamlFile(
+  source: string,
+  outputFilePath: string = 'ast.yaml',
+  filename: string = '<unknown>'
+): void {
+  const yamlContent = parseCanonToYaml(source, filename);
+  fs.writeFileSync(outputFilePath, yamlContent, 'utf-8');
+  console.log(`✅ AST written to ${outputFilePath}`);
+}
