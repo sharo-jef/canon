@@ -793,13 +793,25 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitAnnotation(ctx: AnnotationContext): ASTNode {
     const name = ctx.ANNOTATION().text.substring(1); // Remove '@' prefix
-    const stringLiteralCtx = ctx.stringLiteral();
-    const value = stringLiteralCtx ? this.visit(stringLiteralCtx) : undefined;
+    const arguments_: ASTNode[] = [];
+
+    // Handle arguments list (e.g., @description('text', priority: 1))
+    const argumentListCtx = ctx.argumentList();
+    if (argumentListCtx) {
+      arguments_.push(...this.visitArgumentList(argumentListCtx).arguments);
+    }
+    // Handle single string literal (e.g., @description 'text')
+    else {
+      const stringLiteralCtx = ctx.stringLiteral();
+      if (stringLiteralCtx) {
+        arguments_.push(this.visit(stringLiteralCtx));
+      }
+    }
 
     return {
       type: 'Annotation',
       name,
-      value: value?.value,
+      arguments: arguments_,
       loc: this.getLocationInfo(ctx),
     };
   }

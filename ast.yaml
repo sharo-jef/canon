@@ -8,7 +8,17 @@ body:
         annotations:
           - type: Annotation
             name: description
-            value: A plugin header
+            arguments:
+              - type: StringLiteral
+                value: A plugin header
+                raw: '''A plugin header'''
+                loc:
+                  start:
+                    line: 9
+                    column: 17
+                  end:
+                    line: 9
+                    column: 34
             loc:
               start:
                 line: 9
@@ -69,7 +79,17 @@ body:
     annotations:
       - type: Annotation
         name: description
-        value: Plugin header struct
+        arguments:
+          - type: StringLiteral
+            value: Plugin header struct
+            raw: '"Plugin header struct"'
+            loc:
+              start:
+                line: 14
+                column: 13
+              end:
+                line: 14
+                column: 35
         loc:
           start:
             line: 14

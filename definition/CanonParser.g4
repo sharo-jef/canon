@@ -140,4 +140,4 @@ templateStringContent:
     | TEMPLATE_INTERPOLATION;
 
 // Annotations
-annotation: ANNOTATION (stringLiteral | LPAREN stringLiteral RPAREN)?;
+annotation: ANNOTATION (LPAREN argumentList? RPAREN | stringLiteral)?;
