@@ -26,7 +26,6 @@ REPEATED: 'repeated';
 USE: 'use';
 IF: 'if';
 ELSE: 'else';
-ERROR: 'error';
 NOT: 'not';
 THIS: 'this';
 

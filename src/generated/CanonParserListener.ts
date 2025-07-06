@@ -20,7 +20,6 @@ import { ThisExpressionContext } from "./CanonParser";
 import { IfExpressionContext } from "./CanonParser";
 import { ParenthesizedExpressionContext } from "./CanonParser";
 import { CallExpressionPrimaryContext } from "./CanonParser";
-import { ErrorExpressionContext } from "./CanonParser";
 import { ProgramContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { UseStatementContext } from "./CanonParser";
@@ -282,19 +281,6 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitCallExpressionPrimary?: (ctx: CallExpressionPrimaryContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `errorExpression`
-	 * labeled alternative in `CanonParser.primary`.
-	 * @param ctx the parse tree
-	 */
-	enterErrorExpression?: (ctx: ErrorExpressionContext) => void;
-	/**
-	 * Exit a parse tree produced by the `errorExpression`
-	 * labeled alternative in `CanonParser.primary`.
-	 * @param ctx the parse tree
-	 */
-	exitErrorExpression?: (ctx: ErrorExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.program`.

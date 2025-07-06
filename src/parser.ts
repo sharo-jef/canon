@@ -55,7 +55,6 @@ import {
   IfExpressionContext,
   ParenthesizedExpressionContext,
   CallExpressionPrimaryContext,
-  ErrorExpressionContext,
 } from './generated/CanonParser';
 import { CanonParserVisitor } from './generated/CanonParserVisitor';
 
@@ -993,15 +992,58 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitIfExpression(ctx: IfExpressionContext): ASTNode {
     const condition = this.visit(ctx.expression(0));
-    const then = this.visit(ctx.expression(1));
-    // elseは省略可能
-    const elseExpression = ctx.expression().length > 2 ? this.visit(ctx.expression(2)) : undefined;
+
+    // Get all expressions and blocks
+    const expressions = ctx.expression();
+    const blocks = ctx.block();
+
+    // Then branch: first expression after condition OR first block
+    let thenBranch: any[];
+    if (blocks.length > 0 && expressions.length === 1) {
+      // Format: if (cond) { block }
+      const blockResult = this.visit(blocks[0]);
+      thenBranch = blockResult.body;
+    } else if (expressions.length > 1) {
+      // Format: if (cond) expr
+      thenBranch = [
+        {
+          type: 'ExpressionStatement',
+          expression: this.visit(expressions[1]),
+          loc: this.getLocationInfo(expressions[1]),
+        },
+      ];
+    } else {
+      thenBranch = [];
+    }
+
+    // Else branch: optional
+    let elseBranch: any[] | undefined = undefined;
+    if (ctx.ELSE()) {
+      if (blocks.length > 1) {
+        // Format: if (cond) { block } else { block }
+        const blockResult = this.visit(blocks[1]);
+        elseBranch = blockResult.body;
+      } else if (blocks.length === 1 && expressions.length > 2) {
+        // Format: if (cond) expr else { block }
+        const blockResult = this.visit(blocks[0]);
+        elseBranch = blockResult.body;
+      } else if (expressions.length > 2) {
+        // Format: if (cond) expr else expr
+        elseBranch = [
+          {
+            type: 'ExpressionStatement',
+            expression: this.visit(expressions[2]),
+            loc: this.getLocationInfo(expressions[2]),
+          },
+        ];
+      }
+    }
 
     return {
       type: 'IfExpression',
       condition,
-      then,
-      else: elseExpression,
+      then: thenBranch,
+      else: elseBranch,
       loc: this.getLocationInfo(ctx),
     };
   }
@@ -1012,15 +1054,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitCallExpressionPrimary(ctx: CallExpressionPrimaryContext): ASTNode {
     return this.visit(ctx.callExpression());
-  }
-
-  visitErrorExpression(ctx: ErrorExpressionContext): ASTNode {
-    const message = this.visit(ctx.stringLiteral());
-    return {
-      type: 'ErrorExpression',
-      message: message.value,
-      loc: this.getLocationInfo(ctx),
-    };
   }
 
   visitLiteral(ctx: LiteralContext): ASTNode {

@@ -914,15 +914,44 @@ body:
                     line: 39
                     column: 65
               then:
-                type: ErrorExpression
-                message: Given version is not valid
-                loc:
-                  start:
-                    line: 39
-                    column: 67
-                  end:
-                    line: 39
-                    column: 102
+                - type: ExpressionStatement
+                  expression:
+                    type: CallExpression
+                    callee:
+                      type: Identifier
+                      name: error
+                      loc:
+                        start:
+                          line: 39
+                          column: 67
+                        end:
+                          line: 39
+                          column: 72
+                    arguments:
+                      - type: StringLiteral
+                        value: Given version is not valid
+                        raw: '''Given version is not valid'''
+                        loc:
+                          start:
+                            line: 39
+                            column: 73
+                          end:
+                            line: 39
+                            column: 101
+                    loc:
+                      start:
+                        line: 39
+                        column: 67
+                      end:
+                        line: 39
+                        column: 102
+                  loc:
+                    start:
+                      line: 39
+                      column: 67
+                    end:
+                      line: 39
+                      column: 102
               loc:
                 start:
                   line: 39

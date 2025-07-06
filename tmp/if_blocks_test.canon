@@ -1,0 +1,18 @@
+struct TestIfBlocks {
+    // Test single expression if
+    simple: string = if (true) "yes" else "no"
+    
+    // Test block if
+    complex: string = if (true) {
+        "block result"
+    } else {
+        "else block"
+    }
+    
+    // Test error as function call in block
+    validate() {
+        if (false) {
+            error("This is an error")
+        }
+    }
+}

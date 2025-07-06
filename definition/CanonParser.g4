@@ -113,10 +113,9 @@ primary:
     literal                                                     #literalExpression
     | IDENTIFIER                                                #identifierExpression
     | THIS                                                      #thisExpression
-    | IF LPAREN expression RPAREN expression (ELSE expression)? #ifExpression
+    | IF LPAREN expression RPAREN (expression | block) (ELSE (expression | block))? #ifExpression
     | LPAREN expression RPAREN                                  #parenthesizedExpression
-    | callExpression                                            #callExpressionPrimary
-    | ERROR LPAREN stringLiteral RPAREN                        #errorExpression;
+    | callExpression                                            #callExpressionPrimary;
 
 // Literals
 literal:
