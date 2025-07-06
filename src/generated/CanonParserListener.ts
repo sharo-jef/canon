@@ -38,7 +38,7 @@ import { MappingBlockContext } from "./CanonParser";
 import { MappingEntryContext } from "./CanonParser";
 import { ParameterListContext } from "./CanonParser";
 import { ParameterContext } from "./CanonParser";
-import { ObjectInstantiationContext } from "./CanonParser";
+import { CallExpressionContext } from "./CanonParser";
 import { ArgumentListContext } from "./CanonParser";
 import { IfStatementContext } from "./CanonParser";
 import { ExpressionStatementContext } from "./CanonParser";
@@ -464,15 +464,15 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitParameter?: (ctx: ParameterContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `CanonParser.objectInstantiation`.
+	 * Enter a parse tree produced by `CanonParser.callExpression`.
 	 * @param ctx the parse tree
 	 */
-	enterObjectInstantiation?: (ctx: ObjectInstantiationContext) => void;
+	enterCallExpression?: (ctx: CallExpressionContext) => void;
 	/**
-	 * Exit a parse tree produced by `CanonParser.objectInstantiation`.
+	 * Exit a parse tree produced by `CanonParser.callExpression`.
 	 * @param ctx the parse tree
 	 */
-	exitObjectInstantiation?: (ctx: ObjectInstantiationContext) => void;
+	exitCallExpression?: (ctx: CallExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.argumentList`.

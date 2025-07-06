@@ -18,10 +18,10 @@ body:
       end:
         line: 3
         column: 10
-  - type: ObjectInstantiation
-    typeName: PluginHeader
+  - type: CallExpression
+    functionName: PluginHeader
     arguments: []
-    body:
+    lambdaBody:
       - type: AssignmentStatement
         name: name
         isThisAccess: false
@@ -68,7 +68,7 @@ body:
         name: version
         isThisAccess: false
         value:
-          type: FunctionCallExpression
+          type: CallExpression
           callee:
             type: Identifier
             name: Version
@@ -131,14 +131,14 @@ body:
       end:
         line: 9
         column: 1
-  - type: ObjectInstantiation
-    typeName: pipeline
+  - type: CallExpression
+    functionName: pipeline
     arguments: []
-    body:
-      - type: ObjectInstantiation
-        typeName: build
+    lambdaBody:
+      - type: CallExpression
+        functionName: build
         arguments: []
-        body:
+        lambdaBody:
           - type: AssignmentStatement
             name: command
             isThisAccess: false
@@ -167,10 +167,10 @@ body:
           end:
             line: 14
             column: 5
-      - type: ObjectInstantiation
-        typeName: test
+      - type: CallExpression
+        functionName: test
         arguments: []
-        body:
+        lambdaBody:
           - type: AssignmentStatement
             name: script
             isThisAccess: false
@@ -192,7 +192,7 @@ body:
                       line: 16
                       column: 27
                 right:
-                  type: FunctionCallExpression
+                  type: CallExpression
                   callee:
                     type: Identifier
                     name: getEnv

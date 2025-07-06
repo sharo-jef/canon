@@ -38,7 +38,7 @@ import { MappingBlockContext } from "./CanonParser";
 import { MappingEntryContext } from "./CanonParser";
 import { ParameterListContext } from "./CanonParser";
 import { ParameterContext } from "./CanonParser";
-import { ObjectInstantiationContext } from "./CanonParser";
+import { CallExpressionContext } from "./CanonParser";
 import { ArgumentListContext } from "./CanonParser";
 import { IfStatementContext } from "./CanonParser";
 import { ExpressionStatementContext } from "./CanonParser";
@@ -316,11 +316,11 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitParameter?: (ctx: ParameterContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.objectInstantiation`.
+	 * Visit a parse tree produced by `CanonParser.callExpression`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitObjectInstantiation?: (ctx: ObjectInstantiationContext) => Result;
+	visitCallExpression?: (ctx: CallExpressionContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.argumentList`.

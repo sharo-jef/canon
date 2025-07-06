@@ -19,7 +19,7 @@ topLevelElement:
     | structDeclaration
     | unionDeclaration
     | typeDeclaration
-    | objectInstantiation;
+    | callExpression;
 
 // Schema declaration
 schemaDeclaration: annotation* SCHEMA block;
@@ -56,7 +56,7 @@ blockContent:
     | functionDeclaration
     | getterDeclaration
     | repeatedDeclaration
-    | objectInstantiation
+    | callExpression
     | ifStatement
     | expressionStatement;
 
@@ -86,8 +86,8 @@ mappingEntry: IDENTIFIER ARROW IDENTIFIER;
 parameterList: parameter (COMMA parameter)*;
 parameter: (THIS DOT)? IDENTIFIER (COLON type)?;
 
-// Object instantiation
-objectInstantiation: IDENTIFIER (LPAREN argumentList? RPAREN)? block;
+// Call expression (function call with optional lambda block)
+callExpression: IDENTIFIER (LPAREN argumentList? RPAREN)? block?;
 
 // Argument list
 argumentList: expression (COMMA expression)*;
@@ -116,7 +116,7 @@ primary:
     | IDENTIFIER
     | THIS
     | LPAREN expression RPAREN
-    | objectInstantiation
+    | callExpression
     | ERROR LPAREN stringLiteral RPAREN;
 
 // Literals

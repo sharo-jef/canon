@@ -28,10 +28,12 @@ function getChildNodes(node: ASTNode): ChildNodeInfo[] {
 
   // Properties that contain child nodes based on our parser.ts AST structure
   const childProperties = [
-    'body', // ObjectInstantiation, Block, etc.
-    'arguments', // FunctionCallExpression, etc.
+    'body', // Block, etc.
+    'lambdaBody', // CallExpression with lambda block
+    'arguments', // CallExpression, etc.
     'value', // AssignmentStatement, PropertyDeclaration, etc.
-    'callee', // FunctionCallExpression
+    'callee', // CallExpression (function reference)
+    'functionName', // CallExpression (function name as identifier)
     'left', // BinaryExpression
     'right', // BinaryExpression
     'operand', // UnaryExpression
@@ -159,6 +161,10 @@ function getNodeAdditionalInfo(node: ASTNode): string {
     info.push(`prop: ${node.property}`);
   }
 
+  if (node.functionName && typeof node.functionName === 'string') {
+    info.push(`fn: ${node.functionName}`);
+  }
+
   // Operators and expressions
   if (node.operator && typeof node.operator === 'string') {
     info.push(`op: ${node.operator}`);
@@ -199,6 +205,11 @@ function getNodeAdditionalInfo(node: ASTNode): string {
   // Body content count
   if (node.body && Array.isArray(node.body)) {
     info.push(`body: ${node.body.length}`);
+  }
+
+  // Lambda body content count
+  if (node.lambdaBody && Array.isArray(node.lambdaBody)) {
+    info.push(`lambda: ${node.lambdaBody.length}`);
   }
 
   // Annotation specific
