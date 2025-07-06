@@ -2,7 +2,7 @@
   "name": "canon",
   "version": "1.0.0",
   "description": "The definitive canon for your application's configuration, written as declarative, schema-validated code.",
-  "main": "src/hierarchy.ts",
+  "main": "src/parser.ts",
   "directories": {
     "example": "examples"
   },
@@ -12,12 +12,10 @@
     "test:coverage": "jest --coverage",
     "test:error-handling": "jest --testNamePattern=\"error handling\"",
     "test:legacy": "npx tsx src/test-error-handling.ts",
-    "start": "npm run generate && npm run parse:hierarchy && npm run parse:ast",
+    "start": "npm run generate && npm run parse:ast",
     "parse": "npm run parse:ast",
-    "parse:hierarchy": "npx tsx src/hierarchy.ts && npm run generate:hierarchy-docs",
-    "parse:ast": "npx tsx src/ast.ts && npm run generate:ast-docs",
+    "parse:ast": "npx tsx src/parser.ts && npm run generate:ast-docs",
     "generate": "npx antlr4ts -visitor -listener definition/CanonLexer.g4 definition/CanonParser.g4 -o src/generated",
-    "generate:hierarchy-docs": "npx tsx src/generate-hierarchy-docs.ts",
     "generate:ast-docs": "npx tsx src/generate-ast-docs.ts",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",

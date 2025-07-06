@@ -302,13 +302,34 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     }
     return this.defaultResult();
   }
-
   visitPropertyDeclaration(ctx: PropertyDeclarationContext): ASTNode {
     const annotations = ctx.annotation().map((ann) => this.visit(ann));
     const isPrivate = ctx.PRIVATE() !== undefined;
     const name = ctx.IDENTIFIER().text;
     const isOptional = ctx.QUESTION() !== undefined;
-    const typeRef = ctx.type() ? this.visit(ctx.type()!) : undefined;
+
+    let typeRef: ASTNode | undefined;
+    if (ctx.type()) {
+      typeRef = this.visit(ctx.type()!);
+    } else {
+      // 型が省略されている場合、プロパティ名と同じ名前の TypeReference を生成
+      const identifierToken = ctx.IDENTIFIER();
+      typeRef = {
+        type: 'TypeReference',
+        name: name,
+        loc: {
+          start: {
+            line: identifierToken.symbol.line,
+            column: identifierToken.symbol.charPositionInLine,
+          },
+          end: {
+            line: identifierToken.symbol.line,
+            column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+          },
+        },
+      };
+    }
+
     const defaultValue = ctx.expression() ? this.visit(ctx.expression()!) : undefined;
 
     return {
@@ -850,7 +871,7 @@ export function parseCanonFileToYaml(filePath: string): string {
  */
 export function parseCanonFileToYamlFile(
   inputFilePath: string,
-  outputFilePath: string = 'ast.yaml'
+  outputFilePath: string = 'ast.yml'
 ): void {
   const yamlContent = parseCanonFileToYaml(inputFilePath);
   fs.writeFileSync(outputFilePath, yamlContent, 'utf-8');
@@ -862,10 +883,15 @@ export function parseCanonFileToYamlFile(
  */
 export function parseCanonToYamlFile(
   source: string,
-  outputFilePath: string = 'ast.yaml',
+  outputFilePath: string = 'ast.yml',
   filename: string = '<unknown>'
 ): void {
   const yamlContent = parseCanonToYaml(source, filename);
   fs.writeFileSync(outputFilePath, yamlContent, 'utf-8');
   console.log(`✅ AST written to ${outputFilePath}`);
+}
+
+// Main execution when this file is run directly
+if (require.main === module) {
+  parseCanonFileToYamlFile('definition/schema.canon', 'ast.yaml');
 }

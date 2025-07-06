@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
-import { parseCanonFileToYamlFile } from './parser';
 
 interface ASTNode {
   type: string;
@@ -271,7 +270,6 @@ function generateASTHtml(ast: ASTNode): string {
                         <h1 class="text-sm font-medium text-gray-900 dark:text-white">Canon</h1>
                         <nav class="flex">
                             <a href="index.html" class="bg-gray-900 dark:bg-gray-700 text-white px-2 py-1 text-xs">AST</a>
-                            <a href="hierarchy.html" class="bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 text-xs hover:bg-gray-400 dark:hover:bg-gray-500">Hierarchy</a>
                         </nav>
                     </div>
                     <button onclick="toggleTheme()" class="p-1 text-gray-600 dark:text-gray-300">
@@ -540,21 +538,12 @@ function main() {
   try {
     console.log('🚀 Starting AST documentation generation...');
 
-    // Check if AST YAML file exists, if not, generate it
+    // Check if AST YAML file exists
     const astYamlPath = path.join(process.cwd(), 'ast.yaml');
     if (!fs.existsSync(astYamlPath)) {
-      console.log('📄 AST YAML file not found. Generating from definition/config.canon...');
-
-      const inputPath = path.join(process.cwd(), 'definition', 'config.canon');
-
-      if (!fs.existsSync(inputPath)) {
-        console.error('❌ Input Canon file not found: definition/config.canon');
-        console.error('Please create the Canon file or run the parser manually.');
-        process.exit(1);
-      }
-
-      parseCanonFileToYamlFile(inputPath, astYamlPath);
-      console.log('✅ AST YAML file generated successfully!');
+      console.error('❌ AST YAML file not found: ast.yaml');
+      console.error('Please run the parser first to generate the AST file.');
+      process.exit(1);
     }
 
     const astContent = fs.readFileSync(astYamlPath, 'utf8');
