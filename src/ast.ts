@@ -93,196 +93,29 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     }
 
     visitChildren(node: RuleNode): ASTNode {
-        const ruleNames = (node as any).constructor.name || 'UnknownRule';
-        const ruleName = ruleNames.replace('Context', '');
-        
-        // Statement は常に透過化（子ノードに委譲）
-        if (ruleName === 'Statement' && node.childCount === 1) {
-            const child = node.getChild(0);
-            if (child) {
-                return this.visit(child);
+        const children: ASTNode[] = [];
+        for (let i = 0; i < node.childCount; i++) {
+            const childResult = this.visit(node.getChild(i));
+            // visitTerminal が返す 'Terminal' 型や、その他の不要なノードを除外
+            if (childResult && childResult.type !== 'Terminal' && childResult.type !== 'Unknown') {
+                children.push(childResult);
             }
         }
         
-        // 式の階層を簡略化: 単一の子ノードしか持たない式は省略
-        if (this.isSimpleExpressionNode(node, ruleName)) {
-            const child = node.getChild(0);
-            if (child) {
-                return this.visit(child);
-            }
+        // 子が1つだけなら、その子を直接返す（階層をフラットにする）
+        if (children.length === 1) {
+            return children[0];
         }
 
-        const result: ASTNode = {
+        // 複数の子を持つ場合は、汎用的なノードとして返す
+        const ruleName = (node as any).constructor.name.replace('Context', '');
+        return {
             type: ruleName,
-            children: []
+            children: children,
+            loc: this.getLocationInfo(node),
         };
-
-        // Add location information
-        const loc = this.getLocationInfo(node as any);
-        if (loc) {
-            result.loc = loc;
-        }
-
-        // 特定のルールに対して詳細情報を追加
-        this.addRuleSpecificInfo(node, result);
-
-        // Binary expressions that have been structured should not process children
-        const binaryExpressions = ['BinaryExpression'];
-        if ((binaryExpressions.includes(ruleName) || result.type === 'BinaryExpression') && result.left && result.operator && result.right) {
-            delete result.children;
-            return result;
-        }
-
-        // 子ノードを処理
-        if (node.childCount > 0) {
-            for (let i = 0; i < node.childCount; i++) {
-                const child = node.getChild(i);
-                if (child) {
-                    const childNode = this.visit(child);
-                    if (childNode && this.shouldIncludeNode(childNode, ruleName)) {
-                        // 冗長なノードの場合、その子ノードを直接追加
-                        if (this.isRedundantWrapperNode(childNode)) {
-                            if (childNode.children) {
-                                result.children!.push(...childNode.children);
-                            }
-                        } else {
-                            result.children!.push(childNode);
-                        }
-                    }
-                }
-            }
-        }
-
-        // 空のchildrenを持つノードの後処理
-        if (result.children!.length === 0) {
-            delete result.children;
-        } else if (ruleName === 'PrimaryExpression' && result.children!.length === 1 && result.type === 'PrimaryExpression') {
-            // PrimaryExpression with single child should delegate to the child
-            const singleChild = result.children![0];
-            if (singleChild.type === 'Literal' || singleChild.type === 'MemberAccess' || 
-                singleChild.type === 'StringInterpolation' || singleChild.type === 'FunctionCall') {
-                // Return the child directly (transparent delegation)
-                return singleChild;
-            }
-        }
-
-        return result;
     }
 
-    private isSimpleExpressionNode(node: RuleNode, ruleName: string): boolean {
-        // 二項演算子のコンテキストの場合は透過処理しない
-        const binaryExpressions = ['BinaryExpression', 'AdditiveExpression', 'MultiplicativeExpression', 'ComparisonExpression', 'Expression'];
-        if (binaryExpressions.includes(ruleName)) {
-            // 3つ以上の子ノードがある場合は二項演算の可能性が高いので透過処理しない
-            if (node.childCount >= 3) {
-                return false;
-            }
-        }
-        
-        // 単一の子ノードしか持たない式ノードかチェック
-        if (node.childCount === 1) {
-            const expressionTypes = [
-                'Expression', 'ComparisonExpression',
-                'AdditiveExpression', 'MultiplicativeExpression'
-            ];
-            return expressionTypes.includes(ruleName);
-        }
-        return false;
-    }
-
-    private isMeaninglessToken(text?: string): boolean {
-        if (!text) return false;
-        
-        const meaninglessTokens = [
-            // 括弧類
-            '{', '}', '(', ')', '[', ']',
-            // 区切り文字
-            ':', ';', ',', '.', 
-            // 演算子
-            '=', '+', '-', '*', '/', '==', '!=', '<', '>', '<=', '>=',
-            // その他の記号
-            '`', '${', '#schema', '?', '@',
-            // 終端記号
-            '<EOF>',
-            // キーワード類（構造的な意味を持つものは除外対象）
-            'schema', 'struct', 'fun', 'declare', 'return', 'for', 'in',
-            'val', 'var', 'this', 'mixin'
-        ];
-        
-        return meaninglessTokens.includes(text);
-    }
-
-    private addRuleSpecificInfo(node: RuleNode, result: ASTNode): void {
-        const ctx = node as any;
-        
-        // プログラム
-        if (ctx.constructor.name === 'ProgramContext') {
-            // 特別な処理は不要
-        }
-        
-        // Schema directive
-        else if (ctx.constructor.name === 'SchemaDirectiveContext') {
-            const stringLiteral = ctx.STRING_LITERAL();
-            if (stringLiteral) {
-                result.schema = this.unquote(stringLiteral.text);
-            }
-        }
-        
-        // Schema member
-        else if (ctx.constructor.name === 'SchemaMemberContext') {
-            const identifier = ctx.IDENTIFIER();
-            const multiply = ctx.MULTIPLY();
-            const question = ctx.QUESTION();
-            const plus = ctx.PLUS();
-            const typeRef = ctx.typeReference();
-            
-            if (identifier) {
-                result.name = this.createIdentifierWithLocation(identifier.text, identifier);
-                result.multiple = !!multiply || !!plus; // * または + の場合は複数
-                // * は multiple: true, required: false
-                // + は multiple: true, required: true
-                // ? は multiple: false, required: false
-                // 修飾子なしは multiple: false, required: true
-                if (multiply) {
-                    result.required = false; // * は0個以上（任意）
-                } else if (plus) {
-                    result.required = true;  // + は1個以上必須
-                } else if (question) {
-                    result.required = false; // ? は任意
-                } else {
-                    result.required = true;  // 修飾子なしは必須
-                }
-                if (typeRef) {
-                    result.dataType = this.visit(typeRef);
-                }
-            }
-        }
-        
-        // Primary expression - delegate to specific subtypes
-        else if (ctx.constructor.name === 'PrimaryExpressionContext') {
-            const identifier = ctx.IDENTIFIER();
-            const lparen = ctx.LPAREN();
-            const rparen = ctx.RPAREN();
-            
-            if (identifier && lparen && rparen) {
-                // This is an apply() style function call
-                result.type = 'FunctionCall';
-                result.functionName = this.createIdentifierWithLocation(identifier.text, identifier);
-                result.arguments = [];
-            } else if (identifier && !lparen && !rparen) {
-                // Simple identifier reference - create Identifier node
-                result.type = 'Identifier';
-                result.name = identifier.text;
-                // Add location from the identifier token
-                const loc = this.getLocationInfo(identifier);
-                if (loc) {
-                    result.loc = loc;
-                }
-            }
-            // For other cases (literals, complex expressions), let normal processing handle delegation
-        }
-    }
-    
     private extractParameters(parameterList: any): any[] {
         const parameters: any[] = [];
         const params = parameterList.parameter();
@@ -356,61 +189,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         return statements;
     }
 
-    private shouldIncludeNode(childNode: ASTNode, parentRuleName: string): boolean {
-        // Terminal ノードは全て除外（重要な情報は親ノードでプロパティとして抽出済み）
-        if (childNode.type === 'Terminal') {
-            return false;
-        }
-        
-        // FunctionDefinition と MethodDefinition の特定の子ノードは除外（プロパティとして直接設定済み）
-        if (['FunctionDefinition', 'MethodDefinition'].includes(parentRuleName)) {
-            if (['FunctionBody', 'ParameterList', 'TypeReference'].includes(childNode.type)) {
-                return false;
-            }
-        }
-        
-        // ConfigurationCall と FunctionCall の構造的ラッパーは除外（プロパティとして直接設定済み）
-        if (['ConfigurationCall', 'FunctionCall'].includes(parentRuleName)) {
-            if (['ArgumentList', 'ConstructionBody'].includes(childNode.type)) {
-                return false;
-            }
-        }
-        
-        // 重要な構文要素は保持
-        const importantNodes = [
-            'StructMember', 'MixinDeclaration', 'MethodDefinition', 'Annotation',
-            'FunctionCall', 'Assignment', 'ReturnStatement', 'VariableDeclaration',
-            'Literal', 'MemberAccess', 'StringInterpolation', 'ConfigurationCall',
-            'StructContent', 'ExpressionStatement',
-            'InterpolationExpression', 'TypeReference', 'Parameter',
-            'ParameterList', 'ForStatement', 'StringContent',
-            'FunctionBody', 'Statement', 'Identifier'
-        ];
-        
-        if (importantNodes.includes(childNode.type)) {
-            return true;
-        }
-        
-        return true;
-    }
 
-    private isRedundantWrapperNode(node: ASTNode): boolean {
-        // 単一の子ノードを持つ構造的な wrapper ノードを判定
-        // Statement のみ対象（重要な情報を持たない場合）
-        // FunctionBody は関数の実装を含むため除外しない
-        const wrapperNodes = ['Statement'];
-        return wrapperNodes.includes(node.type) && 
-               !!node.children && 
-               node.children.length === 1 &&
-               !this.hasSemanticValue(node);
-    }
-
-    private hasSemanticValue(node: ASTNode): boolean {
-        // ノードが意味的な価値を持つかどうかを判定
-        // （プロパティを持つ、または特定の型の場合は意味的価値がある）
-        const keys = Object.keys(node);
-        return keys.some(key => key !== 'type' && key !== 'children');
-    }
 
     // Visitor methods implementation
     visitProgram(ctx: any): ASTNode { return this.visitChildren(ctx); }
