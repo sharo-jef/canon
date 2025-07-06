@@ -208,6 +208,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       const configCallList = Array.isArray(configurationCalls)
         ? configurationCalls
         : [configurationCalls];
+      // Configuration calls are processed as CallExpression via visitConfigurationCall compatibility method
       statements.push(...configCallList.map((stmt: any) => this.visit(stmt)));
     }
 
@@ -327,15 +328,17 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitFunctionCall(ctx: FunctionCallContext): ASTNode {
+  visitCallExpression(ctx: FunctionCallContext | ConfigurationCallContext): ASTNode {
     const identifier = ctx.IDENTIFIER();
-    const memberAccess = ctx.memberAccess();
     const argumentList = ctx.argumentList();
     const constructionBody = ctx.constructionBody();
 
     let functionName: any;
     let target: any = undefined;
     let isMethodCall = false;
+
+    // Check if this is a FunctionCallContext (has memberAccess method)
+    const memberAccess = 'memberAccess' in ctx ? ctx.memberAccess() : null;
 
     if (memberAccess) {
       // Member function call (e.g., version.toString())
@@ -362,7 +365,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         };
       }
     } else if (identifier) {
-      // Normal function call (e.g., data2(), apply())
+      // Normal function call (e.g., data2(), apply(), configuration calls)
       if (Array.isArray(identifier)) {
         functionName = this.createIdentifierWithLocation(identifier[0]?.text, identifier[0]);
       } else {
@@ -371,7 +374,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     }
 
     const result: ASTNode = {
-      type: 'FunctionCall',
+      type: 'CallExpression',
       functionName: functionName,
       arguments: argumentList ? this.extractArgumentsFromList(argumentList) : [],
       loc: this.getLocationInfo(ctx),
@@ -383,8 +386,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     }
 
     if (constructionBody) {
-      // This is actually an object construction with trailing lambda
-      result.isObjectConstruction = true;
+      // This call has a trailing construction block
       result.body = this.extractStatementsFromBody(constructionBody);
     } else {
       result.body = [];
@@ -392,6 +394,11 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
     return result;
   }
+
+  // Legacy method names for compatibility - use arrow functions to bind context
+  visitFunctionCall = (ctx: FunctionCallContext): ASTNode => this.visitCallExpression(ctx);
+  visitConfigurationCall = (ctx: ConfigurationCallContext): ASTNode =>
+    this.visitCallExpression(ctx);
 
   visitTypeReference(ctx: TypeReferenceContext): ASTNode {
     const stringType = ctx.STRING_TYPE();
@@ -552,22 +559,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       returnType: returnType ? this.visit(returnType) : undefined,
       parameters: parameterList ? this.extractParameters(parameterList) : [],
       functionBody: functionBody ? this.visit(functionBody) : undefined,
-      loc: this.getLocationInfo(ctx),
-    };
-  }
-
-  visitConfigurationCall(ctx: ConfigurationCallContext): ASTNode {
-    const identifier = ctx.IDENTIFIER();
-    const argumentList = ctx.argumentList();
-    const constructionBody = ctx.constructionBody();
-
-    return {
-      type: 'ConfigurationCall',
-      functionName: identifier
-        ? this.createIdentifierWithLocation(identifier.text, identifier)
-        : undefined,
-      arguments: argumentList ? this.extractArgumentsFromList(argumentList) : [],
-      body: constructionBody ? this.extractStatementsFromBody(constructionBody) : [],
       loc: this.getLocationInfo(ctx),
     };
   }
