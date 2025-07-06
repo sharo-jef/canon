@@ -22,7 +22,7 @@ topLevelElement:
     | callExpression;
 
 // Schema declaration
-schemaDeclaration: annotation* SCHEMA block;
+schemaDeclaration: annotation* SCHEMA (block | stringLiteral);
 
 // Struct declaration
 structDeclaration: annotation* STRUCT IDENTIFIER block;
@@ -50,14 +50,13 @@ primitiveType: STRING_TYPE | INT_TYPE | BOOL_TYPE;
 block: LBRACE blockContent* RBRACE;
 
 blockContent:
-    propertyDeclaration
-    | assignmentStatement
+    assignmentStatement
+    | expressionStatement
+    | propertyDeclaration
     | initDeclaration
     | functionDeclaration
     | getterDeclaration
-    | repeatedDeclaration
-    | callExpression
-    | expressionStatement;
+    | repeatedDeclaration;
 
 // Property declarations (in struct and schema)
 propertyDeclaration: annotation* (PRIVATE)? IDENTIFIER ((QUESTION)? COLON type (ASSIGN expression)?)?;

@@ -258,7 +258,7 @@ body:
               column: 20
         defaultValue:
           type: CallExpression
-          name:
+          callee:
             type: Identifier
             name: Version
             loc:
@@ -395,18 +395,27 @@ body:
         annotations: []
         parameters: []
         body:
-          - type: CallExpression
-            name:
-              type: Identifier
-              name: validation
+          - type: ExpressionStatement
+            expression:
+              type: CallExpression
+              callee:
+                type: Identifier
+                name: validation
+                loc:
+                  start:
+                    line: 27
+                    column: 8
+                  end:
+                    line: 27
+                    column: 18
+              arguments: []
               loc:
                 start:
                   line: 27
                   column: 8
                 end:
                   line: 27
-                  column: 18
-            arguments: []
+                  column: 20
             loc:
               start:
                 line: 27
@@ -558,18 +567,27 @@ body:
               end:
                 line: 32
                 column: 17
-          - type: CallExpression
-            name:
-              type: Identifier
-              name: validation
+          - type: ExpressionStatement
+            expression:
+              type: CallExpression
+              callee:
+                type: Identifier
+                name: validation
+                loc:
+                  start:
+                    line: 33
+                    column: 8
+                  end:
+                    line: 33
+                    column: 18
+              arguments: []
               loc:
                 start:
                   line: 33
                   column: 8
                 end:
                   line: 33
-                  column: 18
-            arguments: []
+                  column: 20
             loc:
               start:
                 line: 33
@@ -849,18 +867,27 @@ body:
               end:
                 line: 36
                 column: 60
-          - type: CallExpression
-            name:
-              type: Identifier
-              name: validation
+          - type: ExpressionStatement
+            expression:
+              type: CallExpression
+              callee:
+                type: Identifier
+                name: validation
+                loc:
+                  start:
+                    line: 37
+                    column: 8
+                  end:
+                    line: 37
+                    column: 18
+              arguments: []
               loc:
                 start:
                   line: 37
                   column: 8
                 end:
                   line: 37
-                  column: 18
-            arguments: []
+                  column: 20
             loc:
               start:
                 line: 37

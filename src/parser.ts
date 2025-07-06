@@ -190,14 +190,30 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitSchemaDeclaration(ctx: SchemaDeclarationContext): ASTNode {
     const annotations = ctx.annotation().map((ann) => this.visit(ann));
-    const body = this.visit(ctx.block());
-
-    return {
-      type: 'SchemaDeclaration',
-      annotations,
-      body: body.content,
-      loc: this.getLocationInfo(ctx),
-    };
+    
+    // Handle both block and string literal forms
+    const blockCtx = ctx.block();
+    const stringLiteralCtx = ctx.stringLiteral();
+    
+    if (blockCtx) {
+      const body = this.visit(blockCtx);
+      return {
+        type: 'SchemaDeclaration',
+        annotations,
+        body: body.content,
+        loc: this.getLocationInfo(ctx),
+      };
+    } else if (stringLiteralCtx) {
+      const path = this.visit(stringLiteralCtx);
+      return {
+        type: 'SchemaImport',
+        annotations,
+        path,
+        loc: this.getLocationInfo(ctx),
+      };
+    } else {
+      throw new Error('SchemaDeclaration must have either block or stringLiteral');
+    }
   }
 
   visitStructDeclaration(ctx: StructDeclarationContext): ASTNode {
@@ -741,9 +757,25 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
+  // Helper function to create CallExpression nodes consistently
+  private createCallExpression(
+    callee: ASTNode,
+    args: ASTNode[],
+    lambdaBody?: ASTNode[],
+    loc?: ASTLocation
+  ): ASTNode {
+    return {
+      type: 'CallExpression',
+      callee,
+      arguments: args,
+      lambdaBody,
+      loc,
+    };
+  }
+
   visitCallExpression(ctx: CallExpressionContext): ASTNode {
     const identifierToken = ctx.IDENTIFIER();
-    const name = {
+    const callee = {
       type: 'Identifier',
       name: identifierToken.text,
       loc: {
@@ -762,13 +794,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     const block = ctx.block();
     const lambdaBody = block ? this.visit(block) : undefined;
 
-    return {
-      type: 'CallExpression',
-      name,
-      arguments: args.arguments,
-      lambdaBody: lambdaBody?.content,
-      loc: this.getLocationInfo(ctx),
-    };
+    return this.createCallExpression(callee, args.arguments, lambdaBody?.content, this.getLocationInfo(ctx));
   }
 
   visitArgumentList(ctx: ArgumentListContext): ASTNode {
@@ -826,12 +852,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     const argList = ctx.argumentList();
     const args = argList ? this.visit(argList) : { type: 'ArgumentList', arguments: [] };
 
-    return {
-      type: 'CallExpression',
-      callee,
-      arguments: args.arguments,
-      loc: this.getLocationInfo(ctx),
-    };
+    return this.createCallExpression(callee, args.arguments, undefined, this.getLocationInfo(ctx));
   }
 
   visitUnaryMinusExpression(ctx: UnaryMinusExpressionContext): ASTNode {
