@@ -1269,5 +1269,29 @@ export function parseCanonToYamlFile(
 
 // Main execution when this file is run directly
 if (require.main === module) {
-  parseCanonFileToYamlFile('definition/schema.canon', 'ast.yaml');
+  const args = process.argv.slice(2);
+
+  if (args.length === 0) {
+    console.log('Usage: npx tsx src/parser.ts <input-file> [output-file]');
+    console.log('');
+    console.log('Examples:');
+    console.log('  npx tsx src/parser.ts definition/schema.canon');
+    console.log('  npx tsx src/parser.ts input.canon output.yaml');
+    process.exit(1);
+  }
+
+  const inputFile = args[0];
+  const outputFile = args[1] || 'ast.yaml';
+
+  if (!fs.existsSync(inputFile)) {
+    console.error(`❌ Error: Input file "${inputFile}" does not exist.`);
+    process.exit(1);
+  }
+
+  try {
+    parseCanonFileToYamlFile(inputFile, outputFile);
+  } catch (error) {
+    console.error(`❌ Error parsing file: ${error}`);
+    process.exit(1);
+  }
 }

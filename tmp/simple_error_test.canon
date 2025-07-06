@@ -1,5 +1,0 @@
-struct SimpleTest {
-    simpleFunc() {
-        error("test")
-    }
-}

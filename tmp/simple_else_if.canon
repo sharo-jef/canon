@@ -1,0 +1,3 @@
+struct SimpleElseIf {
+    test: string = if (true) "a" else if (false) "b" else "c"
+}
