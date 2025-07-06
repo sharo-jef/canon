@@ -14,6 +14,13 @@ import { RelationalExpressionContext } from "./CanonParser";
 import { EqualityExpressionContext } from "./CanonParser";
 import { LogicalAndExpressionContext } from "./CanonParser";
 import { LogicalOrExpressionContext } from "./CanonParser";
+import { LiteralExpressionContext } from "./CanonParser";
+import { IdentifierExpressionContext } from "./CanonParser";
+import { ThisExpressionContext } from "./CanonParser";
+import { IfExpressionContext } from "./CanonParser";
+import { ParenthesizedExpressionContext } from "./CanonParser";
+import { CallExpressionPrimaryContext } from "./CanonParser";
+import { ErrorExpressionContext } from "./CanonParser";
 import { ProgramContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { UseStatementContext } from "./CanonParser";
@@ -40,7 +47,6 @@ import { ParameterListContext } from "./CanonParser";
 import { ParameterContext } from "./CanonParser";
 import { CallExpressionContext } from "./CanonParser";
 import { ArgumentListContext } from "./CanonParser";
-import { IfStatementContext } from "./CanonParser";
 import { ExpressionStatementContext } from "./CanonParser";
 import { ExpressionContext } from "./CanonParser";
 import { PrimaryContext } from "./CanonParser";
@@ -198,6 +204,97 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitLogicalOrExpression?: (ctx: LogicalOrExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `literalExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	enterLiteralExpression?: (ctx: LiteralExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `literalExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	exitLiteralExpression?: (ctx: LiteralExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `identifierExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	enterIdentifierExpression?: (ctx: IdentifierExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `identifierExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	exitIdentifierExpression?: (ctx: IdentifierExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `thisExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	enterThisExpression?: (ctx: ThisExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `thisExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	exitThisExpression?: (ctx: ThisExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `ifExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	enterIfExpression?: (ctx: IfExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `ifExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	exitIfExpression?: (ctx: IfExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `parenthesizedExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	enterParenthesizedExpression?: (ctx: ParenthesizedExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `parenthesizedExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	exitParenthesizedExpression?: (ctx: ParenthesizedExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `callExpressionPrimary`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	enterCallExpressionPrimary?: (ctx: CallExpressionPrimaryContext) => void;
+	/**
+	 * Exit a parse tree produced by the `callExpressionPrimary`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	exitCallExpressionPrimary?: (ctx: CallExpressionPrimaryContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `errorExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	enterErrorExpression?: (ctx: ErrorExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `errorExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	exitErrorExpression?: (ctx: ErrorExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.program`.
@@ -484,17 +581,6 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitArgumentList?: (ctx: ArgumentListContext) => void;
-
-	/**
-	 * Enter a parse tree produced by `CanonParser.ifStatement`.
-	 * @param ctx the parse tree
-	 */
-	enterIfStatement?: (ctx: IfStatementContext) => void;
-	/**
-	 * Exit a parse tree produced by `CanonParser.ifStatement`.
-	 * @param ctx the parse tree
-	 */
-	exitIfStatement?: (ctx: IfStatementContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.expressionStatement`.

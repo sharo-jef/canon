@@ -32,9 +32,7 @@ import {
   ParameterContext,
   CallExpressionContext,
   ArgumentListContext,
-  IfStatementContext,
   ExpressionStatementContext,
-  PrimaryContext,
   LiteralContext,
   StringLiteralContext,
   TemplateStringContext,
@@ -51,6 +49,13 @@ import {
   EqualityExpressionContext,
   LogicalAndExpressionContext,
   LogicalOrExpressionContext,
+  LiteralExpressionContext,
+  IdentifierExpressionContext,
+  ThisExpressionContext,
+  IfExpressionContext,
+  ParenthesizedExpressionContext,
+  CallExpressionPrimaryContext,
+  ErrorExpressionContext,
 } from './generated/CanonParser';
 import { CanonParserVisitor } from './generated/CanonParserVisitor';
 
@@ -785,18 +790,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitIfStatement(ctx: IfStatementContext): ASTNode {
-    const condition = this.visit(ctx.expression(0));
-    const then = this.visit(ctx.expression(1));
-
-    return {
-      type: 'IfStatement',
-      condition,
-      then,
-      loc: this.getLocationInfo(ctx),
-    };
-  }
-
   visitExpressionStatement(ctx: ExpressionStatementContext): ASTNode {
     return this.visit(ctx.expression());
   }
@@ -948,7 +941,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   visitLogicalAndExpression(ctx: LogicalAndExpressionContext): ASTNode {
     const left = this.visit(ctx.expression(0));
     const right = this.visit(ctx.expression(1));
-    const operator = ctx.AND() ? 'and' : '&&';
+    const operator = '&&'; // 論理AND演算子は && のみ
 
     return {
       type: 'BinaryExpression',
@@ -962,7 +955,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   visitLogicalOrExpression(ctx: LogicalOrExpressionContext): ASTNode {
     const left = this.visit(ctx.expression(0));
     const right = this.visit(ctx.expression(1));
-    const operator = ctx.OR() ? 'or' : '||';
+    const operator = '||'; // 論理OR演算子は || のみ
 
     return {
       type: 'BinaryExpression',
@@ -973,34 +966,56 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitPrimary(ctx: PrimaryContext): ASTNode {
-    if (ctx.literal()) {
-      return this.visit(ctx.literal()!);
-    } else if (ctx.IDENTIFIER()) {
-      return {
-        type: 'Identifier',
-        name: ctx.IDENTIFIER()!.text,
-        loc: this.getLocationInfo(ctx),
-      };
-    } else if (ctx.THIS()) {
-      return {
-        type: 'ThisExpression',
-        loc: this.getLocationInfo(ctx),
-      };
-    } else if (ctx.expression()) {
-      return this.visit(ctx.expression()!);
-    } else if (ctx.callExpression()) {
-      return this.visit(ctx.callExpression()!);
-    } else if (ctx.ERROR()) {
-      const message = this.visit(ctx.stringLiteral()!);
-      return {
-        type: 'ErrorExpression',
-        message: message.value,
-        loc: this.getLocationInfo(ctx),
-      };
-    }
+  // Primary expression visitors
+  visitLiteralExpression(ctx: LiteralExpressionContext): ASTNode {
+    return this.visit(ctx.literal());
+  }
 
-    return this.defaultResult();
+  visitIdentifierExpression(ctx: IdentifierExpressionContext): ASTNode {
+    return {
+      type: 'Identifier',
+      name: ctx.IDENTIFIER().text,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitThisExpression(ctx: ThisExpressionContext): ASTNode {
+    return {
+      type: 'ThisExpression',
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitIfExpression(ctx: IfExpressionContext): ASTNode {
+    const condition = this.visit(ctx.expression(0));
+    const then = this.visit(ctx.expression(1));
+    // elseは省略可能
+    const elseExpression = ctx.expression().length > 2 ? this.visit(ctx.expression(2)) : undefined;
+
+    return {
+      type: 'IfExpression',
+      condition,
+      then,
+      else: elseExpression,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitParenthesizedExpression(ctx: ParenthesizedExpressionContext): ASTNode {
+    return this.visit(ctx.expression());
+  }
+
+  visitCallExpressionPrimary(ctx: CallExpressionPrimaryContext): ASTNode {
+    return this.visit(ctx.callExpression());
+  }
+
+  visitErrorExpression(ctx: ErrorExpressionContext): ASTNode {
+    const message = this.visit(ctx.stringLiteral());
+    return {
+      type: 'ErrorExpression',
+      message: message.value,
+      loc: this.getLocationInfo(ctx),
+    };
   }
 
   visitLiteral(ctx: LiteralContext): ASTNode {

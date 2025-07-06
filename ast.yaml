@@ -740,13 +740,13 @@ body:
         isPrivate: true
         parameters: []
         body:
-          - type: IfStatement
+          - type: IfExpression
             condition:
               type: BinaryExpression
-              operator: and
+              operator: '&&'
               left:
                 type: BinaryExpression
-                operator: and
+                operator: '&&'
                 left:
                   type: BinaryExpression
                   operator: '=='
@@ -807,28 +807,28 @@ body:
                       loc:
                         start:
                           line: 39
-                          column: 32
+                          column: 31
                         end:
                           line: 39
-                          column: 36
+                          column: 35
                     property:
                       type: Identifier
                       name: minor
                       loc:
                         start:
                           line: 39
-                          column: 37
+                          column: 36
                         end:
                           line: 39
-                          column: 42
+                          column: 41
                     computed: false
                     loc:
                       start:
                         line: 39
-                        column: 32
+                        column: 31
                       end:
                         line: 39
-                        column: 42
+                        column: 41
                   right:
                     type: IntegerLiteral
                     value: 0
@@ -836,24 +836,24 @@ body:
                     loc:
                       start:
                         line: 39
-                        column: 46
+                        column: 45
                       end:
                         line: 39
-                        column: 47
+                        column: 46
                   loc:
                     start:
                       line: 39
-                      column: 32
+                      column: 31
                     end:
                       line: 39
-                      column: 47
+                      column: 46
                 loc:
                   start:
                     line: 39
                     column: 12
                   end:
                     line: 39
-                    column: 47
+                    column: 46
               right:
                 type: BinaryExpression
                 operator: '=='
@@ -864,28 +864,28 @@ body:
                     loc:
                       start:
                         line: 39
-                        column: 52
+                        column: 50
                       end:
                         line: 39
-                        column: 56
+                        column: 54
                   property:
                     type: Identifier
                     name: patch
                     loc:
                       start:
                         line: 39
-                        column: 57
+                        column: 55
                       end:
                         line: 39
-                        column: 62
+                        column: 60
                   computed: false
                   loc:
                     start:
                       line: 39
-                      column: 52
+                      column: 50
                     end:
                       line: 39
-                      column: 62
+                      column: 60
                 right:
                   type: IntegerLiteral
                   value: 0
@@ -893,41 +893,41 @@ body:
                   loc:
                     start:
                       line: 39
-                      column: 66
+                      column: 64
                     end:
                       line: 39
-                      column: 67
+                      column: 65
                 loc:
                   start:
                     line: 39
-                    column: 52
+                    column: 50
                   end:
                     line: 39
-                    column: 67
+                    column: 65
               loc:
                 start:
                   line: 39
                   column: 12
                 end:
                   line: 39
-                  column: 67
+                  column: 65
             then:
               type: ErrorExpression
               message: Given version is not valid
               loc:
                 start:
                   line: 39
-                  column: 69
+                  column: 67
                 end:
                   line: 39
-                  column: 104
+                  column: 102
             loc:
               start:
                 line: 39
                 column: 8
               end:
                 line: 39
-                column: 104
+                column: 102
         loc:
           start:
             line: 38

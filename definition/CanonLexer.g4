@@ -25,9 +25,8 @@ GET: 'get';
 REPEATED: 'repeated';
 USE: 'use';
 IF: 'if';
+ELSE: 'else';
 ERROR: 'error';
-AND: 'and';
-OR: 'or';
 NOT: 'not';
 THIS: 'this';
 

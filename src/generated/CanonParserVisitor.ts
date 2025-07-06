@@ -14,6 +14,13 @@ import { RelationalExpressionContext } from "./CanonParser";
 import { EqualityExpressionContext } from "./CanonParser";
 import { LogicalAndExpressionContext } from "./CanonParser";
 import { LogicalOrExpressionContext } from "./CanonParser";
+import { LiteralExpressionContext } from "./CanonParser";
+import { IdentifierExpressionContext } from "./CanonParser";
+import { ThisExpressionContext } from "./CanonParser";
+import { IfExpressionContext } from "./CanonParser";
+import { ParenthesizedExpressionContext } from "./CanonParser";
+import { CallExpressionPrimaryContext } from "./CanonParser";
+import { ErrorExpressionContext } from "./CanonParser";
 import { ProgramContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { UseStatementContext } from "./CanonParser";
@@ -40,7 +47,6 @@ import { ParameterListContext } from "./CanonParser";
 import { ParameterContext } from "./CanonParser";
 import { CallExpressionContext } from "./CanonParser";
 import { ArgumentListContext } from "./CanonParser";
-import { IfStatementContext } from "./CanonParser";
 import { ExpressionStatementContext } from "./CanonParser";
 import { ExpressionContext } from "./CanonParser";
 import { PrimaryContext } from "./CanonParser";
@@ -146,6 +152,62 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitLogicalOrExpression?: (ctx: LogicalOrExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `literalExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLiteralExpression?: (ctx: LiteralExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `identifierExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitIdentifierExpression?: (ctx: IdentifierExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `thisExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitThisExpression?: (ctx: ThisExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `ifExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitIfExpression?: (ctx: IfExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `parenthesizedExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitParenthesizedExpression?: (ctx: ParenthesizedExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `callExpressionPrimary`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCallExpressionPrimary?: (ctx: CallExpressionPrimaryContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `errorExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitErrorExpression?: (ctx: ErrorExpressionContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.program`.
@@ -328,13 +390,6 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitArgumentList?: (ctx: ArgumentListContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.ifStatement`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitIfStatement?: (ctx: IfStatementContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.expressionStatement`.

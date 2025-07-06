@@ -57,7 +57,6 @@ blockContent:
     | getterDeclaration
     | repeatedDeclaration
     | callExpression
-    | ifStatement
     | expressionStatement;
 
 // Property declarations (in struct and schema)
@@ -93,7 +92,6 @@ callExpression: IDENTIFIER (LPAREN argumentList? RPAREN)? block?;
 argumentList: expression (COMMA expression)*;
 
 // Statements
-ifStatement: IF LPAREN expression RPAREN expression;
 expressionStatement: expression;
 
 // Expressions
@@ -107,17 +105,18 @@ expression:
     | expression (PLUS | MINUS) expression                     #additiveExpression
     | expression (LESS_THAN | GREATER_THAN | LESS_EQUALS | GREATER_EQUALS) expression #relationalExpression
     | expression (EQUALS | NOT_EQUALS) expression              #equalityExpression
-    | expression (AND | LOGICAL_AND) expression                #logicalAndExpression
-    | expression (OR | LOGICAL_OR) expression                  #logicalOrExpression;
+    | expression LOGICAL_AND expression                        #logicalAndExpression
+    | expression LOGICAL_OR expression                         #logicalOrExpression;
 
 // Primary expressions
 primary:
-    literal
-    | IDENTIFIER
-    | THIS
-    | LPAREN expression RPAREN
-    | callExpression
-    | ERROR LPAREN stringLiteral RPAREN;
+    literal                                                     #literalExpression
+    | IDENTIFIER                                                #identifierExpression
+    | THIS                                                      #thisExpression
+    | IF LPAREN expression RPAREN expression (ELSE expression)? #ifExpression
+    | LPAREN expression RPAREN                                  #parenthesizedExpression
+    | callExpression                                            #callExpressionPrimary
+    | ERROR LPAREN stringLiteral RPAREN                        #errorExpression;
 
 // Literals
 literal:
