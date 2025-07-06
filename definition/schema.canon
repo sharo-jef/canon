@@ -33,6 +33,7 @@ struct Version {
         validation()
     }
     init(this.major, this.minor, this.patch) {
+        `${major + minor + patch}あいうえお$majorほげ${this.major}`
         validation()
     }
     private validation() {

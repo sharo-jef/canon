@@ -97,9 +97,34 @@ IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
 fragment EscapeSequence:
     '\\' ['"\\nrtbf];
 
-// Template string mode for handling $identifier interpolation
+// Template string mode for handling ${expression} interpolation
 mode TEMPLATE_MODE;
 
 TEMPLATE_STRING_END: '`' -> popMode;
 TEMPLATE_STRING_PART: (~[`$])+;
-TEMPLATE_INTERPOLATION: '$' [a-zA-Z_][a-zA-Z0-9_]*;
+TEMPLATE_INTERPOLATION_START: '${' -> pushMode(INTERPOLATION_MODE);
+TEMPLATE_INTERPOLATION_SIMPLE: '$' [a-zA-Z_][a-zA-Z0-9_]*;
+
+// Interpolation mode for handling expressions inside ${}
+mode INTERPOLATION_MODE;
+
+INTERPOLATION_END: '}' -> popMode;
+// All regular tokens are available inside interpolation
+INTERPOLATION_IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]* -> type(IDENTIFIER);
+INTERPOLATION_INTEGER: [0-9]+ -> type(INTEGER_LITERAL);
+INTERPOLATION_PLUS: '+' -> type(PLUS);
+INTERPOLATION_MINUS: '-' -> type(MINUS);
+INTERPOLATION_MULTIPLY: '*' -> type(MULTIPLY);
+INTERPOLATION_DIVIDE: '/' -> type(DIVIDE);
+INTERPOLATION_LPAREN: '(' -> type(LPAREN);
+INTERPOLATION_RPAREN: ')' -> type(RPAREN);
+INTERPOLATION_DOT: '.' -> type(DOT);
+INTERPOLATION_EQUALS: '==' -> type(EQUALS);
+INTERPOLATION_NOT_EQUALS: '!=' -> type(NOT_EQUALS);
+INTERPOLATION_LESS_THAN: '<' -> type(LESS_THAN);
+INTERPOLATION_GREATER_THAN: '>' -> type(GREATER_THAN);
+INTERPOLATION_LESS_EQUALS: '<=' -> type(LESS_EQUALS);
+INTERPOLATION_GREATER_EQUALS: '>=' -> type(GREATER_EQUALS);
+INTERPOLATION_LOGICAL_AND: '&&' -> type(LOGICAL_AND);
+INTERPOLATION_LOGICAL_OR: '||' -> type(LOGICAL_OR);
+INTERPOLATION_WS: [ \t\r\n]+ -> skip;

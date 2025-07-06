@@ -699,31 +699,181 @@ body:
                 line: 35
                 column: 43
         body:
-          - type: CallExpression
-            name:
-              type: Identifier
-              name: validation
+          - type: ExpressionStatement
+            expression:
+              type: TemplateLiteral
+              parts:
+                - type: TemplateInterpolation
+                  expression:
+                    type: BinaryExpression
+                    operator: +
+                    left:
+                      type: BinaryExpression
+                      operator: +
+                      left:
+                        type: Identifier
+                        name: major
+                        loc:
+                          start:
+                            line: 36
+                            column: 11
+                          end:
+                            line: 36
+                            column: 16
+                      right:
+                        type: Identifier
+                        name: minor
+                        loc:
+                          start:
+                            line: 36
+                            column: 19
+                          end:
+                            line: 36
+                            column: 24
+                      loc:
+                        start:
+                          line: 36
+                          column: 11
+                        end:
+                          line: 36
+                          column: 24
+                    right:
+                      type: Identifier
+                      name: patch
+                      loc:
+                        start:
+                          line: 36
+                          column: 27
+                        end:
+                          line: 36
+                          column: 32
+                    loc:
+                      start:
+                        line: 36
+                        column: 11
+                      end:
+                        line: 36
+                        column: 32
+                  loc:
+                    start:
+                      line: 36
+                      column: 9
+                    end:
+                      line: 36
+                      column: 33
+                - type: TemplateStringPart
+                  value: あいうえお
+                  loc:
+                    start:
+                      line: 36
+                      column: 33
+                    end:
+                      line: 36
+                      column: 38
+                - type: TemplateInterpolation
+                  expression:
+                    type: Identifier
+                    name: major
+                    loc:
+                      start:
+                        line: 36
+                        column: 38
+                      end:
+                        line: 36
+                        column: 44
+                  loc:
+                    start:
+                      line: 36
+                      column: 38
+                    end:
+                      line: 36
+                      column: 44
+                - type: TemplateStringPart
+                  value: ほげ
+                  loc:
+                    start:
+                      line: 36
+                      column: 44
+                    end:
+                      line: 36
+                      column: 46
+                - type: TemplateInterpolation
+                  expression:
+                    type: MemberAccessExpression
+                    object:
+                      type: Identifier
+                      name: this
+                      loc:
+                        start:
+                          line: 36
+                          column: 48
+                        end:
+                          line: 36
+                          column: 52
+                    property:
+                      type: Identifier
+                      name: major
+                      loc:
+                        start:
+                          line: 36
+                          column: 53
+                        end:
+                          line: 36
+                          column: 58
+                    computed: false
+                    loc:
+                      start:
+                        line: 36
+                        column: 48
+                      end:
+                        line: 36
+                        column: 58
+                  loc:
+                    start:
+                      line: 36
+                      column: 46
+                    end:
+                      line: 36
+                      column: 59
               loc:
                 start:
                   line: 36
                   column: 8
                 end:
                   line: 36
-                  column: 18
-            arguments: []
+                  column: 60
             loc:
               start:
                 line: 36
                 column: 8
               end:
                 line: 36
+                column: 60
+          - type: CallExpression
+            name:
+              type: Identifier
+              name: validation
+              loc:
+                start:
+                  line: 37
+                  column: 8
+                end:
+                  line: 37
+                  column: 18
+            arguments: []
+            loc:
+              start:
+                line: 37
+                column: 8
+              end:
+                line: 37
                 column: 20
         loc:
           start:
             line: 35
             column: 4
           end:
-            line: 37
+            line: 38
             column: 5
       - type: FunctionDeclaration
         name:
@@ -731,10 +881,10 @@ body:
           name: validation
           loc:
             start:
-              line: 38
+              line: 39
               column: 12
             end:
-              line: 38
+              line: 39
               column: 22
         annotations: []
         isPrivate: true
@@ -758,28 +908,28 @@ body:
                         type: ThisExpression
                         loc:
                           start:
-                            line: 39
+                            line: 40
                             column: 12
                           end:
-                            line: 39
+                            line: 40
                             column: 16
                       property:
                         type: Identifier
                         name: major
                         loc:
                           start:
-                            line: 39
+                            line: 40
                             column: 17
                           end:
-                            line: 39
+                            line: 40
                             column: 22
                       computed: false
                       loc:
                         start:
-                          line: 39
+                          line: 40
                           column: 12
                         end:
-                          line: 39
+                          line: 40
                           column: 22
                     right:
                       type: IntegerLiteral
@@ -787,17 +937,17 @@ body:
                       raw: '0'
                       loc:
                         start:
-                          line: 39
+                          line: 40
                           column: 26
                         end:
-                          line: 39
+                          line: 40
                           column: 27
                     loc:
                       start:
-                        line: 39
+                        line: 40
                         column: 12
                       end:
-                        line: 39
+                        line: 40
                         column: 27
                   right:
                     type: BinaryExpression
@@ -808,28 +958,28 @@ body:
                         type: ThisExpression
                         loc:
                           start:
-                            line: 39
+                            line: 40
                             column: 31
                           end:
-                            line: 39
+                            line: 40
                             column: 35
                       property:
                         type: Identifier
                         name: minor
                         loc:
                           start:
-                            line: 39
+                            line: 40
                             column: 36
                           end:
-                            line: 39
+                            line: 40
                             column: 41
                       computed: false
                       loc:
                         start:
-                          line: 39
+                          line: 40
                           column: 31
                         end:
-                          line: 39
+                          line: 40
                           column: 41
                     right:
                       type: IntegerLiteral
@@ -837,24 +987,24 @@ body:
                       raw: '0'
                       loc:
                         start:
-                          line: 39
+                          line: 40
                           column: 45
                         end:
-                          line: 39
+                          line: 40
                           column: 46
                     loc:
                       start:
-                        line: 39
+                        line: 40
                         column: 31
                       end:
-                        line: 39
+                        line: 40
                         column: 46
                   loc:
                     start:
-                      line: 39
+                      line: 40
                       column: 12
                     end:
-                      line: 39
+                      line: 40
                       column: 46
                 right:
                   type: BinaryExpression
@@ -865,28 +1015,28 @@ body:
                       type: ThisExpression
                       loc:
                         start:
-                          line: 39
+                          line: 40
                           column: 50
                         end:
-                          line: 39
+                          line: 40
                           column: 54
                     property:
                       type: Identifier
                       name: patch
                       loc:
                         start:
-                          line: 39
+                          line: 40
                           column: 55
                         end:
-                          line: 39
+                          line: 40
                           column: 60
                     computed: false
                     loc:
                       start:
-                        line: 39
+                        line: 40
                         column: 50
                       end:
-                        line: 39
+                        line: 40
                         column: 60
                   right:
                     type: IntegerLiteral
@@ -894,24 +1044,24 @@ body:
                     raw: '0'
                     loc:
                       start:
-                        line: 39
+                        line: 40
                         column: 64
                       end:
-                        line: 39
+                        line: 40
                         column: 65
                   loc:
                     start:
-                      line: 39
+                      line: 40
                       column: 50
                     end:
-                      line: 39
+                      line: 40
                       column: 65
                 loc:
                   start:
-                    line: 39
+                    line: 40
                     column: 12
                   end:
-                    line: 39
+                    line: 40
                     column: 65
               then:
                 - type: ExpressionStatement
@@ -922,10 +1072,10 @@ body:
                       name: error
                       loc:
                         start:
-                          line: 39
+                          line: 40
                           column: 67
                         end:
-                          line: 39
+                          line: 40
                           column: 72
                     arguments:
                       - type: StringLiteral
@@ -933,45 +1083,45 @@ body:
                         raw: '''Given version is not valid'''
                         loc:
                           start:
-                            line: 39
+                            line: 40
                             column: 73
                           end:
-                            line: 39
+                            line: 40
                             column: 101
                     loc:
                       start:
-                        line: 39
+                        line: 40
                         column: 67
                       end:
-                        line: 39
+                        line: 40
                         column: 102
                   loc:
                     start:
-                      line: 39
+                      line: 40
                       column: 67
                     end:
-                      line: 39
+                      line: 40
                       column: 102
               loc:
                 start:
-                  line: 39
+                  line: 40
                   column: 8
                 end:
-                  line: 39
+                  line: 40
                   column: 102
             loc:
               start:
-                line: 39
+                line: 40
                 column: 8
               end:
-                line: 39
+                line: 40
                 column: 102
         loc:
           start:
-            line: 38
+            line: 39
             column: 4
           end:
-            line: 40
+            line: 41
             column: 5
       - type: PropertyDeclaration
         name:
@@ -979,10 +1129,10 @@ body:
           name: major
           loc:
             start:
-              line: 41
+              line: 42
               column: 4
             end:
-              line: 41
+              line: 42
               column: 9
         annotations: []
         isPrivate: false
@@ -992,17 +1142,17 @@ body:
           name: int
           loc:
             start:
-              line: 41
+              line: 42
               column: 11
             end:
-              line: 41
+              line: 42
               column: 14
         loc:
           start:
-            line: 41
+            line: 42
             column: 4
           end:
-            line: 41
+            line: 42
             column: 14
       - type: PropertyDeclaration
         name:
@@ -1010,10 +1160,10 @@ body:
           name: minor
           loc:
             start:
-              line: 42
+              line: 43
               column: 4
             end:
-              line: 42
+              line: 43
               column: 9
         annotations: []
         isPrivate: false
@@ -1023,17 +1173,17 @@ body:
           name: int
           loc:
             start:
-              line: 42
+              line: 43
               column: 11
             end:
-              line: 42
+              line: 43
               column: 14
         loc:
           start:
-            line: 42
+            line: 43
             column: 4
           end:
-            line: 42
+            line: 43
             column: 14
       - type: PropertyDeclaration
         name:
@@ -1041,10 +1191,10 @@ body:
           name: patch
           loc:
             start:
-              line: 43
+              line: 44
               column: 4
             end:
-              line: 43
+              line: 44
               column: 9
         annotations: []
         isPrivate: false
@@ -1054,17 +1204,17 @@ body:
           name: int
           loc:
             start:
-              line: 43
+              line: 44
               column: 11
             end:
-              line: 43
+              line: 44
               column: 14
         loc:
           start:
-            line: 43
+            line: 44
             column: 4
           end:
-            line: 43
+            line: 44
             column: 14
       - type: PropertyDeclaration
         name:
@@ -1072,10 +1222,10 @@ body:
           name: hoge
           loc:
             start:
-              line: 44
+              line: 45
               column: 12
             end:
-              line: 44
+              line: 45
               column: 16
         annotations: []
         isPrivate: true
@@ -1085,17 +1235,17 @@ body:
           name: string
           loc:
             start:
-              line: 44
+              line: 45
               column: 18
             end:
-              line: 44
+              line: 45
               column: 24
         loc:
           start:
-            line: 44
+            line: 45
             column: 4
           end:
-            line: 44
+            line: 45
             column: 24
       - type: GetterDeclaration
         name:
@@ -1103,10 +1253,10 @@ body:
           name: toString
           loc:
             start:
-              line: 45
+              line: 46
               column: 8
             end:
-              line: 45
+              line: 46
               column: 16
         annotations: []
         body:
@@ -1115,77 +1265,104 @@ body:
               type: TemplateLiteral
               parts:
                 - type: TemplateInterpolation
-                  identifier: major
+                  expression:
+                    type: Identifier
+                    name: major
+                    loc:
+                      start:
+                        line: 47
+                        column: 9
+                      end:
+                        line: 47
+                        column: 15
                   loc:
                     start:
-                      line: 46
+                      line: 47
                       column: 9
                     end:
-                      line: 46
+                      line: 47
                       column: 15
                 - type: TemplateStringPart
                   value: .
                   loc:
                     start:
-                      line: 46
+                      line: 47
                       column: 15
                     end:
-                      line: 46
+                      line: 47
                       column: 16
                 - type: TemplateInterpolation
-                  identifier: minor
+                  expression:
+                    type: Identifier
+                    name: minor
+                    loc:
+                      start:
+                        line: 47
+                        column: 16
+                      end:
+                        line: 47
+                        column: 22
                   loc:
                     start:
-                      line: 46
+                      line: 47
                       column: 16
                     end:
-                      line: 46
+                      line: 47
                       column: 22
                 - type: TemplateStringPart
                   value: .
                   loc:
                     start:
-                      line: 46
+                      line: 47
                       column: 22
                     end:
-                      line: 46
+                      line: 47
                       column: 23
                 - type: TemplateInterpolation
-                  identifier: path
+                  expression:
+                    type: Identifier
+                    name: patch
+                    loc:
+                      start:
+                        line: 47
+                        column: 23
+                      end:
+                        line: 47
+                        column: 29
                   loc:
                     start:
-                      line: 46
+                      line: 47
                       column: 23
                     end:
-                      line: 46
-                      column: 28
+                      line: 47
+                      column: 29
               loc:
                 start:
-                  line: 46
+                  line: 47
                   column: 8
                 end:
-                  line: 46
-                  column: 29
+                  line: 47
+                  column: 30
             loc:
               start:
-                line: 46
+                line: 47
                 column: 8
               end:
-                line: 46
-                column: 29
+                line: 47
+                column: 30
         loc:
           start:
-            line: 45
+            line: 46
             column: 4
           end:
-            line: 47
+            line: 48
             column: 5
     loc:
       start:
         line: 25
         column: 0
       end:
-        line: 48
+        line: 49
         column: 1
   - type: StructDeclaration
     name:
@@ -1193,10 +1370,10 @@ body:
       name: Pipeline
       loc:
         start:
-          line: 50
+          line: 51
           column: 7
         end:
-          line: 50
+          line: 51
           column: 15
     annotations: []
     body:
@@ -1206,10 +1383,10 @@ body:
           name: steps
           loc:
             start:
-              line: 51
+              line: 52
               column: 13
             end:
-              line: 51
+              line: 52
               column: 18
         annotations: []
         typeRef:
@@ -1221,25 +1398,25 @@ body:
               name: Step
               loc:
                 start:
-                  line: 51
+                  line: 52
                   column: 20
                 end:
-                  line: 51
+                  line: 52
                   column: 24
             loc:
               start:
-                line: 51
+                line: 52
                 column: 20
               end:
-                line: 51
+                line: 52
                 column: 24
           dimensions: 1
           loc:
             start:
-              line: 51
+              line: 52
               column: 20
             end:
-              line: 51
+              line: 52
               column: 26
         mapping:
           type: MappingBlock
@@ -1250,27 +1427,27 @@ body:
                 name: build
                 loc:
                   start:
-                    line: 52
+                    line: 53
                     column: 8
                   end:
-                    line: 52
+                    line: 53
                     column: 13
               to:
                 type: Identifier
                 name: BuildStep
                 loc:
                   start:
-                    line: 52
+                    line: 53
                     column: 17
                   end:
-                    line: 52
+                    line: 53
                     column: 26
               loc:
                 start:
-                  line: 52
+                  line: 53
                   column: 8
                 end:
-                  line: 52
+                  line: 53
                   column: 26
             - type: MappingEntry
               from:
@@ -1278,48 +1455,48 @@ body:
                 name: test
                 loc:
                   start:
-                    line: 53
+                    line: 54
                     column: 8
                   end:
-                    line: 53
+                    line: 54
                     column: 12
               to:
                 type: Identifier
                 name: TestStep
                 loc:
                   start:
-                    line: 53
+                    line: 54
                     column: 16
                   end:
-                    line: 53
+                    line: 54
                     column: 24
               loc:
                 start:
-                  line: 53
+                  line: 54
                   column: 8
                 end:
-                  line: 53
+                  line: 54
                   column: 24
           loc:
             start:
-              line: 51
+              line: 52
               column: 27
             end:
-              line: 54
+              line: 55
               column: 5
         loc:
           start:
-            line: 51
+            line: 52
             column: 4
           end:
-            line: 54
+            line: 55
             column: 5
     loc:
       start:
-        line: 50
+        line: 51
         column: 0
       end:
-        line: 55
+        line: 56
         column: 1
   - type: UnionDeclaration
     name:
@@ -1327,10 +1504,10 @@ body:
       name: Step
       loc:
         start:
-          line: 56
+          line: 57
           column: 6
         end:
-          line: 56
+          line: 57
           column: 10
     annotations: []
     types:
@@ -1340,17 +1517,17 @@ body:
           name: BuildStep
           loc:
             start:
-              line: 56
+              line: 57
               column: 13
             end:
-              line: 56
+              line: 57
               column: 22
         loc:
           start:
-            line: 56
+            line: 57
             column: 13
           end:
-            line: 56
+            line: 57
             column: 22
       - type: TypeReference
         name:
@@ -1358,24 +1535,24 @@ body:
           name: TestStep
           loc:
             start:
-              line: 56
+              line: 57
               column: 25
             end:
-              line: 56
+              line: 57
               column: 33
         loc:
           start:
-            line: 56
+            line: 57
             column: 25
           end:
-            line: 56
+            line: 57
             column: 33
     loc:
       start:
-        line: 56
+        line: 57
         column: 0
       end:
-        line: 56
+        line: 57
         column: 33
   - type: StructDeclaration
     name:
@@ -1383,10 +1560,10 @@ body:
       name: BuildStep
       loc:
         start:
-          line: 57
+          line: 58
           column: 7
         end:
-          line: 57
+          line: 58
           column: 16
     annotations: []
     body:
@@ -1396,10 +1573,10 @@ body:
           name: command
           loc:
             start:
-              line: 58
+              line: 59
               column: 4
             end:
-              line: 58
+              line: 59
               column: 11
         annotations: []
         isPrivate: false
@@ -1409,24 +1586,24 @@ body:
           name: string
           loc:
             start:
-              line: 58
+              line: 59
               column: 13
             end:
-              line: 58
+              line: 59
               column: 19
         loc:
           start:
-            line: 58
+            line: 59
             column: 4
           end:
-            line: 58
+            line: 59
             column: 19
     loc:
       start:
-        line: 57
+        line: 58
         column: 0
       end:
-        line: 59
+        line: 60
         column: 1
   - type: StructDeclaration
     name:
@@ -1434,10 +1611,10 @@ body:
       name: TestStep
       loc:
         start:
-          line: 60
+          line: 61
           column: 7
         end:
-          line: 60
+          line: 61
           column: 15
     annotations: []
     body:
@@ -1447,10 +1624,10 @@ body:
           name: script
           loc:
             start:
-              line: 61
+              line: 62
               column: 4
             end:
-              line: 61
+              line: 62
               column: 10
         annotations: []
         isPrivate: false
@@ -1460,29 +1637,29 @@ body:
           name: string
           loc:
             start:
-              line: 61
+              line: 62
               column: 12
             end:
-              line: 61
+              line: 62
               column: 18
         loc:
           start:
-            line: 61
+            line: 62
             column: 4
           end:
-            line: 61
+            line: 62
             column: 18
     loc:
       start:
-        line: 60
+        line: 61
         column: 0
       end:
-        line: 62
+        line: 63
         column: 1
 loc:
   start:
     line: 7
     column: 0
   end:
-    line: 63
+    line: 64
     column: 5

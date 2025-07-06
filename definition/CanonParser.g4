@@ -135,7 +135,8 @@ templateString: TEMPLATE_STRING_START templateStringContent* TEMPLATE_STRING_END
 
 templateStringContent:
     TEMPLATE_STRING_PART
-    | TEMPLATE_INTERPOLATION;
+    | TEMPLATE_INTERPOLATION_SIMPLE
+    | TEMPLATE_INTERPOLATION_START expression INTERPOLATION_END;
 
 // Annotations
 annotation: ANNOTATION (LPAREN argumentList? RPAREN | stringLiteral)?;

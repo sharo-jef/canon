@@ -1119,12 +1119,22 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         value: ctx.TEMPLATE_STRING_PART()!.text,
         loc: this.getLocationInfo(ctx),
       };
-    } else if (ctx.TEMPLATE_INTERPOLATION()) {
-      const text = ctx.TEMPLATE_INTERPOLATION()!.text;
+    } else if (ctx.TEMPLATE_INTERPOLATION_SIMPLE()) {
+      const text = ctx.TEMPLATE_INTERPOLATION_SIMPLE()!.text;
       const identifier = text.substring(1); // Remove the '$' prefix
       return {
         type: 'TemplateInterpolation',
-        identifier,
+        expression: {
+          type: 'Identifier',
+          name: identifier,
+          loc: this.getLocationInfo(ctx),
+        },
+        loc: this.getLocationInfo(ctx),
+      };
+    } else if (ctx.TEMPLATE_INTERPOLATION_START() && ctx.expression()) {
+      return {
+        type: 'TemplateInterpolation',
+        expression: this.visit(ctx.expression()!),
         loc: this.getLocationInfo(ctx),
       };
     }

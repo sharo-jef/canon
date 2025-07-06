@@ -31,7 +31,7 @@ function getChildNodes(node: ASTNode): ChildNodeInfo[] {
     'lambdaBody', // CallExpression with lambda block
     'arguments', // CallExpression, etc.
     'value', // AssignmentStatement, PropertyDeclaration, etc.
-    'expression', // ExpressionStatement
+    'expression', // ExpressionStatement, TemplateInterpolation
     'callee', // CallExpression (function reference)
     'functionName', // CallExpression (function name as identifier)
     'left', // BinaryExpression
@@ -206,8 +206,12 @@ function getNodeAdditionalInfo(node: ASTNode): string {
   }
 
   // Template string specific
-  if (node.type === 'TemplateInterpolation' && node.identifier) {
-    info.push(`$${node.identifier}`);
+  if (node.type === 'TemplateInterpolation' && node.expression) {
+    if (node.expression.type === 'Identifier') {
+      info.push(`$${node.expression.name}`);
+    } else {
+      info.push(`\${${node.expression.type}}`);
+    }
   }
 
   // Function call argument count
