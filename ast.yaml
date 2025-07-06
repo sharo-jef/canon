@@ -1333,20 +1333,11 @@ body:
           line: 56
           column: 10
     annotations: []
-    unionType:
-      type: UnionType
-      types:
-        - type: TypeReference
-          name:
-            type: Identifier
-            name: BuildStep
-            loc:
-              start:
-                line: 56
-                column: 13
-              end:
-                line: 56
-                column: 22
+    types:
+      - type: TypeReference
+        name:
+          type: Identifier
+          name: BuildStep
           loc:
             start:
               line: 56
@@ -1354,17 +1345,17 @@ body:
             end:
               line: 56
               column: 22
-        - type: TypeReference
-          name:
-            type: Identifier
-            name: TestStep
-            loc:
-              start:
-                line: 56
-                column: 25
-              end:
-                line: 56
-                column: 33
+        loc:
+          start:
+            line: 56
+            column: 13
+          end:
+            line: 56
+            column: 22
+      - type: TypeReference
+        name:
+          type: Identifier
+          name: TestStep
           loc:
             start:
               line: 56
@@ -1372,13 +1363,13 @@ body:
             end:
               line: 56
               column: 33
-      loc:
-        start:
-          line: 56
-          column: 13
-        end:
-          line: 56
-          column: 33
+        loc:
+          start:
+            line: 56
+            column: 25
+          end:
+            line: 56
+            column: 33
     loc:
       start:
         line: 56

@@ -1,4 +1,15 @@
-# Canon rule
+# Stria rule
+
+## 言語について
+
+- 語源
+  - `Structura`: 構造 (ラテン語)
+  - `Via`: 道 (ラテン語)
+  - `Strict`: 厳格な (英語)
+- 意味
+  - 厳格 `Strict` な構造 `Structura`
+  - 明確な道 `Via` を提供
+- 拡張子: `.stria`
 
 ## スキーマと構造
 

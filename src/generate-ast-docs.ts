@@ -45,8 +45,7 @@ function getChildNodes(node: ASTNode): ChildNodeInfo[] {
     'typeRef', // PropertyDeclaration, Parameter, etc.
     'defaultValue', // PropertyDeclaration, RepeatedDeclaration
     'annotations', // Various declaration types
-    'unionType', // UnionDeclaration
-    'types', // UnionType
+    'types', // UnionDeclaration
     'elementType', // ArrayType
     'parameters', // Function-related nodes
     'mapping', // RepeatedDeclaration

@@ -43,7 +43,7 @@ struct Version {
     patch: int
     private hoge: string
     get toString() {
-        `$major.$minor.$path`
+        `$major.$minor.$patch`
     }
 }
 

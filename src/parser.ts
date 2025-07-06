@@ -14,7 +14,6 @@ import {
   StructDeclarationContext,
   UnionDeclarationContext,
   TypeDeclarationContext,
-  UnionTypeContext,
   TypeContext,
   BaseTypeContext,
   PrimitiveTypeContext,
@@ -246,13 +245,16 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         },
       },
     };
-    const unionType = this.visit(ctx.unionType());
+    const types = ctx
+      .unionType()
+      .type()
+      .map((t) => this.visit(t));
 
     return {
       type: 'UnionDeclaration',
       name,
       annotations,
-      unionType,
+      types,
       loc: this.getLocationInfo(ctx),
     };
   }
@@ -281,16 +283,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       name,
       annotations,
       typeRef,
-      loc: this.getLocationInfo(ctx),
-    };
-  }
-
-  visitUnionType(ctx: UnionTypeContext): ASTNode {
-    const types = ctx.type().map((t) => this.visit(t));
-
-    return {
-      type: 'UnionType',
-      types,
       loc: this.getLocationInfo(ctx),
     };
   }
