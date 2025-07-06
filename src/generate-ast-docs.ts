@@ -37,6 +37,7 @@ function getChildNodes(node: ASTNode): ChildNodeInfo[] {
     'right', // BinaryExpression
     'operand', // UnaryExpression
     'object', // MemberAccessExpression
+    'property', // MemberAccessExpression
     'condition', // IfStatement
     'then', // IfStatement
     'typeRef', // PropertyDeclaration, Parameter, etc.
@@ -49,6 +50,10 @@ function getChildNodes(node: ASTNode): ChildNodeInfo[] {
     'mapping', // RepeatedDeclaration
     'entries', // MappingBlock
     'parts', // TemplateLiteral
+    'from', // MappingEntry
+    'to', // MappingEntry
+    'name', // Various declaration types (now Identifier nodes)
+    'identifier', // UseStatement (now Identifier node)
   ];
 
   for (const prop of childProperties) {
@@ -164,8 +169,12 @@ function getNodeAdditionalInfo(node: ASTNode): string {
     info.push(`path: ${node.path}`);
   }
 
-  if (node.property && typeof node.property === 'string') {
-    info.push(`prop: ${node.property}`);
+  if (node.property) {
+    if (typeof node.property === 'string') {
+      info.push(`prop: ${node.property}`);
+    } else if (node.property.type === 'Identifier') {
+      info.push(`prop: ${node.property.name}`);
+    }
   }
 
   if (node.functionName && typeof node.functionName === 'string') {
@@ -188,10 +197,6 @@ function getNodeAdditionalInfo(node: ASTNode): string {
 
   if (node.isOptional !== undefined) {
     info.push(`optional: ${node.isOptional}`);
-  }
-
-  if (node.isThisParameter !== undefined) {
-    info.push(`thisParam: ${node.isThisParameter}`);
   }
 
   // Dimensions for arrays

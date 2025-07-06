@@ -435,7 +435,6 @@ body:
                 end:
                   line: 29
                   column: 14
-            isThisParameter: false
             typeRef:
               type: PrimitiveType
               name: int
@@ -590,16 +589,34 @@ body:
         parameters:
           - type: Parameter
             name:
-              type: Identifier
-              name: major
+              type: MemberAccessExpression
+              object:
+                type: ThisExpression
+                loc:
+                  start:
+                    line: 35
+                    column: 9
+                  end:
+                    line: 35
+                    column: 13
+              property:
+                type: Identifier
+                name: major
+                loc:
+                  start:
+                    line: 35
+                    column: 14
+                  end:
+                    line: 35
+                    column: 19
+              computed: false
               loc:
                 start:
                   line: 35
-                  column: 14
+                  column: 9
                 end:
                   line: 35
                   column: 19
-            isThisParameter: true
             loc:
               start:
                 line: 35
@@ -609,16 +626,34 @@ body:
                 column: 19
           - type: Parameter
             name:
-              type: Identifier
-              name: minor
+              type: MemberAccessExpression
+              object:
+                type: ThisExpression
+                loc:
+                  start:
+                    line: 35
+                    column: 21
+                  end:
+                    line: 35
+                    column: 25
+              property:
+                type: Identifier
+                name: minor
+                loc:
+                  start:
+                    line: 35
+                    column: 26
+                  end:
+                    line: 35
+                    column: 31
+              computed: false
               loc:
                 start:
                   line: 35
-                  column: 26
+                  column: 21
                 end:
                   line: 35
                   column: 31
-            isThisParameter: true
             loc:
               start:
                 line: 35
@@ -628,16 +663,34 @@ body:
                 column: 31
           - type: Parameter
             name:
-              type: Identifier
-              name: patch
+              type: MemberAccessExpression
+              object:
+                type: ThisExpression
+                loc:
+                  start:
+                    line: 35
+                    column: 33
+                  end:
+                    line: 35
+                    column: 37
+              property:
+                type: Identifier
+                name: patch
+                loc:
+                  start:
+                    line: 35
+                    column: 38
+                  end:
+                    line: 35
+                    column: 43
+              computed: false
               loc:
                 start:
                   line: 35
-                  column: 38
+                  column: 33
                 end:
                   line: 35
                   column: 43
-            isThisParameter: true
             loc:
               start:
                 line: 35

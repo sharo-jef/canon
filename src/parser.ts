@@ -679,29 +679,67 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitParameter(ctx: ParameterContext): ASTNode {
-    const isThisParameter = ctx.THIS() !== undefined;
     const identifierToken = ctx.IDENTIFIER();
-    const name = {
-      type: 'Identifier',
-      name: identifierToken.text,
-      loc: {
-        start: {
-          line: identifierToken.symbol.line,
-          column: identifierToken.symbol.charPositionInLine,
+
+    let name: ASTNode;
+    if (ctx.THIS() !== undefined) {
+      // this.property のパラメータの場合、MemberAccessExpressionとして扱う
+      name = {
+        type: 'MemberAccessExpression',
+        object: {
+          type: 'ThisExpression',
+          loc: {
+            start: {
+              line: ctx.THIS()!.symbol.line,
+              column: ctx.THIS()!.symbol.charPositionInLine,
+            },
+            end: {
+              line: ctx.THIS()!.symbol.line,
+              column: ctx.THIS()!.symbol.charPositionInLine + 4, // 'this'.length
+            },
+          },
         },
-        end: {
-          line: identifierToken.symbol.line,
-          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        property: {
+          type: 'Identifier',
+          name: identifierToken.text,
+          loc: {
+            start: {
+              line: identifierToken.symbol.line,
+              column: identifierToken.symbol.charPositionInLine,
+            },
+            end: {
+              line: identifierToken.symbol.line,
+              column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+            },
+          },
         },
-      },
-    };
+        computed: false,
+        loc: this.getLocationInfo(ctx),
+      };
+    } else {
+      // 通常のパラメータの場合
+      name = {
+        type: 'Identifier',
+        name: identifierToken.text,
+        loc: {
+          start: {
+            line: identifierToken.symbol.line,
+            column: identifierToken.symbol.charPositionInLine,
+          },
+          end: {
+            line: identifierToken.symbol.line,
+            column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+          },
+        },
+      };
+    }
+
     const typeCtx = ctx.type();
     const typeRef = typeCtx ? this.visit(typeCtx) : undefined;
 
     return {
       type: 'Parameter',
       name,
-      isThisParameter,
       typeRef,
       loc: this.getLocationInfo(ctx),
     };
