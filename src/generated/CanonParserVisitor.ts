@@ -3,48 +3,51 @@
 
 import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
+import { PrimaryExpressionContext } from "./CanonParser";
+import { MemberAccessExpressionContext } from "./CanonParser";
+import { FunctionCallExpressionContext } from "./CanonParser";
+import { UnaryMinusExpressionContext } from "./CanonParser";
+import { LogicalNotExpressionContext } from "./CanonParser";
+import { MultiplicativeExpressionContext } from "./CanonParser";
+import { AdditiveExpressionContext } from "./CanonParser";
+import { RelationalExpressionContext } from "./CanonParser";
+import { EqualityExpressionContext } from "./CanonParser";
+import { LogicalAndExpressionContext } from "./CanonParser";
+import { LogicalOrExpressionContext } from "./CanonParser";
 import { ProgramContext } from "./CanonParser";
-import { ConfigurationCallContext } from "./CanonParser";
-import { SchemaImportContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
-import { SchemaDefinitionContext } from "./CanonParser";
-import { SchemaMemberContext } from "./CanonParser";
-import { StructDefinitionContext } from "./CanonParser";
-import { StructContentContext } from "./CanonParser";
-import { MixinDeclarationContext } from "./CanonParser";
-import { StructMemberContext } from "./CanonParser";
-import { MethodDefinitionContext } from "./CanonParser";
-import { FunctionDefinitionContext } from "./CanonParser";
-import { FunctionBodyContext } from "./CanonParser";
+import { UseStatementContext } from "./CanonParser";
+import { TopLevelElementContext } from "./CanonParser";
+import { SchemaDeclarationContext } from "./CanonParser";
+import { StructDeclarationContext } from "./CanonParser";
+import { UnionDeclarationContext } from "./CanonParser";
+import { TypeDeclarationContext } from "./CanonParser";
+import { UnionTypeContext } from "./CanonParser";
+import { TypeContext } from "./CanonParser";
+import { BaseTypeContext } from "./CanonParser";
+import { PrimitiveTypeContext } from "./CanonParser";
+import { BlockContext } from "./CanonParser";
+import { BlockContentContext } from "./CanonParser";
+import { PropertyDeclarationContext } from "./CanonParser";
+import { AssignmentStatementContext } from "./CanonParser";
+import { InitDeclarationContext } from "./CanonParser";
+import { FunctionDeclarationContext } from "./CanonParser";
+import { GetterDeclarationContext } from "./CanonParser";
+import { RepeatedDeclarationContext } from "./CanonParser";
+import { MappingBlockContext } from "./CanonParser";
+import { MappingEntryContext } from "./CanonParser";
 import { ParameterListContext } from "./CanonParser";
 import { ParameterContext } from "./CanonParser";
-import { TypeReferenceContext } from "./CanonParser";
-import { StatementContext } from "./CanonParser";
-import { VariableDeclarationContext } from "./CanonParser";
-import { AssignmentContext } from "./CanonParser";
-import { ExpressionStatementContext } from "./CanonParser";
-import { ReturnStatementContext } from "./CanonParser";
-import { ForStatementContext } from "./CanonParser";
-import { ConstructionBodyContext } from "./CanonParser";
-import { ExpressionContext } from "./CanonParser";
-import { ComparisonExpressionContext } from "./CanonParser";
-import { AdditiveExpressionContext } from "./CanonParser";
-import { MultiplicativeExpressionContext } from "./CanonParser";
-import { PrimaryExpressionContext } from "./CanonParser";
-import { FunctionCallContext } from "./CanonParser";
+import { ObjectInstantiationContext } from "./CanonParser";
 import { ArgumentListContext } from "./CanonParser";
-import { MemberAccessContext } from "./CanonParser";
-import { StringInterpolationContext } from "./CanonParser";
-import { InterpolationContentContext } from "./CanonParser";
-import { InterpolationExpressionContext } from "./CanonParser";
-import { ExprModeExpressionContext } from "./CanonParser";
-import { ExprModeComparisonContext } from "./CanonParser";
-import { ExprModeAdditiveContext } from "./CanonParser";
-import { ExprModeMultiplicativeContext } from "./CanonParser";
-import { ExprModePrimaryContext } from "./CanonParser";
-import { ExprModeMemberAccessContext } from "./CanonParser";
-import { ExprModeArgumentListContext } from "./CanonParser";
+import { IfStatementContext } from "./CanonParser";
+import { ExpressionStatementContext } from "./CanonParser";
+import { ExpressionContext } from "./CanonParser";
+import { PrimaryContext } from "./CanonParser";
 import { LiteralContext } from "./CanonParser";
+import { StringLiteralContext } from "./CanonParser";
+import { TemplateStringContext } from "./CanonParser";
+import { TemplateStringContentContext } from "./CanonParser";
 import { AnnotationContext } from "./CanonParser";
 
 
@@ -57,25 +60,99 @@ import { AnnotationContext } from "./CanonParser";
  */
 export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	/**
+	 * Visit a parse tree produced by the `primaryExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPrimaryExpression?: (ctx: PrimaryExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `memberAccessExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitMemberAccessExpression?: (ctx: MemberAccessExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `functionCallExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFunctionCallExpression?: (ctx: FunctionCallExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `unaryMinusExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitUnaryMinusExpression?: (ctx: UnaryMinusExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `logicalNotExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLogicalNotExpression?: (ctx: LogicalNotExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `multiplicativeExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitMultiplicativeExpression?: (ctx: MultiplicativeExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `additiveExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitAdditiveExpression?: (ctx: AdditiveExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `relationalExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitRelationalExpression?: (ctx: RelationalExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `equalityExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitEqualityExpression?: (ctx: EqualityExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `logicalAndExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLogicalAndExpression?: (ctx: LogicalAndExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `logicalOrExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLogicalOrExpression?: (ctx: LogicalOrExpressionContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `CanonParser.program`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	visitProgram?: (ctx: ProgramContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.configurationCall`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitConfigurationCall?: (ctx: ConfigurationCallContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.schemaImport`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitSchemaImport?: (ctx: SchemaImportContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.schemaDirective`.
@@ -85,67 +162,144 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitSchemaDirective?: (ctx: SchemaDirectiveContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.schemaDefinition`.
+	 * Visit a parse tree produced by `CanonParser.useStatement`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitSchemaDefinition?: (ctx: SchemaDefinitionContext) => Result;
+	visitUseStatement?: (ctx: UseStatementContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.schemaMember`.
+	 * Visit a parse tree produced by `CanonParser.topLevelElement`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitSchemaMember?: (ctx: SchemaMemberContext) => Result;
+	visitTopLevelElement?: (ctx: TopLevelElementContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.structDefinition`.
+	 * Visit a parse tree produced by `CanonParser.schemaDeclaration`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitStructDefinition?: (ctx: StructDefinitionContext) => Result;
+	visitSchemaDeclaration?: (ctx: SchemaDeclarationContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.structContent`.
+	 * Visit a parse tree produced by `CanonParser.structDeclaration`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitStructContent?: (ctx: StructContentContext) => Result;
+	visitStructDeclaration?: (ctx: StructDeclarationContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.mixinDeclaration`.
+	 * Visit a parse tree produced by `CanonParser.unionDeclaration`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitMixinDeclaration?: (ctx: MixinDeclarationContext) => Result;
+	visitUnionDeclaration?: (ctx: UnionDeclarationContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.structMember`.
+	 * Visit a parse tree produced by `CanonParser.typeDeclaration`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitStructMember?: (ctx: StructMemberContext) => Result;
+	visitTypeDeclaration?: (ctx: TypeDeclarationContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.methodDefinition`.
+	 * Visit a parse tree produced by `CanonParser.unionType`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitMethodDefinition?: (ctx: MethodDefinitionContext) => Result;
+	visitUnionType?: (ctx: UnionTypeContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.functionDefinition`.
+	 * Visit a parse tree produced by `CanonParser.type`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitFunctionDefinition?: (ctx: FunctionDefinitionContext) => Result;
+	visitType?: (ctx: TypeContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.functionBody`.
+	 * Visit a parse tree produced by `CanonParser.baseType`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitFunctionBody?: (ctx: FunctionBodyContext) => Result;
+	visitBaseType?: (ctx: BaseTypeContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.primitiveType`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPrimitiveType?: (ctx: PrimitiveTypeContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.block`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitBlock?: (ctx: BlockContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.blockContent`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitBlockContent?: (ctx: BlockContentContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.propertyDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPropertyDeclaration?: (ctx: PropertyDeclarationContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.assignmentStatement`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitAssignmentStatement?: (ctx: AssignmentStatementContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.initDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitInitDeclaration?: (ctx: InitDeclarationContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.functionDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFunctionDeclaration?: (ctx: FunctionDeclarationContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.getterDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitGetterDeclaration?: (ctx: GetterDeclarationContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.repeatedDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitRepeatedDeclaration?: (ctx: RepeatedDeclarationContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.mappingBlock`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitMappingBlock?: (ctx: MappingBlockContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.mappingEntry`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitMappingEntry?: (ctx: MappingEntryContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.parameterList`.
@@ -162,102 +316,11 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitParameter?: (ctx: ParameterContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.typeReference`.
+	 * Visit a parse tree produced by `CanonParser.objectInstantiation`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitTypeReference?: (ctx: TypeReferenceContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.statement`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitStatement?: (ctx: StatementContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.variableDeclaration`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitVariableDeclaration?: (ctx: VariableDeclarationContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.assignment`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitAssignment?: (ctx: AssignmentContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.expressionStatement`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitExpressionStatement?: (ctx: ExpressionStatementContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.returnStatement`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitReturnStatement?: (ctx: ReturnStatementContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.forStatement`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitForStatement?: (ctx: ForStatementContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.constructionBody`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitConstructionBody?: (ctx: ConstructionBodyContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.expression`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitExpression?: (ctx: ExpressionContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.comparisonExpression`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitComparisonExpression?: (ctx: ComparisonExpressionContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.additiveExpression`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitAdditiveExpression?: (ctx: AdditiveExpressionContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.multiplicativeExpression`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitMultiplicativeExpression?: (ctx: MultiplicativeExpressionContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.primaryExpression`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitPrimaryExpression?: (ctx: PrimaryExpressionContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.functionCall`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitFunctionCall?: (ctx: FunctionCallContext) => Result;
+	visitObjectInstantiation?: (ctx: ObjectInstantiationContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.argumentList`.
@@ -267,81 +330,32 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitArgumentList?: (ctx: ArgumentListContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.memberAccess`.
+	 * Visit a parse tree produced by `CanonParser.ifStatement`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitMemberAccess?: (ctx: MemberAccessContext) => Result;
+	visitIfStatement?: (ctx: IfStatementContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.stringInterpolation`.
+	 * Visit a parse tree produced by `CanonParser.expressionStatement`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitStringInterpolation?: (ctx: StringInterpolationContext) => Result;
+	visitExpressionStatement?: (ctx: ExpressionStatementContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.interpolationContent`.
+	 * Visit a parse tree produced by `CanonParser.expression`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitInterpolationContent?: (ctx: InterpolationContentContext) => Result;
+	visitExpression?: (ctx: ExpressionContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.interpolationExpression`.
+	 * Visit a parse tree produced by `CanonParser.primary`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitInterpolationExpression?: (ctx: InterpolationExpressionContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.exprModeExpression`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitExprModeExpression?: (ctx: ExprModeExpressionContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.exprModeComparison`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitExprModeComparison?: (ctx: ExprModeComparisonContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.exprModeAdditive`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitExprModeAdditive?: (ctx: ExprModeAdditiveContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.exprModeMultiplicative`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitExprModeMultiplicative?: (ctx: ExprModeMultiplicativeContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.exprModePrimary`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitExprModePrimary?: (ctx: ExprModePrimaryContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.exprModeMemberAccess`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitExprModeMemberAccess?: (ctx: ExprModeMemberAccessContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.exprModeArgumentList`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitExprModeArgumentList?: (ctx: ExprModeArgumentListContext) => Result;
+	visitPrimary?: (ctx: PrimaryContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.literal`.
@@ -349,6 +363,27 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitLiteral?: (ctx: LiteralContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.stringLiteral`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStringLiteral?: (ctx: StringLiteralContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.templateString`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTemplateString?: (ctx: TemplateStringContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.templateStringContent`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTemplateStringContent?: (ctx: TemplateStringContentContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.annotation`.

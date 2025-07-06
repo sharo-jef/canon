@@ -11,7 +11,8 @@ BLOCK_COMMENT: '/*' .*? '*/' -> skip;
 SCHEMA_DIRECTIVE: '#schema';
 
 // Hash comments (after schema directive to avoid conflicts)
-HASH_COMMENT: '#' ~[\r\n]* -> skip;
+// Match # followed by anything except 'schema' (for comments like # This is a comment)
+HASH_COMMENT: '#' ( ~[\r\ns] | 's' ~[\r\nc] | 'sc' ~[\r\nh] | 'sch' ~[\r\ne] | 'sche' ~[\r\nm] | 'schem' ~[\r\na] ) ~[\r\n]* -> skip;
 
 // Keywords
 SCHEMA: 'schema';
