@@ -205,6 +205,10 @@ function getNodeAdditionalInfo(node: ASTNode): string {
     info.push(`optional: ${node.isOptional}`);
   }
 
+  if (node.inclusive !== undefined) {
+    info.push(`inclusive: ${node.inclusive}`);
+  }
+
   // Dimensions for arrays
   if (node.dimensions !== undefined) {
     info.push(`dims: ${node.dimensions}`);

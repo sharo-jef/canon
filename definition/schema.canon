@@ -70,3 +70,4 @@ infix fun int.add(other: int): int {
 }
 
 val example = 1 add (1 add 1)
+val rangeExample = 1..=10 step 2

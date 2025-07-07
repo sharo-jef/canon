@@ -2034,10 +2034,84 @@ body:
       end:
         line: 72
         column: 29
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: rangeExample
+      loc:
+        start:
+          line: 73
+          column: 4
+        end:
+          line: 73
+          column: 16
+    typeRef: null
+    value:
+      type: InfixCall
+      functionName: step
+      left:
+        type: RangeExpression
+        from:
+          type: IntegerLiteral
+          value: 1
+          raw: '1'
+          loc:
+            start:
+              line: 73
+              column: 19
+            end:
+              line: 73
+              column: 20
+        to:
+          type: IntegerLiteral
+          value: 10
+          raw: '10'
+          loc:
+            start:
+              line: 73
+              column: 23
+            end:
+              line: 73
+              column: 25
+        inclusive: true
+        loc:
+          start:
+            line: 73
+            column: 19
+          end:
+            line: 73
+            column: 25
+      right:
+        type: IntegerLiteral
+        value: 2
+        raw: '2'
+        loc:
+          start:
+            line: 73
+            column: 31
+          end:
+            line: 73
+            column: 32
+      loc:
+        start:
+          line: 73
+          column: 19
+        end:
+          line: 73
+          column: 32
+    annotations: []
+    loc:
+      start:
+        line: 73
+        column: 0
+      end:
+        line: 73
+        column: 32
 loc:
   start:
     line: 7
     column: 0
   end:
-    line: 73
+    line: 74
     column: 5
