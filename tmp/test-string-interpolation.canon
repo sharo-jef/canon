@@ -1,2 +1,0 @@
-val name = "Canon"
-val message = `Hello, ${name}!`

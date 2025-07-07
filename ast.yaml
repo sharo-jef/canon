@@ -4,36 +4,46 @@ body:
     kind: val
     name:
       type: Identifier
-      name: invalid
+      name: range
       loc:
         start:
           line: 1
           column: 4
         end:
           line: 1
-          column: 11
+          column: 9
     typeRef: null
     value:
-      type: LambdaExpression
-      parameters:
-        - x
-      body:
-        type: BlockStatement
-        body: []
+      type: RangeExpression
+      start:
+        type: IntegerLiteral
+        value: 1
+        raw: '1'
         loc:
           start:
             line: 1
-            column: 21
+            column: 12
           end:
             line: 1
-            column: 20
+            column: 13
+      end:
+        type: IntegerLiteral
+        value: 10
+        raw: '10'
+        loc:
+          start:
+            line: 1
+            column: 15
+          end:
+            line: 1
+            column: 17
       loc:
         start:
           line: 1
-          column: 14
+          column: 12
         end:
           line: 1
-          column: 22
+          column: 17
     annotations: []
     loc:
       start:
@@ -41,7 +51,7 @@ body:
         column: 0
       end:
         line: 1
-        column: 22
+        column: 17
 loc:
   start:
     line: 1

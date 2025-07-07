@@ -1,1 +1,1 @@
-Lambda expression missing arrow test
+Lambda expression with incomplete parameter list (missing arrow and closing brace)

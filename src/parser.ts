@@ -22,15 +22,10 @@ import {
   StatementContext,
   PropertyDeclarationContext,
   AssignmentStatementContext,
-  DestructuringAssignmentContext,
-  DestructuringPatternContext,
-  ArrayDestructuringPatternContext,
-  ObjectDestructuringPatternContext,
-  DestructuringElementContext,
-  DestructuringPropertyContext,
   InitDeclarationContext,
   FunctionDeclarationContext,
   GetterDeclarationContext,
+  MethodDeclarationContext,
   RepeatedDeclarationContext,
   MappingBlockContext,
   MappingEntryContext,
@@ -44,24 +39,44 @@ import {
   TemplateStringContext,
   TemplateStringContentContext,
   AnnotationContext,
-  PrimaryExpressionContext,
-  MemberAccessExpressionContext,
-  FunctionCallExpressionContext,
-  NonNullAssertionExpressionContext,
-  UnaryMinusExpressionContext,
-  LogicalNotExpressionContext,
-  MultiplicativeExpressionContext,
-  AdditiveExpressionContext,
-  RelationalExpressionContext,
-  EqualityExpressionContext,
-  LogicalAndExpressionContext,
-  LogicalOrExpressionContext,
-  LiteralExpressionContext,
-  IdentifierExpressionContext,
-  ThisExpressionContext,
-  IfExpressionContext,
-  ParenthesizedExpressionContext,
-  CallExpressionPrimaryContext,
+  PrimaryExprContext,
+  MemberAccessExprContext,
+  FuncCallExprContext,
+  NonNullAssertExprContext,
+  UnaryMinusExprContext,
+  LogicalNotExprContext,
+  MulDivModExprContext,
+  AddSubExprContext,
+  RelationalExprContext,
+  EqualityExprContext,
+  LogicalAndExprContext,
+  LogicalOrExprContext,
+  LiteralExprContext,
+  IdentifierExprContext,
+  ThisExprContext,
+  IfExprContext,
+  ParenExprContext,
+  CallExprPrimaryContext,
+  ListLiteralContext,
+  ListLiteralExprContext,
+  LambdaExpressionContext,
+  LambdaParametersContext,
+  LambdaBodyContext,
+  LambdaExprContext,
+  AnonymousFunctionContext,
+  AnonFuncExprContext,
+  SpreadExpressionContext,
+  SpreadExprContext,
+  PipelineExprContext,
+  SliceExprContext,
+  BitwiseAndExprContext,
+  BitwiseXorExprContext,
+  BitwiseOrExprContext,
+  ShiftExprContext,
+  IndexAccessExprContext,
+  BitwiseNotExprContext,
+  PowerExprContext,
+  RangeExprContext,
 } from './generated/CanonParser';
 import { CanonParserVisitor } from './generated/CanonParserVisitor';
 import { CanonErrorListener } from './error/CanonErrorListener';
@@ -210,7 +225,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       return {
         type: 'SchemaDeclaration',
         annotations,
-        body: body.content,
+        body: body.body || [],
         loc: this.getLocationInfo(ctx),
       };
     } else if (stringLiteralCtx) {
@@ -249,7 +264,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       type: 'StructDeclaration',
       name,
       annotations,
-      body: body.content,
+      body: body.body || [],
       loc: this.getLocationInfo(ctx),
     };
   }
@@ -600,7 +615,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       type: 'InitDeclaration',
       annotations,
       parameters: parameters.parameters,
-      body: body.content,
+      body: body.body || [],
       loc: this.getLocationInfo(ctx),
     };
   }
@@ -638,7 +653,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       annotations,
       parameters: parameters.parameters,
       returnType,
-      body: body.content,
+      body: body.body || [],
       loc: this.getLocationInfo(ctx),
     };
   }
@@ -666,7 +681,48 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       type: 'GetterDeclaration',
       name,
       annotations,
-      body: body.content,
+      body: body.body || [],
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitMethodDeclaration(ctx: MethodDeclarationContext): ASTNode {
+    const annotations = ctx.annotation().map((ann) => this.visit(ann));
+    const isPrivate = ctx.PRIVATE() !== undefined;
+    const identifierToken = ctx.IDENTIFIER();
+    const name = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
+
+    const paramList = ctx.parameterList();
+    const parameters = paramList
+      ? this.visit(paramList)
+      : { type: 'ParameterList', parameters: [] };
+
+    const typeCtx = ctx.type();
+    const returnType = typeCtx ? this.visit(typeCtx) : null;
+
+    const body = this.visit(ctx.block());
+
+    return {
+      type: 'MethodDeclaration',
+      name,
+      annotations,
+      isPrivate,
+      parameters: parameters.parameters,
+      returnType,
+      body: body.body || [],
       loc: this.getLocationInfo(ctx),
     };
   }
@@ -836,14 +892,13 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   private createCallExpression(
     callee: ASTNode,
     args: ASTNode[],
-    lambdaBody?: ASTNode[],
+    _lambdaBody?: ASTNode[],
     loc?: ASTLocation
   ): ASTNode {
     return {
       type: 'CallExpression',
       callee,
       arguments: args,
-      lambdaBody,
       loc,
     };
   }
@@ -864,17 +919,31 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         },
       },
     };
-    const argList = ctx.argumentList();
-    const args = argList ? this.visit(argList) : { type: 'ArgumentList', arguments: [] };
-    const block = ctx.block();
-    const lambdaBody = block ? this.visit(block) : undefined;
 
-    return this.createCallExpression(
+    // Get regular arguments
+    const argList = ctx.argumentList();
+    const args = argList ? this.visit(argList).arguments : [];
+
+    // Check for trailing lambda block
+    const block = ctx.block();
+    if (block) {
+      // Convert block to lambda expression and add as last argument
+      const blockResult = this.visit(block);
+      const lambdaExpression = {
+        type: 'LambdaExpression',
+        parameters: [],
+        body: blockResult.body, // Block already has body as array
+        loc: this.getLocationInfo(block),
+      };
+      args.push(lambdaExpression);
+    }
+
+    return {
+      type: 'CallExpression',
       callee,
-      args.arguments,
-      lambdaBody?.content,
-      this.getLocationInfo(ctx)
-    );
+      arguments: args,
+      loc: this.getLocationInfo(ctx),
+    };
   }
 
   visitArgumentList(ctx: ArgumentListContext): ASTNode {
@@ -897,11 +966,11 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   // Expression visitors
-  visitPrimaryExpression(ctx: PrimaryExpressionContext): ASTNode {
+  visitPrimaryExpr(ctx: PrimaryExprContext): ASTNode {
     return this.visit(ctx.primary());
   }
 
-  visitMemberAccessExpression(ctx: MemberAccessExpressionContext): ASTNode {
+  visitMemberAccessExpr(ctx: MemberAccessExprContext): ASTNode {
     const object = this.visit(ctx.expression());
     const property = {
       type: 'Identifier',
@@ -927,7 +996,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitFunctionCallExpression(ctx: FunctionCallExpressionContext): ASTNode {
+  visitFuncCallExpr(ctx: FuncCallExprContext): ASTNode {
     const callee = this.visit(ctx.expression());
     const argList = ctx.argumentList();
     const args = argList ? this.visit(argList) : { type: 'ArgumentList', arguments: [] };
@@ -935,7 +1004,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     return this.createCallExpression(callee, args.arguments, undefined, this.getLocationInfo(ctx));
   }
 
-  visitNonNullAssertionExpression(ctx: NonNullAssertionExpressionContext): ASTNode {
+  visitNonNullAssertExpr(ctx: NonNullAssertExprContext): ASTNode {
     const operand = this.visit(ctx.expression());
 
     return {
@@ -945,7 +1014,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitUnaryMinusExpression(ctx: UnaryMinusExpressionContext): ASTNode {
+  visitUnaryMinusExpr(ctx: UnaryMinusExprContext): ASTNode {
     const operand = this.visit(ctx.expression());
 
     return {
@@ -956,7 +1025,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitLogicalNotExpression(ctx: LogicalNotExpressionContext): ASTNode {
+  visitLogicalNotExpr(ctx: LogicalNotExprContext): ASTNode {
     const operand = this.visit(ctx.expression());
 
     return {
@@ -967,7 +1036,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitMultiplicativeExpression(ctx: MultiplicativeExpressionContext): ASTNode {
+  visitMulDivModExpr(ctx: MulDivModExprContext): ASTNode {
     const left = this.visit(ctx.expression(0));
     const right = this.visit(ctx.expression(1));
     let operator: string;
@@ -991,7 +1060,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitAdditiveExpression(ctx: AdditiveExpressionContext): ASTNode {
+  visitAddSubExpr(ctx: AddSubExprContext): ASTNode {
     const left = this.visit(ctx.expression(0));
     const right = this.visit(ctx.expression(1));
     const operator = ctx.PLUS() ? '+' : '-';
@@ -1005,7 +1074,18 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitRelationalExpression(ctx: RelationalExpressionContext): ASTNode {
+  visitRangeExpr(ctx: RangeExprContext): ASTNode {
+    const start = this.visit(ctx.expression(0));
+    const end = this.visit(ctx.expression(1));
+    return {
+      type: 'RangeExpression',
+      start,
+      end,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitRelationalExpr(ctx: RelationalExprContext): ASTNode {
     const left = this.visit(ctx.expression(0));
     const right = this.visit(ctx.expression(1));
     let operator: string;
@@ -1031,7 +1111,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitEqualityExpression(ctx: EqualityExpressionContext): ASTNode {
+  visitEqualityExpr(ctx: EqualityExprContext): ASTNode {
     const left = this.visit(ctx.expression(0));
     const right = this.visit(ctx.expression(1));
     const operator = ctx.EQUALS() ? '==' : '!=';
@@ -1045,7 +1125,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitLogicalAndExpression(ctx: LogicalAndExpressionContext): ASTNode {
+  visitLogicalAndExpr(ctx: LogicalAndExprContext): ASTNode {
     const left = this.visit(ctx.expression(0));
     const right = this.visit(ctx.expression(1));
     const operator = '&&'; // 論理AND演算子は && のみ
@@ -1059,7 +1139,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitLogicalOrExpression(ctx: LogicalOrExpressionContext): ASTNode {
+  visitLogicalOrExpr(ctx: LogicalOrExprContext): ASTNode {
     const left = this.visit(ctx.expression(0));
     const right = this.visit(ctx.expression(1));
     const operator = '||'; // 論理OR演算子は || のみ
@@ -1074,11 +1154,11 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   // Primary expression visitors
-  visitLiteralExpression(ctx: LiteralExpressionContext): ASTNode {
+  visitLiteralExpr(ctx: LiteralExprContext): ASTNode {
     return this.visit(ctx.literal());
   }
 
-  visitIdentifierExpression(ctx: IdentifierExpressionContext): ASTNode {
+  visitIdentifierExpr(ctx: IdentifierExprContext): ASTNode {
     return {
       type: 'Identifier',
       name: ctx.IDENTIFIER().text,
@@ -1086,14 +1166,14 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitThisExpression(ctx: ThisExpressionContext): ASTNode {
+  visitThisExpr(ctx: ThisExprContext): ASTNode {
     return {
       type: 'ThisExpression',
       loc: this.getLocationInfo(ctx),
     };
   }
 
-  visitIfExpression(ctx: IfExpressionContext): ASTNode {
+  visitIfExpr(ctx: IfExprContext): ASTNode {
     const condition = this.visit(ctx.expression(0));
 
     // Get all expressions and blocks
@@ -1151,11 +1231,11 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  visitParenthesizedExpression(ctx: ParenthesizedExpressionContext): ASTNode {
+  visitParenExpr(ctx: ParenExprContext): ASTNode {
     return this.visit(ctx.expression());
   }
 
-  visitCallExpressionPrimary(ctx: CallExpressionPrimaryContext): ASTNode {
+  visitCallExprPrimary(ctx: CallExprPrimaryContext): ASTNode {
     return this.visit(ctx.callExpression());
   }
 
@@ -1292,6 +1372,270 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       loc: this.getLocationInfo(ctx),
     };
   }
+
+  // List literal visitor
+  visitListLiteral(ctx: ListLiteralContext): ASTNode {
+    const elements = ctx.expression().map((expr) => this.visit(expr));
+    return {
+      type: 'ListLiteral',
+      elements,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitListLiteralExpr(ctx: ListLiteralExprContext): ASTNode {
+    return this.visit(ctx.listLiteral());
+  }
+
+  // Lambda expression visitors
+  visitLambdaExpression(ctx: LambdaExpressionContext): ASTNode {
+    let parameters: string[] = [];
+    if (ctx.lambdaParameters()) {
+      parameters = ctx
+        .lambdaParameters()!
+        .IDENTIFIER()
+        .map((id) => id.text);
+    }
+
+    let body: ASTNode[] = [];
+    if (ctx.lambdaBody()) {
+      const lambdaBodyResult = this.visit(ctx.lambdaBody()!);
+      if (lambdaBodyResult.type === 'Block') {
+        // Multiple statements
+        body = lambdaBodyResult.body;
+      } else {
+        // Single expression - wrap in ExpressionStatement
+        body = [
+          {
+            type: 'ExpressionStatement',
+            expression: lambdaBodyResult,
+            loc: lambdaBodyResult.loc,
+          },
+        ];
+      }
+    }
+
+    return {
+      type: 'LambdaExpression',
+      parameters,
+      body,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitLambdaParameters(ctx: LambdaParametersContext): ASTNode {
+    return {
+      type: 'LambdaParameters',
+      parameters: ctx.IDENTIFIER().map((id) => id.text),
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitLambdaBody(ctx: LambdaBodyContext): ASTNode {
+    if (ctx.expression()) {
+      return this.visit(ctx.expression()!);
+    } else {
+      const statements = ctx.statement().map((stmt) => this.visit(stmt));
+      return {
+        type: 'Block',
+        body: statements,
+        loc: this.getLocationInfo(ctx),
+      };
+    }
+  }
+
+  visitLambdaExpr(ctx: LambdaExprContext): ASTNode {
+    return this.visit(ctx.lambdaExpression());
+  }
+
+  // Anonymous function visitors
+  visitAnonymousFunction(ctx: AnonymousFunctionContext): ASTNode {
+    const parameters = ctx.parameterList()
+      ? this.visit(ctx.parameterList()!)
+      : {
+          type: 'ParameterList',
+          parameters: [],
+          loc: this.getLocationInfo(ctx),
+        };
+
+    const returnType = ctx.type() ? this.visit(ctx.type()!) : null;
+    const body = this.visit(ctx.block());
+
+    return {
+      type: 'AnonymousFunction',
+      parameters,
+      returnType,
+      body,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitAnonFuncExpr(ctx: AnonFuncExprContext): ASTNode {
+    return this.visit(ctx.anonymousFunction());
+  }
+
+  // Spread expression visitors
+  visitSpreadExpression(ctx: SpreadExpressionContext): ASTNode {
+    const argument = this.visit(ctx.expression());
+    return {
+      type: 'SpreadExpression',
+      argument,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitSpreadExpr(ctx: SpreadExprContext): ASTNode {
+    return this.visit(ctx.spreadExpression());
+  }
+
+  // Pipeline expression visitor
+  visitPipelineExpr(ctx: PipelineExprContext): ASTNode {
+    const left = this.visit(ctx.expression(0));
+    const right = this.visit(ctx.expression(1));
+    return {
+      type: 'PipelineExpression',
+      left,
+      right,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  // Bitwise expression visitors
+  visitBitwiseAndExpr(ctx: BitwiseAndExprContext): ASTNode {
+    const left = this.visit(ctx.expression(0));
+    const right = this.visit(ctx.expression(1));
+    return {
+      type: 'BinaryExpression',
+      operator: '&',
+      left,
+      right,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitBitwiseXorExpr(ctx: BitwiseXorExprContext): ASTNode {
+    const left = this.visit(ctx.expression(0));
+    const right = this.visit(ctx.expression(1));
+    return {
+      type: 'BinaryExpression',
+      operator: '^',
+      left,
+      right,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitBitwiseOrExpr(ctx: BitwiseOrExprContext): ASTNode {
+    const left = this.visit(ctx.expression(0));
+    const right = this.visit(ctx.expression(1));
+    return {
+      type: 'BinaryExpression',
+      operator: '|',
+      left,
+      right,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  // Shift expression visitor
+  visitShiftExpr(ctx: ShiftExprContext): ASTNode {
+    const left = this.visit(ctx.expression(0));
+    const right = this.visit(ctx.expression(1));
+    // Determine the operator based on the token
+    let operator = '<<';
+    if (ctx.text.includes('>>')) {
+      operator = '>>';
+    }
+    return {
+      type: 'BinaryExpression',
+      operator,
+      left,
+      right,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  // Index access and slice expression visitors
+  visitIndexAccessExpr(ctx: IndexAccessExprContext): ASTNode {
+    const object = this.visit(ctx.expression(0));
+    const index = this.visit(ctx.expression(1));
+    return {
+      type: 'IndexAccessExpression',
+      object,
+      index,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitSliceExpr(ctx: SliceExprContext): ASTNode {
+    const object = this.visit(ctx.expression(0));
+    // Handle optional start and end expressions
+    let index;
+    if (ctx.expression().length === 3) {
+      // start..end format: expression[start..end]
+      const start = this.visit(ctx.expression(1));
+      const end = this.visit(ctx.expression(2));
+      // Calculate location based on start and end expressions
+      const startLoc = (start as ASTNode).loc!;
+      const endLoc = (end as ASTNode).loc!;
+      index = {
+        type: 'RangeExpression',
+        start,
+        end,
+        loc: {
+          start: startLoc.start,
+          end: endLoc.end,
+        },
+      };
+    } else if (ctx.expression().length === 2) {
+      // Either start.. or ..end format
+      const secondExpr = this.visit(ctx.expression(1));
+      // This is a simplified implementation - in a real parser you'd need to check which format
+      index = secondExpr;
+    } else {
+      // Just [:] format - full slice
+      index = {
+        type: 'RangeExpression',
+        start: null,
+        end: null,
+        loc: this.getLocationInfo(ctx),
+      };
+    }
+
+    return {
+      type: 'IndexAccessExpression',
+      object,
+      index,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  // Bitwise NOT expression visitor
+  visitBitwiseNotExpr(ctx: BitwiseNotExprContext): ASTNode {
+    const argument = this.visit(ctx.expression());
+    return {
+      type: 'UnaryExpression',
+      operator: '~',
+      argument,
+      prefix: true,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  // Power expression visitor
+  visitPowerExpr(ctx: PowerExprContext): ASTNode {
+    const left = this.visit(ctx.expression(0));
+    const right = this.visit(ctx.expression(1));
+    return {
+      type: 'BinaryExpression',
+      operator: '**',
+      left,
+      right,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  // ...existing code...
 }
 
 /**

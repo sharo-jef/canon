@@ -1,6 +1,0 @@
-struct TestCallExpr {
-  init {
-    function()
-    error("test")
-  }
-}

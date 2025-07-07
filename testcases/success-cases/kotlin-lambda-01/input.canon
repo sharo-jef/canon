@@ -1,0 +1,3 @@
+val emptyLambda = { -> }
+val emptyBody = {}
+val withoutArrow = { 42 }

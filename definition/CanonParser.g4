@@ -1,24 +1,26 @@
+// ──────────────────────────────────────────────
+// CanonParser.g4  (functionally identical version)
+// ──────────────────────────────────────────────
 parser grammar CanonParser;
 
-options {
-    tokenVocab = CanonLexer;
-}
+options { tokenVocab = CanonLexer; }
 
-// Root rule
-program: (schemaDirective | useStatement | topLevelStatement)* EOF;
+// ───── entry ──────────────────────────────────
+program
+    : (schemaDirective | useStatement | topLevelStatement)* EOF
+    ;
 
-// Schema directive
-schemaDirective: SCHEMA_DIRECTIVE stringLiteral;
+// ───── directives / imports ───────────────────
+schemaDirective : SCHEMA_DIRECTIVE stringLiteral ;
+useStatement    : USE IDENTIFIER ;
 
-// Use statement
-useStatement: USE IDENTIFIER;
+// ───── top-level ──────────────────────────────
+topLevelStatement
+    : topLevelElement ( SEMICOLON topLevelElement )*
+    ;
 
-// Top-level statements - newline-separated, semicolon only for same-line multiple statements
-topLevelStatement: topLevelElement (SEMICOLON topLevelElement)*;
-
-// Top-level elements
-topLevelElement:
-    schemaDeclaration
+topLevelElement
+    : schemaDeclaration
     | structDeclaration
     | unionDeclaration
     | typeDeclaration
@@ -26,180 +28,203 @@ topLevelElement:
     | functionDeclaration
     | assignmentStatement
     | destructuringAssignment
-    | callExpression;
+    | callExpression
+    ;
 
-// Schema declaration
-schemaDeclaration: annotation* SCHEMA (block | stringLiteral);
+// ───── declarations ─────────────────
+schemaDeclaration        : annotation* SCHEMA  ( block | stringLiteral ) ;
+structDeclaration        : annotation* STRUCT  IDENTIFIER block ;
+unionDeclaration         : annotation* UNION   IDENTIFIER ASSIGN unionType ;
+typeDeclaration          : annotation* TYPE    IDENTIFIER ASSIGN type ;
+functionDeclaration
+    : annotation* FUN IDENTIFIER
+      LPAREN parameterList? RPAREN
+      ( COLON type )?
+      block
+    ;
 
-// Struct declaration
-structDeclaration: annotation* STRUCT IDENTIFIER block;
+variableDeclaration
+    : annotation* ( VAL | VAR ) IDENTIFIER
+      ( COLON type )?
+      ASSIGN expression
+    ;
 
-// Union declaration
-unionDeclaration: annotation* UNION IDENTIFIER ASSIGN unionType;
+// ───── type system ────────────────────────────
+unionType : type ( BIT_OR type )* ;
 
-// Type declaration (for future type constraints)
-typeDeclaration: annotation* TYPE IDENTIFIER ASSIGN type;
+type      : baseType ( LBRACKET RBRACKET )* ;
+baseType  : primitiveType | IDENTIFIER ;
+primitiveType : STRING_TYPE | INT_TYPE | BOOL_TYPE ;
 
-// Top-level function declarations
-functionDeclaration: annotation* FUN IDENTIFIER LPAREN parameterList? RPAREN (COLON type)? block;
+// ───── blocks / statements ────────────────────
+block
+    : LBRACE ( statement ( SEMICOLON statement )* )* RBRACE
+    ;
 
-// Variable declarations  
-variableDeclaration: annotation* (VAL | VAR) IDENTIFIER (COLON type)? ASSIGN expression;
-
-// Union type
-unionType: type (BIT_OR type)*;
-
-// Type definitions
-type:
-    baseType (LBRACKET RBRACKET)*;
-
-baseType:
-    primitiveType
-    | IDENTIFIER;
-
-primitiveType: STRING_TYPE | INT_TYPE | BOOL_TYPE;
-
-// Block (used in schema, struct, object instantiation)
-block: LBRACE (statement (SEMICOLON statement)*)* RBRACE;
-
-statement:
-    assignmentStatement
+statement
+    : assignmentStatement
     | expressionStatement
     | propertyDeclaration
     | initDeclaration
     | getterDeclaration
+    | methodDeclaration
     | repeatedDeclaration
-    | variableDeclaration;
+    | variableDeclaration
+    ;
 
-// Property declarations (in struct and schema)
-propertyDeclaration: annotation* (PRIVATE)? IDENTIFIER ((QUESTION)? COLON type (ASSIGN expression)?)?;
+expressionStatement : expression ;
 
-// Assignment statements (covers both property assignments and variable assignments)
-assignmentStatement: (THIS DOT)? IDENTIFIER (ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | MULTIPLY_ASSIGN | DIVIDE_ASSIGN | MODULO_ASSIGN | POWER_ASSIGN) expression;
+// ───── members & misc. ────────────────────────
+propertyDeclaration
+    : annotation* PRIVATE? IDENTIFIER
+      ( QUESTION? COLON type ( ASSIGN expression )? )?
+    ;
 
-// Destructuring assignment statements
-destructuringAssignment: destructuringPattern ASSIGN expression;
+assignmentStatement
+    : ( THIS DOT )? IDENTIFIER
+      ( ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN
+      | MULTIPLY_ASSIGN | DIVIDE_ASSIGN | MODULO_ASSIGN | POWER_ASSIGN )
+      expression
+    ;
 
-// Destructuring patterns
-destructuringPattern:
-    arrayDestructuringPattern           // [a, b, c] = ...
-    | objectDestructuringPattern;       // {a, b, c} = ...
+destructuringAssignment
+    : destructuringPattern ASSIGN expression
+    ;
 
-    // Array destructuring patterns
-arrayDestructuringPattern: LBRACKET destructuringElement (COMMA destructuringElement)* RBRACKET;
+destructuringPattern
+    : arrayDestructuringPattern
+    | objectDestructuringPattern
+    ;
 
-// Object destructuring patterns  
-objectDestructuringPattern: LBRACE destructuringProperty (COMMA destructuringProperty)* RBRACE;
+arrayDestructuringPattern
+    : LBRACKET destructuringElement ( COMMA destructuringElement )* RBRACKET
+    ;
 
-// Elements in array destructuring
-destructuringElement:
-    IDENTIFIER (ASSIGN expression)?    // with optional default value
-    | destructuringPattern             // nested pattern
-    | SPREAD IDENTIFIER;               // rest pattern: ...rest
+objectDestructuringPattern
+    : LBRACE destructuringProperty ( COMMA destructuringProperty )* RBRACE
+    ;
 
-// Properties in object destructuring
-destructuringProperty:
-    IDENTIFIER (ASSIGN expression)?    // {prop} or {prop = default}
-    | IDENTIFIER COLON IDENTIFIER (ASSIGN expression)?; // {prop: newName} or {prop: newName = default}
+destructuringElement
+    : IDENTIFIER ( ASSIGN expression )?
+    | destructuringPattern
+    | SPREAD IDENTIFIER
+    ;
 
-// Init declarations
-initDeclaration: annotation* INIT (LPAREN parameterList? RPAREN)? block;
+destructuringProperty
+    : IDENTIFIER ( ASSIGN expression )?
+    | IDENTIFIER COLON IDENTIFIER ( ASSIGN expression )?
+    ;
 
-// Getter declarations
-getterDeclaration: annotation* GET IDENTIFIER LPAREN RPAREN block;
+initDeclaration    : annotation* INIT ( LPAREN parameterList? RPAREN )? block ;
+getterDeclaration  : annotation* GET  IDENTIFIER LPAREN RPAREN block ;
+methodDeclaration  : annotation* PRIVATE? IDENTIFIER
+                     LPAREN parameterList? RPAREN
+                     ( COLON type )?
+                     block ;
+repeatedDeclaration: annotation* REPEATED IDENTIFIER COLON type
+                     mappingBlock?
+                     ( ASSIGN expression )? ;
+mappingBlock       : LBRACE mappingEntry* RBRACE ;
+mappingEntry       : IDENTIFIER ARROW IDENTIFIER ;
 
-// Repeated declarations
-repeatedDeclaration: annotation* REPEATED IDENTIFIER COLON type (mappingBlock)? (ASSIGN expression)?;
+parameterList : parameter ( COMMA parameter )* ;
+parameter     : ( THIS DOT )? IDENTIFIER ( COLON type )? ;
 
-// Mapping block for repeated declarations
-mappingBlock: LBRACE mappingEntry* RBRACE;
-mappingEntry: IDENTIFIER ARROW IDENTIFIER;
+// ───── calls & arguments ──────────────────────
+callExpression
+    : IDENTIFIER
+      ( LPAREN argumentList? RPAREN )?
+      block?
+    ;
 
-// Parameter list
-parameterList: parameter (COMMA parameter)*;
-parameter: (THIS DOT)? IDENTIFIER (COLON type)?;
+argumentList  : expression ( COMMA expression )* ;
 
-// Call expression (function call with optional lambda block)
-callExpression: IDENTIFIER (LPAREN argumentList? RPAREN)? block?;
+// ───── expressions (precedence climbing) ──────
+expression
+    : primary                                      #primaryExpr
+    | MINUS         expression                     #unaryMinusExpr
+    | NOT           expression                     #logicalNotExpr
+    | BIT_NOT       expression                     #bitwiseNotExpr
+    | expression POWER                           expression #powerExpr
+    | expression op=(MULTIPLY | DIVIDE | MODULO) expression #mulDivModExpr
+    | expression op=(PLUS | MINUS)               expression #addSubExpr
+    | expression RANGE                           expression #rangeExpr
+    | expression op=(LEFT_SHIFT | RIGHT_SHIFT)   expression #shiftExpr
+    | expression op=(LESS_THAN|GREATER_THAN|LESS_EQUALS|GREATER_EQUALS) expression #relationalExpr
+    | expression op=(EQUALS | NOT_EQUALS)        expression #equalityExpr
+    | expression BIT_AND                expression #bitwiseAndExpr
+    | expression BIT_XOR                expression #bitwiseXorExpr
+    | expression BIT_OR                 expression #bitwiseOrExpr
+    | expression LOGICAL_AND            expression #logicalAndExpr
+    | expression LOGICAL_OR             expression #logicalOrExpr
+    | expression PIPELINE               expression #pipelineExpr
+    | expression DOT IDENTIFIER                      #memberAccessExpr
+    | expression LBRACKET expression RBRACKET        #indexAccessExpr
+    | expression LBRACKET expression? RANGE expression? RBRACKET
+                                                #sliceExpr
+    | expression LPAREN argumentList? RPAREN         #funcCallExpr
+    | expression EXCLAMATION                         #nonNullAssertExpr
+    ;
 
-// Argument list
-argumentList: expression (COMMA expression)*;
+// ───── primaries ───────────────────────────────
+primary
+    : literal                         #literalExpr
+    | listLiteral                     #listLiteralExpr
+    | lambdaExpression                #lambdaExpr
+    | anonymousFunction               #anonFuncExpr
+    | spreadExpression                #spreadExpr
+    | IDENTIFIER                      #identifierExpr
+    | THIS                            #thisExpr
+    | IF LPAREN expression RPAREN ( expression | block )
+          ( ELSE ( expression | block ) )?          #ifExpr
+    | LPAREN expression RPAREN        #parenExpr
+    | callExpression                  #callExprPrimary
+    ;
 
-// Statements
-expressionStatement: expression;
-
-// Expressions
-expression:
-    primary                                                     #primaryExpression
-    | expression DOT IDENTIFIER                                 #memberAccessExpression
-    | expression LBRACKET expression RBRACKET                   #indexAccessExpression
-    | expression LBRACKET expression? RANGE expression? RBRACKET #sliceExpression
-    | expression LPAREN argumentList? RPAREN                    #functionCallExpression
-    | expression EXCLAMATION                                    #nonNullAssertionExpression
-    | MINUS expression                                          #unaryMinusExpression
-    | NOT expression                                            #logicalNotExpression
-    | BIT_NOT expression                                        #bitwiseNotExpression
-    | expression POWER expression                               #powerExpression
-    | expression (MULTIPLY | DIVIDE | MODULO) expression       #multiplicativeExpression
-    | expression (PLUS | MINUS) expression                     #additiveExpression
-    | expression (LEFT_SHIFT | RIGHT_SHIFT) expression         #shiftExpression
-    | expression (LESS_THAN | GREATER_THAN | LESS_EQUALS | GREATER_EQUALS) expression #relationalExpression
-    | expression (EQUALS | NOT_EQUALS) expression              #equalityExpression
-    | expression BIT_AND expression                            #bitwiseAndExpression
-    | expression BIT_XOR expression                            #bitwiseXorExpression
-    | expression BIT_OR expression                             #bitwiseOrExpression
-    | expression LOGICAL_AND expression                        #logicalAndExpression
-    | expression LOGICAL_OR expression                         #logicalOrExpression
-    | expression PIPELINE expression                           #pipelineExpression
-    | expression RANGE expression                              #rangeExpression;
-
-// Primary expressions
-primary:
-    literal                                                     #literalExpression
-    | listLiteral                                               #listLiteralExpression
-    | lambdaExpression                                          #lambdaExpressionPrimary
-    | anonymousFunction                                         #anonymousFunctionPrimary
-    | spreadExpression                                          #spreadExpressionPrimary
-    | IDENTIFIER                                                #identifierExpression
-    | THIS                                                      #thisExpression
-    | IF LPAREN expression RPAREN (expression | block) (ELSE (expression | block))? #ifExpression
-    | LPAREN expression RPAREN                                  #parenthesizedExpression
-    | callExpression                                            #callExpressionPrimary;
-
-// Literals
-literal:
-    stringLiteral
+// ───── literals / annotations ─────────────────
+literal
+    : stringLiteral
     | INTEGER_LITERAL
     | TRUE
-    | FALSE;
+    | FALSE
+    ;
 
-// String literals (including template strings)
-stringLiteral:
-    STRING_LITERAL
+stringLiteral
+    : STRING_LITERAL
     | DOUBLE_STRING_LITERAL
-    | templateString;
+    | templateString
+    ;
 
-// Template string handling
-templateString: TEMPLATE_STRING_START templateStringContent* TEMPLATE_STRING_END;
+templateString
+    : TEMPLATE_STRING_START templateStringContent* TEMPLATE_STRING_END
+    ;
 
-templateStringContent:
-    TEMPLATE_STRING_PART
+templateStringContent
+    : TEMPLATE_STRING_PART
     | TEMPLATE_INTERPOLATION_SIMPLE
-    | TEMPLATE_INTERPOLATION_START expression INTERPOLATION_END;
+    | TEMPLATE_INTERPOLATION_START expression INTERPOLATION_END
+    ;
 
-// Annotations
-annotation: ANNOTATION (LPAREN argumentList? RPAREN | stringLiteral)?;
+// annotations
+annotation
+    : ANNOTATION ( LPAREN argumentList? RPAREN | stringLiteral )?
+    ;
 
-// List literal
-listLiteral: LBRACKET (expression (COMMA expression)*)? RBRACKET;
+// lists / spread
+listLiteral      : LBRACKET ( expression ( COMMA expression )* )? RBRACKET ;
+lambdaExpression
+    : LBRACE RBRACE
+    | LBRACE ARROW RBRACE
+    | LBRACE ARROW lambdaBody RBRACE
+    | LBRACE lambdaParameters ARROW RBRACE
+    | LBRACE lambdaParameters ARROW lambdaBody RBRACE
+    | LBRACE lambdaBody RBRACE
+    ;
+lambdaParameters : IDENTIFIER ( COMMA IDENTIFIER )* ;
+lambdaBody       : expression | ( statement ( SEMICOLON statement )* )+ ;
 
-// Lambda expression
-lambdaExpression: LBRACE (lambdaParameters ARROW)? lambdaBody RBRACE;
-lambdaParameters: IDENTIFIER (COMMA IDENTIFIER)*;
-lambdaBody: expression | (statement (SEMICOLON statement)*)*;
+anonymousFunction
+    : FUN LPAREN parameterList? RPAREN ( COLON type )? block
+    ;
 
-// Anonymous function
-anonymousFunction: FUN LPAREN parameterList? RPAREN (COLON type)? block;
-
-// Spread expression (for future use)
-spreadExpression: SPREAD expression;
+spreadExpression : SPREAD expression ;

@@ -1,0 +1,1 @@
+Kotlin-compatible lambda expressions test

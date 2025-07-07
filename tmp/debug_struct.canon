@@ -1,4 +1,0 @@
-struct MyStruct
-    name: string
-    age: int
-}
