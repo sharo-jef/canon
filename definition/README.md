@@ -103,6 +103,9 @@
   - `use getEnv` のように、関数名を指定する
 - `struct` には `get` 修飾子を用いて `getter` を定義できる
   - `getter` は何度でも呼び出せる
+- RangeExpression は Range<T> のリテラルと捉えられる
+  - `1..10` は `Range<int>` として解釈され、 `1..10 step 2` は `infix fun Range<int>.step(step: int): Range<int>` と解釈される
+  - Range<T> は暗黙的に定義されているものとする
 
 ## アノテーション
 

@@ -2108,10 +2108,359 @@ body:
       end:
         line: 73
         column: 32
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: rangeExample2
+      loc:
+        start:
+          line: 74
+          column: 4
+        end:
+          line: 74
+          column: 17
+    typeRef: null
+    value:
+      type: InfixCall
+      functionName: step
+      left:
+        type: InfixCall
+        functionName: step
+        left:
+          type: RangeExpression
+          from:
+            type: IntegerLiteral
+            value: 1
+            raw: '1'
+            loc:
+              start:
+                line: 74
+                column: 20
+              end:
+                line: 74
+                column: 21
+          to:
+            type: IntegerLiteral
+            value: 10
+            raw: '10'
+            loc:
+              start:
+                line: 74
+                column: 24
+              end:
+                line: 74
+                column: 26
+          inclusive: true
+          loc:
+            start:
+              line: 74
+              column: 20
+            end:
+              line: 74
+              column: 26
+        right:
+          type: IntegerLiteral
+          value: 2
+          raw: '2'
+          loc:
+            start:
+              line: 74
+              column: 32
+            end:
+              line: 74
+              column: 33
+        loc:
+          start:
+            line: 74
+            column: 20
+          end:
+            line: 74
+            column: 33
+      right:
+        type: IntegerLiteral
+        value: 3
+        raw: '3'
+        loc:
+          start:
+            line: 74
+            column: 39
+          end:
+            line: 74
+            column: 40
+      loc:
+        start:
+          line: 74
+          column: 20
+        end:
+          line: 74
+          column: 40
+    annotations: []
+    loc:
+      start:
+        line: 74
+        column: 0
+      end:
+        line: 74
+        column: 40
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: rangeExample3
+      loc:
+        start:
+          line: 75
+          column: 4
+        end:
+          line: 75
+          column: 17
+    typeRef: null
+    value:
+      type: InfixCall
+      functionName: until
+      left:
+        type: IntegerLiteral
+        value: 1
+        raw: '1'
+        loc:
+          start:
+            line: 75
+            column: 20
+          end:
+            line: 75
+            column: 21
+      right:
+        type: IntegerLiteral
+        value: 10
+        raw: '10'
+        loc:
+          start:
+            line: 75
+            column: 28
+          end:
+            line: 75
+            column: 30
+      loc:
+        start:
+          line: 75
+          column: 20
+        end:
+          line: 75
+          column: 30
+    annotations: []
+    loc:
+      start:
+        line: 75
+        column: 0
+      end:
+        line: 75
+        column: 30
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: rangeExample4
+      loc:
+        start:
+          line: 76
+          column: 4
+        end:
+          line: 76
+          column: 17
+    typeRef: null
+    value:
+      type: InfixCall
+      functionName: step
+      left:
+        type: InfixCall
+        functionName: until
+        left:
+          type: IntegerLiteral
+          value: 1
+          raw: '1'
+          loc:
+            start:
+              line: 76
+              column: 20
+            end:
+              line: 76
+              column: 21
+        right:
+          type: IntegerLiteral
+          value: 10
+          raw: '10'
+          loc:
+            start:
+              line: 76
+              column: 28
+            end:
+              line: 76
+              column: 30
+        loc:
+          start:
+            line: 76
+            column: 20
+          end:
+            line: 76
+            column: 30
+      right:
+        type: IntegerLiteral
+        value: 2
+        raw: '2'
+        loc:
+          start:
+            line: 76
+            column: 36
+          end:
+            line: 76
+            column: 37
+      loc:
+        start:
+          line: 76
+          column: 20
+        end:
+          line: 76
+          column: 37
+    annotations: []
+    loc:
+      start:
+        line: 76
+        column: 0
+      end:
+        line: 76
+        column: 37
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: rangeExample5
+      loc:
+        start:
+          line: 77
+          column: 4
+        end:
+          line: 77
+          column: 17
+    typeRef: null
+    value:
+      type: InfixCall
+      functionName: downTo
+      left:
+        type: IntegerLiteral
+        value: 10
+        raw: '10'
+        loc:
+          start:
+            line: 77
+            column: 20
+          end:
+            line: 77
+            column: 22
+      right:
+        type: IntegerLiteral
+        value: 1
+        raw: '1'
+        loc:
+          start:
+            line: 77
+            column: 30
+          end:
+            line: 77
+            column: 31
+      loc:
+        start:
+          line: 77
+          column: 20
+        end:
+          line: 77
+          column: 31
+    annotations: []
+    loc:
+      start:
+        line: 77
+        column: 0
+      end:
+        line: 77
+        column: 31
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: rangeExample6
+      loc:
+        start:
+          line: 78
+          column: 4
+        end:
+          line: 78
+          column: 17
+    typeRef: null
+    value:
+      type: InfixCall
+      functionName: step
+      left:
+        type: InfixCall
+        functionName: downTo
+        left:
+          type: IntegerLiteral
+          value: 10
+          raw: '10'
+          loc:
+            start:
+              line: 78
+              column: 20
+            end:
+              line: 78
+              column: 22
+        right:
+          type: IntegerLiteral
+          value: 1
+          raw: '1'
+          loc:
+            start:
+              line: 78
+              column: 30
+            end:
+              line: 78
+              column: 31
+        loc:
+          start:
+            line: 78
+            column: 20
+          end:
+            line: 78
+            column: 31
+      right:
+        type: IntegerLiteral
+        value: 2
+        raw: '2'
+        loc:
+          start:
+            line: 78
+            column: 37
+          end:
+            line: 78
+            column: 38
+      loc:
+        start:
+          line: 78
+          column: 20
+        end:
+          line: 78
+          column: 38
+    annotations: []
+    loc:
+      start:
+        line: 78
+        column: 0
+      end:
+        line: 78
+        column: 38
 loc:
   start:
     line: 7
     column: 0
   end:
-    line: 74
+    line: 79
     column: 5

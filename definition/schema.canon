@@ -71,3 +71,8 @@ infix fun int.add(other: int): int {
 
 val example = 1 add (1 add 1)
 val rangeExample = 1..=10 step 2
+val rangeExample2 = 1..=10 step 2 step 3
+val rangeExample3 = 1 until 10
+val rangeExample4 = 1 until 10 step 2
+val rangeExample5 = 10 downTo 1
+val rangeExample6 = 10 downTo 1 step 2
