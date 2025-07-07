@@ -277,7 +277,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
   private tokenToUserFriendlyName(tokenName: string): string {
     // Remove quotes and handle special cases
     const cleanToken = tokenName.replace(/^'|'$/g, '');
-    
+
     const tokenMap: Record<string, string> = {
       // Literals
       IDENTIFIER: 'identifier',
@@ -285,13 +285,13 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
       INTEGER_LITERAL: 'number',
       BOOLEAN_LITERAL: 'boolean',
       DOUBLE_STRING_LITERAL: 'double-quoted string',
-      
+
       // Template string tokens
       TEMPLATE_STRING_START: 'template string start',
       TEMPLATE_STRING_END: 'template string end',
       TEMPLATE_STRING_PART: 'template string content',
       TEMPLATE_INTERPOLATION_SIMPLE: 'template interpolation',
-      
+
       // Keywords
       val: "'val'",
       var: "'var'",
@@ -310,7 +310,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
       not: "'not'",
       true: "'true'",
       false: "'false'",
-      
+
       // Symbols (keep quotes for clarity)
       '{': "'{'",
       '}': "'}'",
@@ -325,7 +325,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
       ':': "':'",
       $: "'$'",
       '${': "'${'",
-      
+
       // Technical tokens
       RBRACE: "'}'",
       LPAREN: "'('",
@@ -333,10 +333,10 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
       LBRACE: "'{'",
       MINUS: "'-'",
       ANNOTATION: 'annotation',
-      
+
       // Hash schema tokens
       '#schema': "'#schema'",
-      
+
       // Special tokens
       EOF: 'end of file',
       '<EOF>': 'end of file',
@@ -421,7 +421,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
     if (mismatchedMatch) {
       const unexpectedToken = mismatchedMatch[1];
       const expectedPart = mismatchedMatch[2];
-      
+
       const expectedTokens = this.parseExpectedTokens(`expecting ${expectedPart}`);
       if (expectedTokens.length > 0) {
         const formattedExpected = this.formatTokenList(expectedTokens);
@@ -456,7 +456,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
     if (extraneousMatch) {
       const extraToken = extraneousMatch[1];
       const expectedPart = extraneousMatch[2];
-      
+
       const expectedTokens = this.parseExpectedTokens(`expecting ${expectedPart}`);
       if (expectedTokens.length > 0) {
         const formattedExpected = this.formatTokenList(expectedTokens);

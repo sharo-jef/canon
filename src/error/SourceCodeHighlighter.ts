@@ -115,7 +115,7 @@ export class SourceCodeHighlighter {
     result.push(`${errorLinePrefix} | ${errorLine}`);
 
     // Add the highlight line
-    const emptyPrefix = '  '; // Always use 2 spaces for empty lines
+    const emptyPrefix = this.createEmptyPrefix(maxLineNumber);
 
     // Check for parenthesis matching error
     if (isParenthesisError) {
@@ -165,7 +165,7 @@ export class SourceCodeHighlighter {
         }
       }
 
-      result.push(`  | ${highlightLine}`);
+      result.push(`${emptyPrefix} | ${highlightLine}`);
     }
 
     // Add context lines after the error
