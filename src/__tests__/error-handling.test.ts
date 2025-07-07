@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { describe, test, expect } from '@jest/globals';
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
 import { CanonLexer } from '../generated/CanonLexer';
 import { CanonParser } from '../generated/CanonParser';
