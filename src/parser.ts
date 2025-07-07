@@ -1075,12 +1075,12 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitRangeExpr(ctx: RangeExprContext): ASTNode {
-    const start = this.visit(ctx.expression(0));
-    const end = this.visit(ctx.expression(1));
+    const from = this.visit(ctx.expression(0));
+    const to = this.visit(ctx.expression(1));
     return {
       type: 'RangeExpression',
-      start,
-      end,
+      from,
+      to,
       loc: this.getLocationInfo(ctx),
     };
   }
@@ -1573,18 +1573,18 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     let index;
     if (ctx.expression().length === 3) {
       // start..end format: expression[start..end]
-      const start = this.visit(ctx.expression(1));
-      const end = this.visit(ctx.expression(2));
+      const from = this.visit(ctx.expression(1));
+      const to = this.visit(ctx.expression(2));
       // Calculate location based on start and end expressions
-      const startLoc = (start as ASTNode).loc!;
-      const endLoc = (end as ASTNode).loc!;
+      const fromLoc = (from as ASTNode).loc!;
+      const toLoc = (to as ASTNode).loc!;
       index = {
         type: 'RangeExpression',
-        start,
-        end,
+        from,
+        to,
         loc: {
-          start: startLoc.start,
-          end: endLoc.end,
+          start: fromLoc.start,
+          end: toLoc.end,
         },
       };
     } else if (ctx.expression().length === 2) {
@@ -1596,8 +1596,8 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       // Just [:] format - full slice
       index = {
         type: 'RangeExpression',
-        start: null,
-        end: null,
+        from: null,
+        to: null,
         loc: this.getLocationInfo(ctx),
       };
     }

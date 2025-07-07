@@ -15,7 +15,7 @@ body:
     typeRef: null
     value:
       type: RangeExpression
-      start:
+      from:
         type: IntegerLiteral
         value: 1
         raw: '1'
@@ -26,7 +26,7 @@ body:
           end:
             line: 1
             column: 13
-      end:
+      to:
         type: IntegerLiteral
         value: 10
         raw: '10'

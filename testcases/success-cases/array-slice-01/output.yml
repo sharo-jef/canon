@@ -27,7 +27,7 @@ body:
             column: 19
       index:
         type: RangeExpression
-        start:
+        from:
           type: IntegerLiteral
           value: 1
           raw: '1'
@@ -38,7 +38,7 @@ body:
             end:
               line: 1
               column: 21
-        end:
+        to:
           type: IntegerLiteral
           value: 3
           raw: '3'
