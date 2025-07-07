@@ -31,6 +31,7 @@ THIS: 'this';
 VAL: 'val';
 VAR: 'var';
 FUN: 'fun';
+INFIX: 'infix';
 
 // Built-in types
 STRING_TYPE: 'string';

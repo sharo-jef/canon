@@ -77,6 +77,7 @@ import {
   BitwiseNotExprContext,
   PowerExprContext,
   RangeExprContext,
+  InfixCallExprContext,
 } from './generated/CanonParser';
 import { CanonParserVisitor } from './generated/CanonParserVisitor';
 import { CanonErrorListener } from './error/CanonErrorListener';
@@ -622,33 +623,75 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitFunctionDeclaration(ctx: FunctionDeclarationContext): ASTNode {
     const annotations = ctx.annotation().map((ann) => this.visit(ann));
-    const identifierToken = ctx.IDENTIFIER();
-    const name = {
-      type: 'Identifier',
-      name: identifierToken.text,
-      loc: {
-        start: {
-          line: identifierToken.symbol.line,
-          column: identifierToken.symbol.charPositionInLine,
+    const isInfix = ctx.INFIX() !== undefined;
+
+    let name: ASTNode;
+    let receiverType: ASTNode | null = null;
+
+    if (isInfix) {
+      // For infix functions: infix fun Type.functionName
+      const types = ctx.type();
+      receiverType = types.length > 0 ? this.visit(types[0]) : null;
+      const identifierToken = ctx.IDENTIFIER();
+      if (!identifierToken) {
+        throw new Error('Infix function missing identifier');
+      }
+      name = {
+        type: 'Identifier',
+        name: identifierToken.text,
+        loc: {
+          start: {
+            line: identifierToken.symbol.line,
+            column: identifierToken.symbol.charPositionInLine,
+          },
+          end: {
+            line: identifierToken.symbol.line,
+            column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+          },
         },
-        end: {
-          line: identifierToken.symbol.line,
-          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+      };
+    } else {
+      // For regular functions: fun functionName
+      const identifierToken = ctx.IDENTIFIER();
+      if (!identifierToken) {
+        throw new Error('Function missing identifier');
+      }
+      name = {
+        type: 'Identifier',
+        name: identifierToken.text,
+        loc: {
+          start: {
+            line: identifierToken.symbol.line,
+            column: identifierToken.symbol.charPositionInLine,
+          },
+          end: {
+            line: identifierToken.symbol.line,
+            column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+          },
         },
-      },
-    };
+      };
+    }
+
     const paramList = ctx.parameterList();
     const parameters = paramList
       ? this.visit(paramList)
       : { type: 'ParameterList', parameters: [] };
 
-    const typeCtx = ctx.type();
-    const returnType = typeCtx ? this.visit(typeCtx) : null;
+    // Return type is the last type in the array for infix functions, or the only type for regular functions
+    const types = ctx.type();
+    const returnType =
+      isInfix && types.length > 1
+        ? this.visit(types[1])
+        : !isInfix && types.length > 0
+          ? this.visit(types[0])
+          : null;
 
     const body = this.visit(ctx.block());
 
     return {
       type: 'FunctionDeclaration',
+      isInfix,
+      receiverType,
       name,
       annotations,
       parameters: parameters.parameters,
@@ -1081,6 +1124,20 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       type: 'RangeExpression',
       from,
       to,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitInfixCallExpr(ctx: InfixCallExprContext): ASTNode {
+    const left = this.visit(ctx.expression(0));
+    const right = this.visit(ctx.expression(1));
+    const functionName = ctx.IDENTIFIER().text;
+
+    return {
+      type: 'InfixCall',
+      functionName,
+      left,
+      right,
       loc: this.getLocationInfo(ctx),
     };
   }

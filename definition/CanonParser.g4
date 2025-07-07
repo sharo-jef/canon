@@ -37,7 +37,7 @@ structDeclaration        : annotation* STRUCT  IDENTIFIER block ;
 unionDeclaration         : annotation* UNION   IDENTIFIER ASSIGN unionType ;
 typeDeclaration          : annotation* TYPE    IDENTIFIER ASSIGN type ;
 functionDeclaration
-    : annotation* FUN IDENTIFIER
+    : annotation* (INFIX FUN type DOT IDENTIFIER | FUN IDENTIFIER)
       LPAREN parameterList? RPAREN
       ( COLON type )?
       block
@@ -149,6 +149,7 @@ expression
     | expression op=(MULTIPLY | DIVIDE | MODULO) expression #mulDivModExpr
     | expression op=(PLUS | MINUS)               expression #addSubExpr
     | expression RANGE                           expression #rangeExpr
+    | expression IDENTIFIER                      expression #infixCallExpr
     | expression op=(LEFT_SHIFT | RIGHT_SHIFT)   expression #shiftExpr
     | expression op=(LESS_THAN|GREATER_THAN|LESS_EQUALS|GREATER_EQUALS) expression #relationalExpr
     | expression op=(EQUALS | NOT_EQUALS)        expression #equalityExpr

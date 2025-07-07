@@ -17,7 +17,7 @@ error[E0014]: unexpected end of file
 2 |     name = "test"
 3 |     version = "1.0.0"
   |
-  = note: expected end of file, '#schema', 'schema', 'struct', 'union', 'type', 'use', 'this', 'val', 'var', 'fun', '{', 'LBRACKET', annotation, or identifier
+  = note: expected end of file, '#schema', 'schema', 'struct', 'union', 'type', 'use', 'this', 'val', 'var', 'fun', 'infix', '{', 'LBRACKET', annotation, or identifier
   = note: the file ended unexpectedly
   = help: check if you are missing closing braces, parentheses, or string terminators
 

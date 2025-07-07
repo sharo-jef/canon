@@ -1,0 +1,5 @@
+infix fun int.add(other: int): int {
+    this + other
+}
+
+val result = 1 add (1 add 1)

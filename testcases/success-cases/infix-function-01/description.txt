@@ -1,0 +1,1 @@
+Basic infix function declaration and call test

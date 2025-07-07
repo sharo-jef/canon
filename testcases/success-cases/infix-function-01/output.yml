@@ -1,0 +1,169 @@
+type: Program
+body:
+  - type: FunctionDeclaration
+    isInfix: true
+    receiverType:
+      type: PrimitiveType
+      name: int
+      loc:
+        start:
+          line: 1
+          column: 10
+        end:
+          line: 1
+          column: 13
+    name:
+      type: Identifier
+      name: add
+      loc:
+        start:
+          line: 1
+          column: 14
+        end:
+          line: 1
+          column: 17
+    annotations: []
+    parameters:
+      - type: Parameter
+        name:
+          type: Identifier
+          name: other
+          loc:
+            start:
+              line: 1
+              column: 18
+            end:
+              line: 1
+              column: 23
+        typeRef:
+          type: PrimitiveType
+          name: int
+          loc:
+            start:
+              line: 1
+              column: 25
+            end:
+              line: 1
+              column: 28
+        loc:
+          start:
+            line: 1
+            column: 18
+          end:
+            line: 1
+            column: 28
+    returnType:
+      type: PrimitiveType
+      name: int
+      loc:
+        start:
+          line: 1
+          column: 31
+        end:
+          line: 1
+          column: 34
+    body:
+      - type: ExpressionStatement
+        expression:
+          type: BinaryExpression
+          operator: +
+          left:
+            type: ThisExpression
+            loc:
+              start:
+                line: 2
+                column: 4
+              end:
+                line: 2
+                column: 8
+          right:
+            type: Identifier
+            name: other
+            loc:
+              start:
+                line: 2
+                column: 11
+              end:
+                line: 2
+                column: 16
+          loc:
+            start:
+              line: 2
+              column: 4
+            end:
+              line: 2
+              column: 16
+        loc:
+          start:
+            line: 2
+            column: 4
+          end:
+            line: 2
+            column: 16
+    loc:
+      start:
+        line: 1
+        column: 0
+      end:
+        line: 3
+        column: 1
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: result
+      loc:
+        start:
+          line: 5
+          column: 4
+        end:
+          line: 5
+          column: 10
+    typeRef: null
+    value:
+      type: InfixCall
+      functionName: add
+      left:
+        type: IntegerLiteral
+        value: 1
+        raw: '1'
+        loc:
+          start:
+            line: 5
+            column: 13
+          end:
+            line: 5
+            column: 14
+      right:
+        type: IntegerLiteral
+        value: 2
+        raw: '2'
+        loc:
+          start:
+            line: 5
+            column: 19
+          end:
+            line: 5
+            column: 20
+      loc:
+        start:
+          line: 5
+          column: 13
+        end:
+          line: 5
+          column: 20
+    annotations: []
+    loc:
+      start:
+        line: 5
+        column: 0
+      end:
+        line: 5
+        column: 20
+loc:
+  start:
+    line: 1
+    column: 0
+  end:
+    line: 6
+    column: 5

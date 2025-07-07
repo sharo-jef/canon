@@ -21,6 +21,7 @@ import { PowerExprContext } from "./CanonParser";
 import { MulDivModExprContext } from "./CanonParser";
 import { AddSubExprContext } from "./CanonParser";
 import { RangeExprContext } from "./CanonParser";
+import { InfixCallExprContext } from "./CanonParser";
 import { ShiftExprContext } from "./CanonParser";
 import { RelationalExprContext } from "./CanonParser";
 import { EqualityExprContext } from "./CanonParser";
@@ -237,6 +238,14 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitRangeExpr?: (ctx: RangeExprContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `infixCallExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitInfixCallExpr?: (ctx: InfixCallExprContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `shiftExpr`

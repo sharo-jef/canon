@@ -64,3 +64,9 @@ struct BuildStep {
 struct TestStep {
     script: string
 }
+
+infix fun int.add(other: int): int {
+    this + other
+}
+
+val example = 1 add (1 add 1)
