@@ -28,6 +28,9 @@ IF: 'if';
 ELSE: 'else';
 NOT: 'not';
 THIS: 'this';
+VAL: 'val';
+VAR: 'var';
+FUN: 'fun';
 
 // Built-in types
 STRING_TYPE: 'string';
@@ -51,10 +54,14 @@ GREATER_EQUALS: '>=';
 
 // Assignment
 ASSIGN: '=';
+PLUS_ASSIGN: '+=';
 
 // Logical operators
 LOGICAL_AND: '&&';
 LOGICAL_OR: '||';
+
+// Unary operators
+EXCLAMATION: '!';
 
 // Delimiters
 LBRACE: '{';
@@ -127,4 +134,5 @@ INTERPOLATION_LESS_EQUALS: '<=' -> type(LESS_EQUALS);
 INTERPOLATION_GREATER_EQUALS: '>=' -> type(GREATER_EQUALS);
 INTERPOLATION_LOGICAL_AND: '&&' -> type(LOGICAL_AND);
 INTERPOLATION_LOGICAL_OR: '||' -> type(LOGICAL_OR);
+INTERPOLATION_EXCLAMATION: '!' -> type(EXCLAMATION);
 INTERPOLATION_WS: [ \t\r\n]+ -> skip;

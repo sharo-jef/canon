@@ -6,6 +6,7 @@ import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 import { PrimaryExpressionContext } from "./CanonParser";
 import { MemberAccessExpressionContext } from "./CanonParser";
 import { FunctionCallExpressionContext } from "./CanonParser";
+import { NonNullAssertionExpressionContext } from "./CanonParser";
 import { UnaryMinusExpressionContext } from "./CanonParser";
 import { LogicalNotExpressionContext } from "./CanonParser";
 import { MultiplicativeExpressionContext } from "./CanonParser";
@@ -28,6 +29,8 @@ import { SchemaDeclarationContext } from "./CanonParser";
 import { StructDeclarationContext } from "./CanonParser";
 import { UnionDeclarationContext } from "./CanonParser";
 import { TypeDeclarationContext } from "./CanonParser";
+import { FunctionDeclarationContext } from "./CanonParser";
+import { VariableDeclarationContext } from "./CanonParser";
 import { UnionTypeContext } from "./CanonParser";
 import { TypeContext } from "./CanonParser";
 import { BaseTypeContext } from "./CanonParser";
@@ -37,7 +40,6 @@ import { BlockContentContext } from "./CanonParser";
 import { PropertyDeclarationContext } from "./CanonParser";
 import { AssignmentStatementContext } from "./CanonParser";
 import { InitDeclarationContext } from "./CanonParser";
-import { FunctionDeclarationContext } from "./CanonParser";
 import { GetterDeclarationContext } from "./CanonParser";
 import { RepeatedDeclarationContext } from "./CanonParser";
 import { MappingBlockContext } from "./CanonParser";
@@ -99,6 +101,19 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitFunctionCallExpression?: (ctx: FunctionCallExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `nonNullAssertionExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterNonNullAssertionExpression?: (ctx: NonNullAssertionExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `nonNullAssertionExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitNonNullAssertionExpression?: (ctx: NonNullAssertionExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `unaryMinusExpression`
@@ -371,6 +386,28 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitTypeDeclaration?: (ctx: TypeDeclarationContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `CanonParser.functionDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	enterFunctionDeclaration?: (ctx: FunctionDeclarationContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.functionDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	exitFunctionDeclaration?: (ctx: FunctionDeclarationContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.variableDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	enterVariableDeclaration?: (ctx: VariableDeclarationContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.variableDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	exitVariableDeclaration?: (ctx: VariableDeclarationContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `CanonParser.unionType`.
 	 * @param ctx the parse tree
 	 */
@@ -468,17 +505,6 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitInitDeclaration?: (ctx: InitDeclarationContext) => void;
-
-	/**
-	 * Enter a parse tree produced by `CanonParser.functionDeclaration`.
-	 * @param ctx the parse tree
-	 */
-	enterFunctionDeclaration?: (ctx: FunctionDeclarationContext) => void;
-	/**
-	 * Exit a parse tree produced by `CanonParser.functionDeclaration`.
-	 * @param ctx the parse tree
-	 */
-	exitFunctionDeclaration?: (ctx: FunctionDeclarationContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.getterDeclaration`.

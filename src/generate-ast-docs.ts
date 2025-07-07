@@ -187,6 +187,11 @@ function getNodeAdditionalInfo(node: ASTNode): string {
     info.push(`op: ${node.operator}`);
   }
 
+  // Variable declaration kind (val/var)
+  if (node.kind && typeof node.kind === 'string') {
+    info.push(`kind: ${node.kind}`);
+  }
+
   // Boolean flags
   if (node.isThisAccess !== undefined) {
     info.push(`thisAccess: ${node.isThisAccess}`);

@@ -14,6 +14,7 @@ import {
   StructDeclarationContext,
   UnionDeclarationContext,
   TypeDeclarationContext,
+  VariableDeclarationContext,
   TypeContext,
   BaseTypeContext,
   PrimitiveTypeContext,
@@ -40,6 +41,7 @@ import {
   PrimaryExpressionContext,
   MemberAccessExpressionContext,
   FunctionCallExpressionContext,
+  NonNullAssertionExpressionContext,
   UnaryMinusExpressionContext,
   LogicalNotExpressionContext,
   MultiplicativeExpressionContext,
@@ -305,6 +307,41 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
+  visitVariableDeclaration(ctx: VariableDeclarationContext): ASTNode {
+    const annotations = ctx.annotation().map((ann) => this.visit(ann));
+    const isVal = ctx.VAL() !== undefined;
+    const isVar = ctx.VAR() !== undefined;
+    const identifierToken = ctx.IDENTIFIER();
+    const name = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
+
+    const typeCtx = ctx.type();
+    const typeRef = typeCtx ? this.visit(typeCtx) : null;
+    const value = this.visit(ctx.expression());
+
+    return {
+      type: 'VariableDeclaration',
+      kind: isVal ? 'val' : 'var',
+      name,
+      typeRef,
+      value,
+      annotations,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
   visitType(ctx: TypeContext): ASTNode {
     const baseType = this.visit(ctx.baseType());
     const arrayDimensions = ctx.LBRACKET().length;
@@ -457,6 +494,9 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   visitAssignmentStatement(ctx: AssignmentStatementContext): ASTNode {
     const value = this.visit(ctx.expression());
 
+    // Determine the assignment operator
+    const operator = ctx.ASSIGN() ? '=' : '+=';
+
     let left: ASTNode;
     if (ctx.THIS()) {
       // this.identifier の場合はMemberAccessExpressionとして表現
@@ -512,6 +552,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
     return {
       type: 'AssignmentStatement',
+      operator,
       left,
       right: value,
       loc: this.getLocationInfo(ctx),
@@ -537,7 +578,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitFunctionDeclaration(ctx: FunctionDeclarationContext): ASTNode {
     const annotations = ctx.annotation().map((ann) => this.visit(ann));
-    const isPrivate = ctx.PRIVATE() !== undefined;
     const identifierToken = ctx.IDENTIFIER();
     const name = {
       type: 'Identifier',
@@ -557,14 +597,18 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     const parameters = paramList
       ? this.visit(paramList)
       : { type: 'ParameterList', parameters: [] };
+
+    const typeCtx = ctx.type();
+    const returnType = typeCtx ? this.visit(typeCtx) : null;
+
     const body = this.visit(ctx.block());
 
     return {
       type: 'FunctionDeclaration',
       name,
       annotations,
-      isPrivate,
       parameters: parameters.parameters,
+      returnType,
       body: body.content,
       loc: this.getLocationInfo(ctx),
     };
@@ -860,6 +904,16 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     const args = argList ? this.visit(argList) : { type: 'ArgumentList', arguments: [] };
 
     return this.createCallExpression(callee, args.arguments, undefined, this.getLocationInfo(ctx));
+  }
+
+  visitNonNullAssertionExpression(ctx: NonNullAssertionExpressionContext): ASTNode {
+    const operand = this.visit(ctx.expression());
+
+    return {
+      type: 'NonNullAssertionExpression',
+      operand,
+      loc: this.getLocationInfo(ctx),
+    };
   }
 
   visitUnaryMinusExpression(ctx: UnaryMinusExpressionContext): ASTNode {

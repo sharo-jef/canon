@@ -6,6 +6,7 @@ import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 import { PrimaryExpressionContext } from "./CanonParser";
 import { MemberAccessExpressionContext } from "./CanonParser";
 import { FunctionCallExpressionContext } from "./CanonParser";
+import { NonNullAssertionExpressionContext } from "./CanonParser";
 import { UnaryMinusExpressionContext } from "./CanonParser";
 import { LogicalNotExpressionContext } from "./CanonParser";
 import { MultiplicativeExpressionContext } from "./CanonParser";
@@ -28,6 +29,8 @@ import { SchemaDeclarationContext } from "./CanonParser";
 import { StructDeclarationContext } from "./CanonParser";
 import { UnionDeclarationContext } from "./CanonParser";
 import { TypeDeclarationContext } from "./CanonParser";
+import { FunctionDeclarationContext } from "./CanonParser";
+import { VariableDeclarationContext } from "./CanonParser";
 import { UnionTypeContext } from "./CanonParser";
 import { TypeContext } from "./CanonParser";
 import { BaseTypeContext } from "./CanonParser";
@@ -37,7 +40,6 @@ import { BlockContentContext } from "./CanonParser";
 import { PropertyDeclarationContext } from "./CanonParser";
 import { AssignmentStatementContext } from "./CanonParser";
 import { InitDeclarationContext } from "./CanonParser";
-import { FunctionDeclarationContext } from "./CanonParser";
 import { GetterDeclarationContext } from "./CanonParser";
 import { RepeatedDeclarationContext } from "./CanonParser";
 import { MappingBlockContext } from "./CanonParser";
@@ -87,6 +89,14 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitFunctionCallExpression?: (ctx: FunctionCallExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `nonNullAssertionExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitNonNullAssertionExpression?: (ctx: NonNullAssertionExpressionContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `unaryMinusExpression`
@@ -257,6 +267,20 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitTypeDeclaration?: (ctx: TypeDeclarationContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by `CanonParser.functionDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFunctionDeclaration?: (ctx: FunctionDeclarationContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.variableDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitVariableDeclaration?: (ctx: VariableDeclarationContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `CanonParser.unionType`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -318,13 +342,6 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitInitDeclaration?: (ctx: InitDeclarationContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CanonParser.functionDeclaration`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitFunctionDeclaration?: (ctx: FunctionDeclarationContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.getterDeclaration`.

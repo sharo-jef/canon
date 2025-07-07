@@ -19,6 +19,9 @@ topLevelElement:
     | structDeclaration
     | unionDeclaration
     | typeDeclaration
+    | variableDeclaration
+    | functionDeclaration
+    | assignmentStatement
     | callExpression;
 
 // Schema declaration
@@ -32,6 +35,12 @@ unionDeclaration: annotation* UNION IDENTIFIER ASSIGN unionType;
 
 // Type declaration (for future type constraints)
 typeDeclaration: annotation* TYPE IDENTIFIER ASSIGN type;
+
+// Top-level function declarations
+functionDeclaration: annotation* FUN IDENTIFIER LPAREN parameterList? RPAREN (COLON type)? block;
+
+// Variable declarations  
+variableDeclaration: annotation* (VAL | VAR) IDENTIFIER (COLON type)? ASSIGN expression;
 
 // Union type
 unionType: type (PIPE type)*;
@@ -54,21 +63,18 @@ blockContent:
     | expressionStatement
     | propertyDeclaration
     | initDeclaration
-    | functionDeclaration
     | getterDeclaration
-    | repeatedDeclaration;
+    | repeatedDeclaration
+    | variableDeclaration;
 
 // Property declarations (in struct and schema)
 propertyDeclaration: annotation* (PRIVATE)? IDENTIFIER ((QUESTION)? COLON type (ASSIGN expression)?)?;
 
 // Assignment statements (covers both property assignments and variable assignments)
-assignmentStatement: (THIS DOT)? IDENTIFIER ASSIGN expression;
+assignmentStatement: (THIS DOT)? IDENTIFIER (ASSIGN | PLUS_ASSIGN) expression;
 
 // Init declarations
 initDeclaration: annotation* INIT (LPAREN parameterList? RPAREN)? block;
-
-// Function declarations
-functionDeclaration: annotation* (PRIVATE)? IDENTIFIER LPAREN parameterList? RPAREN block;
 
 // Getter declarations
 getterDeclaration: annotation* GET IDENTIFIER LPAREN RPAREN block;
@@ -98,6 +104,7 @@ expression:
     primary                                                     #primaryExpression
     | expression DOT IDENTIFIER                                 #memberAccessExpression
     | expression LPAREN argumentList? RPAREN                    #functionCallExpression
+    | expression EXCLAMATION                                    #nonNullAssertionExpression
     | MINUS expression                                          #unaryMinusExpression
     | NOT expression                                            #logicalNotExpression
     | expression (MULTIPLY | DIVIDE | MODULO) expression       #multiplicativeExpression
