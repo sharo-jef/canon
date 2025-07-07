@@ -109,11 +109,8 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
 
             // Check if there's no value or only comment after =
             if (trimmedAfterEqual === '' || trimmedAfterEqual.startsWith('//')) {
-              // Always point right after the = and any whitespace, regardless of comment
-              const afterEqualText = line.substring(equalIndex + 1);
-              const whitespaceMatch = afterEqualText.match(/^(\s*)/);
-              const whitespaceLength = whitespaceMatch ? whitespaceMatch[1].length : 0;
-              const targetColumn = equalIndex + 2 + whitespaceLength; // +2 for = (1-based) and +whitespace
+              // Point right after the = sign
+              const targetColumn = equalIndex + 2; // +1 for 0-based to 1-based, +1 to point after =
 
               return {
                 line: i + 1,
@@ -123,7 +120,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
           }
         }
       }
-    } catch (error) {
+    } catch {
       // If we can't read the file or parse it, fall back to original location
     }
 
@@ -150,7 +147,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
       // Extract the last word (variable name)
       const variableMatch = beforeEqual.match(/(\w+)\s*$/);
       return variableMatch ? variableMatch[1] : null;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -160,6 +157,15 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
    */
   private determineErrorCode(msg: string, offendingSymbol?: Token): ErrorCode {
     const lowerMsg = msg.toLowerCase();
+
+    // Check for EOF-related errors first
+    if (offendingSymbol?.type === Token.EOF || lowerMsg.includes('<eof>')) {
+      // Check if this is an incomplete configuration call
+      if (this.isIncompleteConfigurationCall(msg, offendingSymbol)) {
+        return ErrorCode.E0012; // Missing block after call expression
+      }
+      return ErrorCode.E0014; // Unexpected end of file
+    }
 
     // Check for specific error patterns
     if (lowerMsg.includes('missing') && (lowerMsg.includes("')'") || lowerMsg.includes('rparen'))) {
@@ -175,10 +181,6 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
     }
 
     if (lowerMsg.includes('extraneous') || lowerMsg.includes('unexpected')) {
-      // Check if this is an incomplete configuration call (identifier followed by EOF)
-      if (this.isIncompleteConfigurationCall(msg, offendingSymbol)) {
-        return ErrorCode.E0006; // Incomplete configuration call
-      }
       return ErrorCode.E0005; // Unexpected token
     }
 
@@ -190,7 +192,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
       return ErrorCode.E0002; // Missing closing parenthesis
     }
 
-    if (lowerMsg.includes('no viable alternative')) {
+    if (lowerMsg.includes('no viable alternative') || lowerMsg.includes('mismatched input')) {
       // Check if this looks like a missing closing parenthesis in function call
       if (
         offendingSymbol &&
@@ -207,7 +209,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
         // Look for patterns that suggest missing expression
         return ErrorCode.E0001; // Missing expression after assignment
       }
-      return ErrorCode.E0005; // Unexpected token
+      return ErrorCode.E0013; // Invalid token sequence
     }
 
     if (lowerMsg.includes('expecting')) {
@@ -215,7 +217,8 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
       if (
         lowerMsg.includes('string_literal') ||
         lowerMsg.includes('integer_literal') ||
-        lowerMsg.includes('identifier')
+        lowerMsg.includes('identifier') ||
+        lowerMsg.includes('expression')
       ) {
         return ErrorCode.E0001; // Missing expression
       }
@@ -252,7 +255,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
         return "expected ']' to close bracket";
       case ErrorCode.E0006:
         return 'incomplete configuration call';
-      default:
+      default: {
         // Clean up ANTLR's default messages
         const cleanedMsg = msg
           .replace(/^line \d+:\d+ /, '') // Remove line prefix
@@ -268,6 +271,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
         }
 
         return cleanedMsg;
+      }
     }
   }
 
@@ -278,7 +282,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
     const lowerMsg = msg.toLowerCase();
 
     switch (error.code) {
-      case ErrorCode.E0001:
+      case ErrorCode.E0001: {
         const variableName = this.findVariableNameInAssignment(error.location);
         const helpExample = variableName || 'some_variable';
 
@@ -290,6 +294,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
         return error
           .withNote('assignment expressions require a value on the right side')
           .withNote(`try providing a value like: ${helpExample} = "some_value"`, 'help');
+      }
 
       case ErrorCode.E0002:
         if (lowerMsg.includes('no viable alternative') && offendingSymbol?.text === '{') {
@@ -338,7 +343,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
         }
         break;
 
-      case ErrorCode.E0006:
+      case ErrorCode.E0006: {
         const identifierName = this.getIncompleteIdentifierName();
         return error
           .withNote('configuration calls require either parentheses or a body')
@@ -346,6 +351,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
             `try adding parentheses: ${identifierName}() or a body: ${identifierName} {}`,
             'help'
           );
+      }
     }
 
     return error;
@@ -354,7 +360,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
   /**
    * Checks if the offending symbol appears after an assignment operator
    */
-  private isAfterAssignment(symbol: Token): boolean {
+  private isAfterAssignment(_symbol: Token): boolean {
     // This is a simplified check - in a real implementation,
     // you might want to look at the token stream to find the previous tokens
     return false; // Placeholder implementation
@@ -363,7 +369,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
   /**
    * Checks if this is an incomplete configuration call (identifier followed by EOF)
    */
-  private isIncompleteConfigurationCall(msg: string, offendingSymbol?: Token): boolean {
+  private isIncompleteConfigurationCall(msg: string, _offendingSymbol?: Token): boolean {
     try {
       // Check if the error is related to unexpected token at EOF
       const lowerMsg = msg.toLowerCase();
@@ -389,7 +395,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
       }
 
       return false;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -421,7 +427,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
       }
 
       return null;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -448,7 +454,7 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
       }
 
       return 'data1'; // Default fallback
-    } catch (error) {
+    } catch {
       return 'data1'; // Default fallback
     }
   }

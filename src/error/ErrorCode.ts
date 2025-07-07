@@ -14,6 +14,9 @@ export enum ErrorCode {
   E0009 = 'E0009', // Invalid operator
   E0010 = 'E0010', // Missing semicolon
   E0011 = 'E0011', // Invalid assignment target
+  E0012 = 'E0012', // Missing block after call expression
+  E0013 = 'E0013', // Invalid token sequence
+  E0014 = 'E0014', // Unexpected end of file
 
   // Type Errors (E0100-E0199)
   E0100 = 'E0100', // Type mismatch
@@ -55,6 +58,9 @@ export const ERROR_DESCRIPTIONS: Record<ErrorCode, string> = {
   [ErrorCode.E0009]: 'invalid operator',
   [ErrorCode.E0010]: 'missing semicolon',
   [ErrorCode.E0011]: 'invalid assignment target',
+  [ErrorCode.E0012]: 'missing block after call expression',
+  [ErrorCode.E0013]: 'invalid token sequence',
+  [ErrorCode.E0014]: 'unexpected end of file',
 
   [ErrorCode.E0100]: 'type mismatch',
   [ErrorCode.E0101]: 'undefined variable',

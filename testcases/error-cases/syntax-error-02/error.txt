@@ -1,11 +1,11 @@
 error[E0002]: missing closing parenthesis
- --> input:1:21
+ --> input.canon:1:22
   |
-1 | data1("arg1", "arg2" {
-  |      -               ^ expected ')' here
-  |      |
-  |      opening parenthesis found here
-2 |     datam1 = "value1"
+1 | config("arg1", "arg2" {
+  |       -               ^ expected ')' here
+  |       |
+  |       opening parenthesis found here
+2 |     name = "test"
   |
   = note: parentheses must be properly matched in function calls
   = help: add the missing ')' before the opening brace '{'

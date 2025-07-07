@@ -90,7 +90,12 @@ export class SourceCodeHighlighter {
 
     // Add the location header
     result.push(` --> ${this.filename}:${location.line}:${location.column}`);
-    result.push(`  |`); // Always use 2 spaces for empty lines
+
+    // Only add empty line if we have context to show
+    if (startLine < targetLine || targetLine < endLine) {
+      const emptyPrefix = ' '.repeat(maxLineNumber.toString().length);
+      result.push(`${emptyPrefix} |`);
+    }
 
     // Add context lines before the error
     for (let i = startLine; i < targetLine; i++) {
@@ -245,7 +250,7 @@ export class SourceCodeHighlighter {
     line: string,
     errorColumn: number,
     openParenColumn: number,
-    maxLineNumber: number
+    _maxLineNumber: number
   ): string[] {
     const result: string[] = [];
 

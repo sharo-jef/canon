@@ -1,10 +1,9 @@
 error[E0005]: unexpected token
- --> input:2:0
+ --> input.canon:3:5
   |
-1 | data1
-2 | 
-  | ^
+2 |     name = "test"
+3 |     = // missing left side of assignment
+  |     ^ unexpected token '='
   |
-  = note: unexpected token sequence
-  = note: the file ended unexpectedly
-  = help: check if you're missing closing braces, parentheses, or other delimiters
+  = note: found unexpected token '='
+  = help: check the syntax around this location

@@ -1,1 +1,1 @@
-Incomplete configuration call without parentheses or braces - tests parser error when identifier lacks required syntax elements
+Missing left side of assignment statement - tests unexpected token error reporting

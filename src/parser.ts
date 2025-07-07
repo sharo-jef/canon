@@ -56,6 +56,8 @@ import {
   CallExpressionPrimaryContext,
 } from './generated/CanonParser';
 import { CanonParserVisitor } from './generated/CanonParserVisitor';
+import { CanonErrorListener } from './error/CanonErrorListener';
+import { ErrorFormatter } from './error/ErrorFormatter';
 
 export interface ASTLocation {
   start: { line: number; column: number };
@@ -190,11 +192,11 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   visitSchemaDeclaration(ctx: SchemaDeclarationContext): ASTNode {
     const annotations = ctx.annotation().map((ann) => this.visit(ann));
-    
+
     // Handle both block and string literal forms
     const blockCtx = ctx.block();
     const stringLiteralCtx = ctx.stringLiteral();
-    
+
     if (blockCtx) {
       const body = this.visit(blockCtx);
       return {
@@ -794,7 +796,12 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     const block = ctx.block();
     const lambdaBody = block ? this.visit(block) : undefined;
 
-    return this.createCallExpression(callee, args.arguments, lambdaBody?.content, this.getLocationInfo(ctx));
+    return this.createCallExpression(
+      callee,
+      args.arguments,
+      lambdaBody?.content,
+      this.getLocationInfo(ctx)
+    );
   }
 
   visitArgumentList(ctx: ArgumentListContext): ASTNode {
@@ -1220,8 +1227,30 @@ export function parseCanon(source: string, filename: string = '<unknown>'): ASTN
   // Create parser
   const parser = new CanonParser(tokenStream);
 
+  // Remove default error listeners
+  parser.removeErrorListeners();
+  lexer.removeErrorListeners();
+
+  // Add our custom error listener
+  const errorListener = new CanonErrorListener(filename);
+  parser.addErrorListener(errorListener);
+  // Note: lexer uses a different error listener interface, keep default for now
+
   // Parse the program
   const tree = parser.program();
+
+  // Check for parse errors
+  const errorCollection = errorListener.getErrors();
+  if (errorCollection.hasErrors()) {
+    // Format and display errors
+    const errorFormatter = new ErrorFormatter(source, filename);
+    const errors = Array.from(errorCollection.getErrors());
+    const formattedErrors = errorFormatter.formatErrors(errors);
+    console.error(formattedErrors);
+
+    // Throw error to stop processing
+    throw new Error(`Parse failed with ${errors.length} error${errors.length > 1 ? 's' : ''}`);
+  }
 
   // Basic error checking - if there are no children, likely a parse error
   if (tree.childCount === 0 && source.trim().length > 0) {

@@ -1,1 +1,3 @@
-data1
+config {
+    name = "test"
+    = // missing left side of assignment

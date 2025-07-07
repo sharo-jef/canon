@@ -1,4 +1,4 @@
-import { ParseError, ErrorNote } from './ParseError';
+import { ParseError } from './ParseError';
 import { SourceCodeHighlighter } from './SourceCodeHighlighter';
 import { ErrorCode, getErrorDescription } from './ErrorCode';
 
@@ -77,27 +77,33 @@ export class ErrorFormatter {
     );
 
     sourceLines.forEach((line) => {
-      if (line.startsWith('-->')) {
+      if (line.startsWith(' --> ')) {
         lines.push(this.colorize(line, 'blue'));
-      } else if (line.includes('|')) {
-        if (line.includes('^')) {
-          // Highlight line with caret - color everything blue except the ^
-          const parts = line.split('|');
+      } else if (line.includes(' | ')) {
+        if (line.includes('^') || line.includes('~')) {
+          // Highlight line with caret or tilde - color everything blue except the ^ or ~
+          const parts = line.split(' | ');
           if (parts.length >= 2) {
-            const prefix = this.colorize(parts[0] + '|', 'blue');
-            const content = parts.slice(1).join('|');
+            const prefix = this.colorize(parts[0] + ' |', 'blue');
+            const content = ' ' + parts.slice(1).join(' | ');
 
-            // Split content by ^ to color separately
-            const beforeCaret = content.substring(0, content.indexOf('^'));
-            const caretPart = content.match(/\^+/)?.[0] || '^';
-            const afterCaret = content.substring(content.indexOf('^') + caretPart.length);
+            // Find caret/tilde positions and color them red
+            const caretMatch = content.match(/[\^~]+/);
+            if (caretMatch) {
+              const caretStart = content.indexOf(caretMatch[0]);
+              const beforeCaret = content.substring(0, caretStart);
+              const caretPart = caretMatch[0];
+              const afterCaret = content.substring(caretStart + caretPart.length);
 
-            const coloredContent =
-              this.colorize(beforeCaret, 'blue') +
-              this.colorize(caretPart, 'red') +
-              this.colorize(afterCaret, 'blue');
+              const coloredContent =
+                this.colorize(beforeCaret, 'blue') +
+                this.colorize(caretPart, 'red') +
+                this.colorize(afterCaret, 'blue');
 
-            lines.push(prefix + coloredContent);
+              lines.push(prefix + coloredContent);
+            } else {
+              lines.push(this.colorize(line, 'blue'));
+            }
           } else {
             lines.push(this.colorize(line, 'blue'));
           }
@@ -109,8 +115,15 @@ export class ErrorFormatter {
       }
     });
 
-    // Add empty line with proper alignment (always 2 spaces for empty lines)
-    lines.push(this.colorize(`  |`, 'blue'));
+    // Add empty line with proper alignment
+    if (sourceLines.length > 0) {
+      const maxLineNumberWidth = this.getMaxLineNumberWidth(
+        error.location.line,
+        this.options.contextLines
+      );
+      const emptyPrefix = ' '.repeat(maxLineNumberWidth);
+      lines.push(this.colorize(`${emptyPrefix} |`, 'blue'));
+    }
 
     // Add custom error message if different from default
     if (error.message !== getErrorDescription(error.code)) {
@@ -133,6 +146,14 @@ export class ErrorFormatter {
     });
 
     return lines.join('\n');
+  }
+
+  /**
+   * Gets the maximum line number width for proper alignment
+   */
+  private getMaxLineNumberWidth(errorLine: number, contextLines: number): number {
+    const maxLine = errorLine + contextLines;
+    return maxLine.toString().length;
   }
 
   /**
