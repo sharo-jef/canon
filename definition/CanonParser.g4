@@ -5,13 +5,16 @@ options {
 }
 
 // Root rule
-program: (schemaDirective | useStatement | topLevelElement)* EOF;
+program: (schemaDirective | useStatement | topLevelStatement)* EOF;
 
 // Schema directive
 schemaDirective: SCHEMA_DIRECTIVE stringLiteral;
 
 // Use statement
 useStatement: USE IDENTIFIER;
+
+// Top-level statements - newline-separated, semicolon only for same-line multiple statements
+topLevelStatement: topLevelElement (SEMICOLON topLevelElement)*;
 
 // Top-level elements
 topLevelElement:
@@ -56,9 +59,9 @@ baseType:
 primitiveType: STRING_TYPE | INT_TYPE | BOOL_TYPE;
 
 // Block (used in schema, struct, object instantiation)
-block: LBRACE blockContent* RBRACE;
+block: LBRACE (statement (SEMICOLON statement)*)* RBRACE;
 
-blockContent:
+statement:
     assignmentStatement
     | expressionStatement
     | propertyDeclaration

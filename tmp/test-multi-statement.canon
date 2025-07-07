@@ -1,0 +1,1 @@
+val name = "Test"; val age = 30; val message = `Hello, ${name}!`

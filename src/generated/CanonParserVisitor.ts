@@ -24,6 +24,7 @@ import { CallExpressionPrimaryContext } from "./CanonParser";
 import { ProgramContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { UseStatementContext } from "./CanonParser";
+import { TopLevelStatementContext } from "./CanonParser";
 import { TopLevelElementContext } from "./CanonParser";
 import { SchemaDeclarationContext } from "./CanonParser";
 import { StructDeclarationContext } from "./CanonParser";
@@ -36,7 +37,7 @@ import { TypeContext } from "./CanonParser";
 import { BaseTypeContext } from "./CanonParser";
 import { PrimitiveTypeContext } from "./CanonParser";
 import { BlockContext } from "./CanonParser";
-import { BlockContentContext } from "./CanonParser";
+import { StatementContext } from "./CanonParser";
 import { PropertyDeclarationContext } from "./CanonParser";
 import { AssignmentStatementContext } from "./CanonParser";
 import { InitDeclarationContext } from "./CanonParser";
@@ -232,6 +233,13 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitUseStatement?: (ctx: UseStatementContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by `CanonParser.topLevelStatement`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTopLevelStatement?: (ctx: TopLevelStatementContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `CanonParser.topLevelElement`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -316,11 +324,11 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitBlock?: (ctx: BlockContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CanonParser.blockContent`.
+	 * Visit a parse tree produced by `CanonParser.statement`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitBlockContent?: (ctx: BlockContentContext) => Result;
+	visitStatement?: (ctx: StatementContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.propertyDeclaration`.

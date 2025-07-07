@@ -1,2 +1,2 @@
-val name = "Test";
-val message = `Hello, ${name}!;
+val name = "Test"
+val message = `Hello, ${name}!

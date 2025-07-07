@@ -1,0 +1,6 @@
+#schema './schema.canon'
+
+Test {
+    name = "test1"; message = "hello"
+    value = 42
+}

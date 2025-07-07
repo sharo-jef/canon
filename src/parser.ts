@@ -19,7 +19,7 @@ import {
   BaseTypeContext,
   PrimitiveTypeContext,
   BlockContext,
-  BlockContentContext,
+  StatementContext,
   PropertyDeclarationContext,
   AssignmentStatementContext,
   InitDeclarationContext,
@@ -416,17 +416,28 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitBlock(ctx: BlockContext): ASTNode {
-    const content = ctx.blockContent().map((bc) => this.visit(bc));
+    // New grammar: block: LBRACE (statement (SEMICOLON statement)*)* RBRACE;
+    const statements: ASTNode[] = [];
+
+    // Get all statement nodes from the block
+    const statementNodes = ctx.statement();
+
+    for (const stmt of statementNodes) {
+      const result = this.visit(stmt);
+      if (result) {
+        statements.push(result);
+      }
+    }
 
     return {
       type: 'Block',
-      content,
+      body: statements,
       loc: this.getLocationInfo(ctx),
     };
   }
 
-  visitBlockContent(ctx: BlockContentContext): ASTNode {
-    // BlockContent is a choice rule, so we visit the actual content
+  visitStatement(ctx: StatementContext): ASTNode {
+    // statement is a choice rule, so we visit the actual content
     for (let i = 0; i < ctx.childCount; i++) {
       const child = ctx.getChild(i);
       if (child instanceof RuleNode) {

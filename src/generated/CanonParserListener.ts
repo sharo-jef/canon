@@ -24,6 +24,7 @@ import { CallExpressionPrimaryContext } from "./CanonParser";
 import { ProgramContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { UseStatementContext } from "./CanonParser";
+import { TopLevelStatementContext } from "./CanonParser";
 import { TopLevelElementContext } from "./CanonParser";
 import { SchemaDeclarationContext } from "./CanonParser";
 import { StructDeclarationContext } from "./CanonParser";
@@ -36,7 +37,7 @@ import { TypeContext } from "./CanonParser";
 import { BaseTypeContext } from "./CanonParser";
 import { PrimitiveTypeContext } from "./CanonParser";
 import { BlockContext } from "./CanonParser";
-import { BlockContentContext } from "./CanonParser";
+import { StatementContext } from "./CanonParser";
 import { PropertyDeclarationContext } from "./CanonParser";
 import { AssignmentStatementContext } from "./CanonParser";
 import { InitDeclarationContext } from "./CanonParser";
@@ -331,6 +332,17 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitUseStatement?: (ctx: UseStatementContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `CanonParser.topLevelStatement`.
+	 * @param ctx the parse tree
+	 */
+	enterTopLevelStatement?: (ctx: TopLevelStatementContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.topLevelStatement`.
+	 * @param ctx the parse tree
+	 */
+	exitTopLevelStatement?: (ctx: TopLevelStatementContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `CanonParser.topLevelElement`.
 	 * @param ctx the parse tree
 	 */
@@ -463,15 +475,15 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitBlock?: (ctx: BlockContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `CanonParser.blockContent`.
+	 * Enter a parse tree produced by `CanonParser.statement`.
 	 * @param ctx the parse tree
 	 */
-	enterBlockContent?: (ctx: BlockContentContext) => void;
+	enterStatement?: (ctx: StatementContext) => void;
 	/**
-	 * Exit a parse tree produced by `CanonParser.blockContent`.
+	 * Exit a parse tree produced by `CanonParser.statement`.
 	 * @param ctx the parse tree
 	 */
-	exitBlockContent?: (ctx: BlockContentContext) => void;
+	exitStatement?: (ctx: StatementContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.propertyDeclaration`.
