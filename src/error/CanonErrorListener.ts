@@ -272,12 +272,123 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
   }
 
   /**
+   * Converts ANTLR token names to user-friendly descriptions
+   */
+  private tokenToUserFriendlyName(tokenName: string): string {
+    // Remove quotes and handle special cases
+    const cleanToken = tokenName.replace(/^'|'$/g, '');
+    
+    const tokenMap: Record<string, string> = {
+      // Literals
+      IDENTIFIER: 'identifier',
+      STRING_LITERAL: 'string',
+      INTEGER_LITERAL: 'number',
+      BOOLEAN_LITERAL: 'boolean',
+      DOUBLE_STRING_LITERAL: 'double-quoted string',
+      
+      // Template string tokens
+      TEMPLATE_STRING_START: 'template string start',
+      TEMPLATE_STRING_END: 'template string end',
+      TEMPLATE_STRING_PART: 'template string content',
+      TEMPLATE_INTERPOLATION_SIMPLE: 'template interpolation',
+      
+      // Keywords
+      val: "'val'",
+      var: "'var'",
+      fun: "'fun'",
+      use: "'use'",
+      this: "'this'",
+      schema: "'schema'",
+      struct: "'struct'",
+      union: "'union'",
+      type: "'type'",
+      init: "'init'",
+      private: "'private'",
+      get: "'get'",
+      repeated: "'repeated'",
+      if: "'if'",
+      not: "'not'",
+      true: "'true'",
+      false: "'false'",
+      
+      // Symbols (keep quotes for clarity)
+      '{': "'{'",
+      '}': "'}'",
+      '(': "'('",
+      ')': "')'",
+      '[': "'['",
+      ']': "']'",
+      '=': "'='",
+      ',': "','",
+      ';': "';'",
+      '.': "'.'",
+      ':': "':'",
+      $: "'$'",
+      '${': "'${'",
+      
+      // Technical tokens
+      RBRACE: "'}'",
+      LPAREN: "'('",
+      RPAREN: "')'",
+      LBRACE: "'{'",
+      MINUS: "'-'",
+      ANNOTATION: 'annotation',
+      
+      // Hash schema tokens
+      '#schema': "'#schema'",
+      
+      // Special tokens
+      EOF: 'end of file',
+      '<EOF>': 'end of file',
+    };
+
+    return tokenMap[cleanToken] || `'${cleanToken}'`;
+  }
+
+  /**
+   * Parses expected tokens from ANTLR error message
+   */
+  private parseExpectedTokens(msg: string): string[] {
+    // Match patterns like "expecting {A, B, C}" or "expecting A"
+    const expectingMatch = msg.match(/expecting\s+\{([^}]+)\}/);
+    if (expectingMatch) {
+      return expectingMatch[1]
+        .split(',')
+        .map((token) => token.trim())
+        .filter((token) => token.length > 0);
+    }
+
+    // Single token expectation
+    const singleTokenMatch = msg.match(/expecting\s+([^\s,}]+)/);
+    if (singleTokenMatch) {
+      return [singleTokenMatch[1]];
+    }
+
+    return [];
+  }
+
+  /**
+   * Formats a list of tokens into user-friendly text
+   */
+  private formatTokenList(tokens: string[]): string {
+    if (tokens.length === 0) return '';
+    if (tokens.length === 1) return this.tokenToUserFriendlyName(tokens[0]);
+    if (tokens.length === 2) {
+      return `${this.tokenToUserFriendlyName(tokens[0])} or ${this.tokenToUserFriendlyName(tokens[1])}`;
+    }
+
+    const lastToken = tokens[tokens.length - 1];
+    const otherTokens = tokens.slice(0, -1);
+    return `${otherTokens.map((t) => this.tokenToUserFriendlyName(t)).join(', ')}, or ${this.tokenToUserFriendlyName(lastToken)}`;
+  }
+
+  /**
    * Enhances the error message with more user-friendly text
    */
   private enhanceErrorMessage(msg: string, offendingSymbol?: Token, errorCode?: ErrorCode): string {
     const lowerMsg = msg.toLowerCase();
 
-    // For some common errors, provide better messages
+    // For some common errors, provide better messages based on error code
     switch (errorCode) {
       case ErrorCode.E0001:
         if (lowerMsg.includes('no viable alternative') && offendingSymbol?.text === '}') {
@@ -285,7 +396,6 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
         }
         return "expected expression after '='";
       case ErrorCode.E0002:
-        // For parenthesis errors, use the standard description from ErrorCode
         return getErrorDescription(ErrorCode.E0002);
       case ErrorCode.E0003:
         return "expected '}' to close brace";
@@ -293,24 +403,68 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
         return "expected ']' to close bracket";
       case ErrorCode.E0006:
         return 'incomplete configuration call';
-      default: {
-        // Clean up ANTLR's default messages
-        const cleanedMsg = msg
-          .replace(/^line \d+:\d+ /, '') // Remove line prefix
-          .replace(/at '<EOF>'/, 'at end of file')
-          .replace(/token recognition error at: '([^']*)'/, "unexpected character '$1'");
+      default:
+        break;
+    }
 
-        // For "no viable alternative" errors, provide more helpful message
-        if (lowerMsg.includes('no viable alternative')) {
-          if (offendingSymbol?.text === '}') {
-            return 'unexpected closing brace';
-          }
-          return 'unexpected token sequence';
-        }
+    // Enhanced message processing for ANTLR messages
+    let enhancedMsg = msg;
 
-        return cleanedMsg;
+    // Clean up ANTLR's default messages
+    enhancedMsg = enhancedMsg
+      .replace(/^line \d+:\d+ /, '') // Remove line prefix
+      .replace(/at '<EOF>'/, 'at end of file')
+      .replace(/token recognition error at: '([^']*)'/, "unexpected character '$1'");
+
+    // Handle "mismatched input" errors
+    const mismatchedMatch = enhancedMsg.match(/mismatched input '([^']*)' expecting (.+)/);
+    if (mismatchedMatch) {
+      const unexpectedToken = mismatchedMatch[1];
+      const expectedPart = mismatchedMatch[2];
+      
+      const expectedTokens = this.parseExpectedTokens(`expecting ${expectedPart}`);
+      if (expectedTokens.length > 0) {
+        const formattedExpected = this.formatTokenList(expectedTokens);
+        return `unexpected '${unexpectedToken}', expected ${formattedExpected}`;
       }
     }
+
+    // Handle standalone "expecting" errors
+    const expectingMatch = enhancedMsg.match(/expecting (.+)/);
+    if (expectingMatch && !enhancedMsg.includes('mismatched')) {
+      const expectedPart = expectingMatch[1];
+      const expectedTokens = this.parseExpectedTokens(`expecting ${expectedPart}`);
+      if (expectedTokens.length > 0) {
+        const formattedExpected = this.formatTokenList(expectedTokens);
+        return `expected ${formattedExpected}`;
+      }
+    }
+
+    // Handle "no viable alternative" errors
+    if (lowerMsg.includes('no viable alternative')) {
+      if (offendingSymbol?.text === '}') {
+        return 'unexpected closing brace';
+      }
+      if (offendingSymbol?.text) {
+        return `unexpected '${offendingSymbol.text}'`;
+      }
+      return 'unexpected token sequence';
+    }
+
+    // Handle "extraneous input" errors
+    const extraneousMatch = enhancedMsg.match(/extraneous input '([^']*)' expecting (.+)/);
+    if (extraneousMatch) {
+      const extraToken = extraneousMatch[1];
+      const expectedPart = extraneousMatch[2];
+      
+      const expectedTokens = this.parseExpectedTokens(`expecting ${expectedPart}`);
+      if (expectedTokens.length > 0) {
+        const formattedExpected = this.formatTokenList(expectedTokens);
+        return `unexpected '${extraToken}', expected ${formattedExpected}`;
+      }
+    }
+
+    return enhancedMsg;
   }
 
   /**

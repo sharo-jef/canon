@@ -6,6 +6,6 @@ error[E0015]: unterminated template string
 3 | 
   | ^
   |
-  = note: extraneous input '<EOF>' expecting {TEMPLATE_STRING_END, TEMPLATE_STRING_PART, '${', TEMPLATE_INTERPOLATION_SIMPLE}
+  = note: expected template string end, template string content, '${', or template interpolation
   = note: template strings must be closed with a backtick
   = help: add a closing backtick (`) to end your template string
