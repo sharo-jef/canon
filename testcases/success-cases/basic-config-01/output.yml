@@ -1,26 +1,37 @@
 type: Program
-children:
+body:
   - type: SchemaDirective
-    schema: ./schema.canon
-  - type: ConfigurationCall
-    functionName:
+    path: ./schema.canon
+    loc:
+      start:
+        line: 1
+        column: 0
+      end:
+        line: 1
+        column: 24
+  - type: CallExpression
+    callee:
       type: Identifier
       name: data1
+      loc:
+        start:
+          line: 3
+          column: 0
+        end:
+          line: 3
+          column: 5
     arguments: []
-    body:
-      - type: Assignment
-        target:
-          type: Identifier
-          name: datam1
-        expression:
-          type: Literal
-          literalType: string
-          value: value1
-      - type: Assignment
-        target:
-          type: Identifier
-          name: datam2
-        expression:
-          type: Literal
-          literalType: string
-          value: value2
+    loc:
+      start:
+        line: 3
+        column: 0
+      end:
+        line: 6
+        column: 1
+loc:
+  start:
+    line: 1
+    column: 0
+  end:
+    line: 7
+    column: 5

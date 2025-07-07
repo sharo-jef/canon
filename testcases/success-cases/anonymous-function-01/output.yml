@@ -1,0 +1,163 @@
+type: Program
+body:
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: add
+      loc:
+        start:
+          line: 1
+          column: 4
+        end:
+          line: 1
+          column: 7
+    typeRef: null
+    value:
+      type: AnonymousFunction
+      parameters:
+        type: ParameterList
+        parameters:
+          - type: Parameter
+            name:
+              type: Identifier
+              name: a
+              loc:
+                start:
+                  line: 1
+                  column: 14
+                end:
+                  line: 1
+                  column: 15
+            typeRef:
+              type: PrimitiveType
+              name: int
+              loc:
+                start:
+                  line: 1
+                  column: 17
+                end:
+                  line: 1
+                  column: 20
+            loc:
+              start:
+                line: 1
+                column: 14
+              end:
+                line: 1
+                column: 20
+          - type: Parameter
+            name:
+              type: Identifier
+              name: b
+              loc:
+                start:
+                  line: 1
+                  column: 22
+                end:
+                  line: 1
+                  column: 23
+            typeRef:
+              type: PrimitiveType
+              name: int
+              loc:
+                start:
+                  line: 1
+                  column: 25
+                end:
+                  line: 1
+                  column: 28
+            loc:
+              start:
+                line: 1
+                column: 22
+              end:
+                line: 1
+                column: 28
+        loc:
+          start:
+            line: 1
+            column: 14
+          end:
+            line: 1
+            column: 28
+      returnType:
+        type: PrimitiveType
+        name: int
+        loc:
+          start:
+            line: 1
+            column: 31
+          end:
+            line: 1
+            column: 34
+      body:
+        type: Block
+        body:
+          - type: ExpressionStatement
+            expression:
+              type: BinaryExpression
+              operator: +
+              left:
+                type: Identifier
+                name: a
+                loc:
+                  start:
+                    line: 2
+                    column: 2
+                  end:
+                    line: 2
+                    column: 3
+              right:
+                type: Identifier
+                name: b
+                loc:
+                  start:
+                    line: 2
+                    column: 6
+                  end:
+                    line: 2
+                    column: 7
+              loc:
+                start:
+                  line: 2
+                  column: 2
+                end:
+                  line: 2
+                  column: 7
+            loc:
+              start:
+                line: 2
+                column: 2
+              end:
+                line: 2
+                column: 7
+        loc:
+          start:
+            line: 1
+            column: 35
+          end:
+            line: 3
+            column: 1
+      loc:
+        start:
+          line: 1
+          column: 10
+        end:
+          line: 3
+          column: 1
+    annotations: []
+    loc:
+      start:
+        line: 1
+        column: 0
+      end:
+        line: 3
+        column: 1
+loc:
+  start:
+    line: 1
+    column: 0
+  end:
+    line: 4
+    column: 5

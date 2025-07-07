@@ -1,0 +1,10 @@
+error[E0016]: invalid semicolon usage
+ --> testcases\error-cases\spread-error-01\input.canon:2:1
+  |
+1 | val incomplete = ...
+2 | 
+  | ^
+  |
+  = note: unexpected '<EOF>', expected 'if', 'not', 'this', 'fun', '-', '~', '...', '{', '(', 'LBRACKET', string, double-quoted string, template string start, number, 'true', 'false', or identifier
+  = note: semicolons should only be used to separate multiple statements on the same line
+  = help: remove the semicolon or add another statement after it

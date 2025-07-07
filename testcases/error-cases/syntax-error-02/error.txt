@@ -10,15 +10,14 @@ error[E0002]: missing closing parenthesis
   = help: check for missing ')' or extra '(' in your code
 
 error[E0014]: unexpected end of file
- --> testcases\error-cases\syntax-error-02\input.canon:3:1
+ --> testcases\error-cases\syntax-error-02\input.canon:4:1
   |
-1 | config("arg1", "arg2" {
 2 |     name = "test"
 3 | }
-  | ^
 4 | 
+  | ^
   |
-  = note: expected end of file, '#schema', 'schema', 'struct', 'union', 'type', 'use', 'this', 'val', 'var', 'fun', annotation, or identifier
+  = note: unexpected '<EOF>', expected '='
   = note: the file ended unexpectedly
   = help: check if you are missing closing braces, parentheses, or string terminators
 

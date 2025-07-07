@@ -1,15 +1,20 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as yaml from 'js-yaml';
 import { describe, test, expect } from '@jest/globals';
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
 import { CanonLexer } from '../generated/CanonLexer';
 import { CanonParser } from '../generated/CanonParser';
 import { CanonErrorListener, ErrorFormatter, DEFAULT_FORMATTER_OPTIONS } from '../error';
+import { parseCanon } from '../parser';
 
 /**
  * Parse Canon input and return formatted errors or success indicator
  */
-function parseCanonInput(input: string, inputFile: string): { success: boolean; errors?: string } {
+function parseCanonInput(
+  input: string,
+  inputFile: string
+): { success: boolean; errors?: string; ast?: any } {
   try {
     const inputStream = CharStreams.fromString(input);
     const lexer = new CanonLexer(inputStream);
@@ -22,7 +27,7 @@ function parseCanonInput(input: string, inputFile: string): { success: boolean; 
     parser.addErrorListener(errorListener);
 
     // Parse
-    parser.program();
+    const _tree = parser.program();
 
     if (errorListener.hasErrors()) {
       const errors = errorListener.getErrors();
@@ -34,7 +39,13 @@ function parseCanonInput(input: string, inputFile: string): { success: boolean; 
       const formattedErrors = formatter.formatErrors([...errors.getSortedErrors()]);
       return { success: false, errors: formattedErrors.replace(/\r\n/g, '\n').trim() };
     } else {
-      return { success: true };
+      // Success case - try to generate AST using parseCanon function
+      try {
+        const ast = parseCanon(input, inputFile);
+        return { success: true, ast: ast };
+      } catch {
+        return { success: true, ast: undefined }; // Parse succeeded even if visitor failed
+      }
     }
   } catch (error) {
     throw new Error(`Unexpected error during parsing: ${error}`);
@@ -112,8 +123,24 @@ describe('Canon Error Handling', () => {
           expect(result.errors).toBeDefined();
 
           // Normalize both actual and expected errors for comparison
-          const actualError = result.errors!;
-          const expectedError = testCase.expectedError!;
+          const normalizeErrorMessage = (message: string): string => {
+            // Remove Node.js experimental warnings and other system-specific messages
+            return message
+              .split('\n')
+              .filter(
+                (line) =>
+                  !line.includes('ExperimentalWarning') &&
+                  !line.includes('Support for loading ES Module') &&
+                  !line.includes('Use `node --trace-warnings') &&
+                  !line.includes('(Use `node --trace-warnings') &&
+                  !line.trim().startsWith('(node:')
+              )
+              .join('\n')
+              .trim();
+          };
+
+          const actualError = normalizeErrorMessage(result.errors!);
+          const expectedError = normalizeErrorMessage(testCase.expectedError!);
 
           expect(actualError).toBe(expectedError);
         });
@@ -146,8 +173,23 @@ describe('Canon Error Handling', () => {
 
           // TODO: Add AST validation when expectedOutput is available
           if (testCase.expectedOutput) {
-            // This would require implementing AST serialization to compare with expected output
-            console.log('Expected output validation not yet implemented');
+            // Convert AST to YAML format to match expected output
+            const astYaml = yaml.dump(result.ast, {
+              indent: 2,
+              lineWidth: -1,
+              sortKeys: false,
+            });
+            const expectedYaml = testCase.expectedOutput.trim();
+
+            try {
+              // Parse both as YAML and compare objects
+              const actualAst = yaml.load(astYaml);
+              const expectedAst = yaml.load(expectedYaml);
+              expect(actualAst).toEqual(expectedAst);
+            } catch {
+              // Fall back to string comparison if YAML parsing fails
+              expect(astYaml.trim()).toBe(expectedYaml);
+            }
           }
         });
       });

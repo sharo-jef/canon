@@ -1,4 +1,2 @@
-config {
-    name = "test"
-    version = // missing value - syntax error
-}
+val name = "test"
+val version = // missing value - syntax error

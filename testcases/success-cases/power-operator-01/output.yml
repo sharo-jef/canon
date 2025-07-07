@@ -1,0 +1,62 @@
+type: Program
+body:
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: result
+      loc:
+        start:
+          line: 1
+          column: 4
+        end:
+          line: 1
+          column: 10
+    typeRef: null
+    value:
+      type: BinaryExpression
+      operator: '**'
+      left:
+        type: IntegerLiteral
+        value: 2
+        raw: '2'
+        loc:
+          start:
+            line: 1
+            column: 13
+          end:
+            line: 1
+            column: 14
+      right:
+        type: IntegerLiteral
+        value: 3
+        raw: '3'
+        loc:
+          start:
+            line: 1
+            column: 18
+          end:
+            line: 1
+            column: 19
+      loc:
+        start:
+          line: 1
+          column: 13
+        end:
+          line: 1
+          column: 19
+    annotations: []
+    loc:
+      start:
+        line: 1
+        column: 0
+      end:
+        line: 1
+        column: 19
+loc:
+  start:
+    line: 1
+    column: 0
+  end:
+    line: 2
+    column: 5

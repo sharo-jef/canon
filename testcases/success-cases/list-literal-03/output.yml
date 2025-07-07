@@ -1,0 +1,80 @@
+type: Program
+body:
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: mixed
+      loc:
+        start:
+          line: 1
+          column: 4
+        end:
+          line: 1
+          column: 9
+    typeRef: null
+    value:
+      type: ListLiteral
+      elements:
+        - type: IntegerLiteral
+          value: 1
+          raw: '1'
+          loc:
+            start:
+              line: 1
+              column: 13
+            end:
+              line: 1
+              column: 14
+        - type: StringLiteral
+          value: hello
+          raw: '''hello'''
+          loc:
+            start:
+              line: 1
+              column: 16
+            end:
+              line: 1
+              column: 23
+        - type: BooleanLiteral
+          value: true
+          raw: 'true'
+          loc:
+            start:
+              line: 1
+              column: 25
+            end:
+              line: 1
+              column: 29
+        - type: BooleanLiteral
+          value: false
+          raw: 'false'
+          loc:
+            start:
+              line: 1
+              column: 31
+            end:
+              line: 1
+              column: 36
+      loc:
+        start:
+          line: 1
+          column: 12
+        end:
+          line: 1
+          column: 37
+    annotations: []
+    loc:
+      start:
+        line: 1
+        column: 0
+      end:
+        line: 1
+        column: 37
+loc:
+  start:
+    line: 1
+    column: 0
+  end:
+    line: 2
+    column: 5

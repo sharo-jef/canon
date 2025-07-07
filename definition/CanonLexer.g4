@@ -43,6 +43,7 @@ MINUS: '-';
 MULTIPLY: '*';
 DIVIDE: '/';
 MODULO: '%';
+POWER: '**';
 
 // Comparison operators
 EQUALS: '==';
@@ -59,10 +60,26 @@ MINUS_ASSIGN: '-=';
 MULTIPLY_ASSIGN: '*=';
 DIVIDE_ASSIGN: '/=';
 MODULO_ASSIGN: '%=';
+POWER_ASSIGN: '**=';
 
 // Logical operators
 LOGICAL_AND: '&&';
 LOGICAL_OR: '||';
+
+// Pipeline operator (must come before BIT_OR)
+PIPELINE: '|>';
+
+// Bitwise operators
+BIT_AND: '&';
+BIT_OR: '|';
+BIT_XOR: '^';
+BIT_NOT: '~';
+LEFT_SHIFT: '<<';
+RIGHT_SHIFT: '>>';
+
+// Range and spread operators
+RANGE: '..';
+SPREAD: '...';
 
 // Unary operators
 EXCLAMATION: '!';
@@ -82,7 +99,6 @@ COLON: ':';
 SEMICOLON: ';';
 QUESTION: '?';
 ARROW: '->';
-PIPE: '|';
 
 // String literals
 STRING_LITERAL: '\'' (~['\\\r\n] | EscapeSequence)* '\'';
@@ -127,8 +143,11 @@ INTERPOLATION_PLUS: '+' -> type(PLUS);
 INTERPOLATION_MINUS: '-' -> type(MINUS);
 INTERPOLATION_MULTIPLY: '*' -> type(MULTIPLY);
 INTERPOLATION_DIVIDE: '/' -> type(DIVIDE);
+INTERPOLATION_POWER: '**' -> type(POWER);
 INTERPOLATION_LPAREN: '(' -> type(LPAREN);
 INTERPOLATION_RPAREN: ')' -> type(RPAREN);
+INTERPOLATION_LBRACKET: '[' -> type(LBRACKET);
+INTERPOLATION_RBRACKET: ']' -> type(RBRACKET);
 INTERPOLATION_DOT: '.' -> type(DOT);
 INTERPOLATION_EQUALS: '==' -> type(EQUALS);
 INTERPOLATION_NOT_EQUALS: '!=' -> type(NOT_EQUALS);
@@ -139,4 +158,7 @@ INTERPOLATION_GREATER_EQUALS: '>=' -> type(GREATER_EQUALS);
 INTERPOLATION_LOGICAL_AND: '&&' -> type(LOGICAL_AND);
 INTERPOLATION_LOGICAL_OR: '||' -> type(LOGICAL_OR);
 INTERPOLATION_EXCLAMATION: '!' -> type(EXCLAMATION);
+INTERPOLATION_BIT_AND: '&' -> type(BIT_AND);
+INTERPOLATION_BIT_OR: '|' -> type(BIT_OR);
+INTERPOLATION_BIT_XOR: '^' -> type(BIT_XOR);
 INTERPOLATION_WS: [ \t\r\n]+ -> skip;

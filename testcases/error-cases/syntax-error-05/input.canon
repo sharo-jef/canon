@@ -1,3 +1,2 @@
-config {
-    name = "test"
-    = // missing left side of assignment
+val name = "test"
+= // missing left side of assignment

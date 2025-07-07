@@ -5,17 +5,31 @@ import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 
 import { PrimaryExpressionContext } from "./CanonParser";
 import { MemberAccessExpressionContext } from "./CanonParser";
+import { IndexAccessExpressionContext } from "./CanonParser";
+import { SliceExpressionContext } from "./CanonParser";
 import { FunctionCallExpressionContext } from "./CanonParser";
 import { NonNullAssertionExpressionContext } from "./CanonParser";
 import { UnaryMinusExpressionContext } from "./CanonParser";
 import { LogicalNotExpressionContext } from "./CanonParser";
+import { BitwiseNotExpressionContext } from "./CanonParser";
+import { PowerExpressionContext } from "./CanonParser";
 import { MultiplicativeExpressionContext } from "./CanonParser";
 import { AdditiveExpressionContext } from "./CanonParser";
+import { ShiftExpressionContext } from "./CanonParser";
 import { RelationalExpressionContext } from "./CanonParser";
 import { EqualityExpressionContext } from "./CanonParser";
+import { BitwiseAndExpressionContext } from "./CanonParser";
+import { BitwiseXorExpressionContext } from "./CanonParser";
+import { BitwiseOrExpressionContext } from "./CanonParser";
 import { LogicalAndExpressionContext } from "./CanonParser";
 import { LogicalOrExpressionContext } from "./CanonParser";
+import { PipelineExpressionContext } from "./CanonParser";
+import { RangeExpressionContext } from "./CanonParser";
 import { LiteralExpressionContext } from "./CanonParser";
+import { ListLiteralExpressionContext } from "./CanonParser";
+import { LambdaExpressionPrimaryContext } from "./CanonParser";
+import { AnonymousFunctionPrimaryContext } from "./CanonParser";
+import { SpreadExpressionPrimaryContext } from "./CanonParser";
 import { IdentifierExpressionContext } from "./CanonParser";
 import { ThisExpressionContext } from "./CanonParser";
 import { IfExpressionContext } from "./CanonParser";
@@ -40,6 +54,12 @@ import { BlockContext } from "./CanonParser";
 import { StatementContext } from "./CanonParser";
 import { PropertyDeclarationContext } from "./CanonParser";
 import { AssignmentStatementContext } from "./CanonParser";
+import { DestructuringAssignmentContext } from "./CanonParser";
+import { DestructuringPatternContext } from "./CanonParser";
+import { ArrayDestructuringPatternContext } from "./CanonParser";
+import { ObjectDestructuringPatternContext } from "./CanonParser";
+import { DestructuringElementContext } from "./CanonParser";
+import { DestructuringPropertyContext } from "./CanonParser";
 import { InitDeclarationContext } from "./CanonParser";
 import { GetterDeclarationContext } from "./CanonParser";
 import { RepeatedDeclarationContext } from "./CanonParser";
@@ -57,6 +77,12 @@ import { StringLiteralContext } from "./CanonParser";
 import { TemplateStringContext } from "./CanonParser";
 import { TemplateStringContentContext } from "./CanonParser";
 import { AnnotationContext } from "./CanonParser";
+import { ListLiteralContext } from "./CanonParser";
+import { LambdaExpressionContext } from "./CanonParser";
+import { LambdaParametersContext } from "./CanonParser";
+import { LambdaBodyContext } from "./CanonParser";
+import { AnonymousFunctionContext } from "./CanonParser";
+import { SpreadExpressionContext } from "./CanonParser";
 
 
 /**
@@ -89,6 +115,32 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitMemberAccessExpression?: (ctx: MemberAccessExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `indexAccessExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterIndexAccessExpression?: (ctx: IndexAccessExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `indexAccessExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitIndexAccessExpression?: (ctx: IndexAccessExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `sliceExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterSliceExpression?: (ctx: SliceExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `sliceExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitSliceExpression?: (ctx: SliceExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `functionCallExpression`
@@ -143,6 +195,32 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitLogicalNotExpression?: (ctx: LogicalNotExpressionContext) => void;
 
 	/**
+	 * Enter a parse tree produced by the `bitwiseNotExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterBitwiseNotExpression?: (ctx: BitwiseNotExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `bitwiseNotExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitBitwiseNotExpression?: (ctx: BitwiseNotExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `powerExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterPowerExpression?: (ctx: PowerExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `powerExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitPowerExpression?: (ctx: PowerExpressionContext) => void;
+
+	/**
 	 * Enter a parse tree produced by the `multiplicativeExpression`
 	 * labeled alternative in `CanonParser.expression`.
 	 * @param ctx the parse tree
@@ -167,6 +245,19 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitAdditiveExpression?: (ctx: AdditiveExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `shiftExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterShiftExpression?: (ctx: ShiftExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `shiftExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitShiftExpression?: (ctx: ShiftExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `relationalExpression`
@@ -195,6 +286,45 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitEqualityExpression?: (ctx: EqualityExpressionContext) => void;
 
 	/**
+	 * Enter a parse tree produced by the `bitwiseAndExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterBitwiseAndExpression?: (ctx: BitwiseAndExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `bitwiseAndExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitBitwiseAndExpression?: (ctx: BitwiseAndExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `bitwiseXorExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterBitwiseXorExpression?: (ctx: BitwiseXorExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `bitwiseXorExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitBitwiseXorExpression?: (ctx: BitwiseXorExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `bitwiseOrExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterBitwiseOrExpression?: (ctx: BitwiseOrExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `bitwiseOrExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitBitwiseOrExpression?: (ctx: BitwiseOrExpressionContext) => void;
+
+	/**
 	 * Enter a parse tree produced by the `logicalAndExpression`
 	 * labeled alternative in `CanonParser.expression`.
 	 * @param ctx the parse tree
@@ -221,6 +351,32 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitLogicalOrExpression?: (ctx: LogicalOrExpressionContext) => void;
 
 	/**
+	 * Enter a parse tree produced by the `pipelineExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterPipelineExpression?: (ctx: PipelineExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `pipelineExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitPipelineExpression?: (ctx: PipelineExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `rangeExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterRangeExpression?: (ctx: RangeExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `rangeExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitRangeExpression?: (ctx: RangeExpressionContext) => void;
+
+	/**
 	 * Enter a parse tree produced by the `literalExpression`
 	 * labeled alternative in `CanonParser.primary`.
 	 * @param ctx the parse tree
@@ -232,6 +388,58 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitLiteralExpression?: (ctx: LiteralExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `listLiteralExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	enterListLiteralExpression?: (ctx: ListLiteralExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `listLiteralExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	exitListLiteralExpression?: (ctx: ListLiteralExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `lambdaExpressionPrimary`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	enterLambdaExpressionPrimary?: (ctx: LambdaExpressionPrimaryContext) => void;
+	/**
+	 * Exit a parse tree produced by the `lambdaExpressionPrimary`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	exitLambdaExpressionPrimary?: (ctx: LambdaExpressionPrimaryContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `anonymousFunctionPrimary`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	enterAnonymousFunctionPrimary?: (ctx: AnonymousFunctionPrimaryContext) => void;
+	/**
+	 * Exit a parse tree produced by the `anonymousFunctionPrimary`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	exitAnonymousFunctionPrimary?: (ctx: AnonymousFunctionPrimaryContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `spreadExpressionPrimary`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	enterSpreadExpressionPrimary?: (ctx: SpreadExpressionPrimaryContext) => void;
+	/**
+	 * Exit a parse tree produced by the `spreadExpressionPrimary`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 */
+	exitSpreadExpressionPrimary?: (ctx: SpreadExpressionPrimaryContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `identifierExpression`
@@ -508,6 +716,72 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitAssignmentStatement?: (ctx: AssignmentStatementContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `CanonParser.destructuringAssignment`.
+	 * @param ctx the parse tree
+	 */
+	enterDestructuringAssignment?: (ctx: DestructuringAssignmentContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.destructuringAssignment`.
+	 * @param ctx the parse tree
+	 */
+	exitDestructuringAssignment?: (ctx: DestructuringAssignmentContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.destructuringPattern`.
+	 * @param ctx the parse tree
+	 */
+	enterDestructuringPattern?: (ctx: DestructuringPatternContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.destructuringPattern`.
+	 * @param ctx the parse tree
+	 */
+	exitDestructuringPattern?: (ctx: DestructuringPatternContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.arrayDestructuringPattern`.
+	 * @param ctx the parse tree
+	 */
+	enterArrayDestructuringPattern?: (ctx: ArrayDestructuringPatternContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.arrayDestructuringPattern`.
+	 * @param ctx the parse tree
+	 */
+	exitArrayDestructuringPattern?: (ctx: ArrayDestructuringPatternContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.objectDestructuringPattern`.
+	 * @param ctx the parse tree
+	 */
+	enterObjectDestructuringPattern?: (ctx: ObjectDestructuringPatternContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.objectDestructuringPattern`.
+	 * @param ctx the parse tree
+	 */
+	exitObjectDestructuringPattern?: (ctx: ObjectDestructuringPatternContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.destructuringElement`.
+	 * @param ctx the parse tree
+	 */
+	enterDestructuringElement?: (ctx: DestructuringElementContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.destructuringElement`.
+	 * @param ctx the parse tree
+	 */
+	exitDestructuringElement?: (ctx: DestructuringElementContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.destructuringProperty`.
+	 * @param ctx the parse tree
+	 */
+	enterDestructuringProperty?: (ctx: DestructuringPropertyContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.destructuringProperty`.
+	 * @param ctx the parse tree
+	 */
+	exitDestructuringProperty?: (ctx: DestructuringPropertyContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `CanonParser.initDeclaration`.
 	 * @param ctx the parse tree
 	 */
@@ -693,5 +967,71 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitAnnotation?: (ctx: AnnotationContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.listLiteral`.
+	 * @param ctx the parse tree
+	 */
+	enterListLiteral?: (ctx: ListLiteralContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.listLiteral`.
+	 * @param ctx the parse tree
+	 */
+	exitListLiteral?: (ctx: ListLiteralContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.lambdaExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterLambdaExpression?: (ctx: LambdaExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.lambdaExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitLambdaExpression?: (ctx: LambdaExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.lambdaParameters`.
+	 * @param ctx the parse tree
+	 */
+	enterLambdaParameters?: (ctx: LambdaParametersContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.lambdaParameters`.
+	 * @param ctx the parse tree
+	 */
+	exitLambdaParameters?: (ctx: LambdaParametersContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.lambdaBody`.
+	 * @param ctx the parse tree
+	 */
+	enterLambdaBody?: (ctx: LambdaBodyContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.lambdaBody`.
+	 * @param ctx the parse tree
+	 */
+	exitLambdaBody?: (ctx: LambdaBodyContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.anonymousFunction`.
+	 * @param ctx the parse tree
+	 */
+	enterAnonymousFunction?: (ctx: AnonymousFunctionContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.anonymousFunction`.
+	 * @param ctx the parse tree
+	 */
+	exitAnonymousFunction?: (ctx: AnonymousFunctionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.spreadExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterSpreadExpression?: (ctx: SpreadExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.spreadExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitSpreadExpression?: (ctx: SpreadExpressionContext) => void;
 }
 

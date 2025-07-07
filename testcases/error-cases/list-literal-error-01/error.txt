@@ -1,0 +1,10 @@
+error[E0014]: unexpected end of file
+ --> testcases\error-cases\list-literal-error-01\input.canon:2:1
+  |
+1 | val incomplete = [1, 2, 3
+2 | 
+  | ^
+  |
+  = note: expected 'RBRACKET', '', or ''
+  = note: the file ended unexpectedly
+  = help: check if you are missing closing braces, parentheses, or string terminators

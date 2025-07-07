@@ -1,0 +1,110 @@
+type: Program
+body:
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: arr
+      loc:
+        start:
+          line: 1
+          column: 4
+        end:
+          line: 1
+          column: 7
+    typeRef: null
+    value:
+      type: ListLiteral
+      elements:
+        - type: IntegerLiteral
+          value: 1
+          raw: '1'
+          loc:
+            start:
+              line: 1
+              column: 11
+            end:
+              line: 1
+              column: 12
+        - type: IntegerLiteral
+          value: 2
+          raw: '2'
+          loc:
+            start:
+              line: 1
+              column: 14
+            end:
+              line: 1
+              column: 15
+        - type: IntegerLiteral
+          value: 3
+          raw: '3'
+          loc:
+            start:
+              line: 1
+              column: 17
+            end:
+              line: 1
+              column: 18
+      loc:
+        start:
+          line: 1
+          column: 10
+        end:
+          line: 1
+          column: 19
+    annotations: []
+    loc:
+      start:
+        line: 1
+        column: 0
+      end:
+        line: 1
+        column: 19
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: spread
+      loc:
+        start:
+          line: 2
+          column: 4
+        end:
+          line: 2
+          column: 10
+    typeRef: null
+    value:
+      type: SpreadExpression
+      argument:
+        type: Identifier
+        name: arr
+        loc:
+          start:
+            line: 2
+            column: 16
+          end:
+            line: 2
+            column: 19
+      loc:
+        start:
+          line: 2
+          column: 13
+        end:
+          line: 2
+          column: 19
+    annotations: []
+    loc:
+      start:
+        line: 2
+        column: 0
+      end:
+        line: 2
+        column: 19
+loc:
+  start:
+    line: 1
+    column: 0
+  end:
+    line: 3
+    column: 5

@@ -1,0 +1,6 @@
+val and_result = 5 & 3
+val or_result = 5 | 3
+val xor_result = 5 ^ 3
+val not_result = ~5
+val shift_left = 5 << 2
+val shift_right = 20 >> 2

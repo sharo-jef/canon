@@ -1,0 +1,10 @@
+error[E0005]: unexpected token
+ --> testcases\error-cases\lambda-error-01\input.canon:1:17
+  |
+1 | val invalid = { -> }
+  |                 ^
+2 | 
+  |
+  = note: expected 'init', 'private', 'get', 'repeated', 'if', 'not', 'this', 'val', 'var', 'fun', '-', '~', '...', '{', '}', '(', 'LBRACKET', string, double-quoted string, template string start, number, 'true', 'false', annotation, or identifier
+  = note: found unexpected token
+  = help: check the syntax around this location

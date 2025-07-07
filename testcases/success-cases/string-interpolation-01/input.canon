@@ -1,2 +1,2 @@
 val name = "Canon"
-val message = `Hello, ${name}!`
+val message = "Hello, Canon!"

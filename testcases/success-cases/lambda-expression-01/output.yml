@@ -1,0 +1,72 @@
+type: Program
+body:
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: double
+      loc:
+        start:
+          line: 1
+          column: 4
+        end:
+          line: 1
+          column: 10
+    typeRef: null
+    value:
+      type: LambdaExpression
+      parameters:
+        - x
+      body:
+        type: BinaryExpression
+        operator: '*'
+        left:
+          type: Identifier
+          name: x
+          loc:
+            start:
+              line: 1
+              column: 20
+            end:
+              line: 1
+              column: 21
+        right:
+          type: IntegerLiteral
+          value: 2
+          raw: '2'
+          loc:
+            start:
+              line: 1
+              column: 24
+            end:
+              line: 1
+              column: 25
+        loc:
+          start:
+            line: 1
+            column: 20
+          end:
+            line: 1
+            column: 25
+      loc:
+        start:
+          line: 1
+          column: 13
+        end:
+          line: 1
+          column: 27
+    annotations: []
+    loc:
+      start:
+        line: 1
+        column: 0
+      end:
+        line: 1
+        column: 27
+loc:
+  start:
+    line: 1
+    column: 0
+  end:
+    line: 2
+    column: 5

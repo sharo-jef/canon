@@ -1,12 +1,11 @@
-error[E0013]: invalid token sequence
- --> testcases\error-cases\syntax-error-05\input.canon:3:5
+error[E0014]: unexpected end of file
+ --> testcases\error-cases\syntax-error-05\input.canon:2:1
   |
-1 | config {
-2 |     name = "test"
-3 |     = // missing left side of assignment
-  |     ^
-4 | 
+1 | val name = "test"
+2 | = // missing left side of assignment
+  | ^
+3 | 
   |
-  = note: unexpected '=', expected 'init', 'private', 'get', 'repeated', 'if', 'not', 'this', 'val', 'var', '-', '}', '(', ';', string, double-quoted string, template string start, number, 'true', 'false', annotation, or identifier
-  = note: this combination of tokens is not valid
-  = help: check the syntax and structure of your code
+  = note: expected end of file, '#schema', 'schema', 'struct', 'union', 'type', 'use', 'this', 'val', 'var', 'fun', '{', 'LBRACKET', annotation, or identifier
+  = note: the file ended unexpectedly
+  = help: check if you are missing closing braces, parentheses, or string terminators

@@ -5,17 +5,31 @@ import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
 import { PrimaryExpressionContext } from "./CanonParser";
 import { MemberAccessExpressionContext } from "./CanonParser";
+import { IndexAccessExpressionContext } from "./CanonParser";
+import { SliceExpressionContext } from "./CanonParser";
 import { FunctionCallExpressionContext } from "./CanonParser";
 import { NonNullAssertionExpressionContext } from "./CanonParser";
 import { UnaryMinusExpressionContext } from "./CanonParser";
 import { LogicalNotExpressionContext } from "./CanonParser";
+import { BitwiseNotExpressionContext } from "./CanonParser";
+import { PowerExpressionContext } from "./CanonParser";
 import { MultiplicativeExpressionContext } from "./CanonParser";
 import { AdditiveExpressionContext } from "./CanonParser";
+import { ShiftExpressionContext } from "./CanonParser";
 import { RelationalExpressionContext } from "./CanonParser";
 import { EqualityExpressionContext } from "./CanonParser";
+import { BitwiseAndExpressionContext } from "./CanonParser";
+import { BitwiseXorExpressionContext } from "./CanonParser";
+import { BitwiseOrExpressionContext } from "./CanonParser";
 import { LogicalAndExpressionContext } from "./CanonParser";
 import { LogicalOrExpressionContext } from "./CanonParser";
+import { PipelineExpressionContext } from "./CanonParser";
+import { RangeExpressionContext } from "./CanonParser";
 import { LiteralExpressionContext } from "./CanonParser";
+import { ListLiteralExpressionContext } from "./CanonParser";
+import { LambdaExpressionPrimaryContext } from "./CanonParser";
+import { AnonymousFunctionPrimaryContext } from "./CanonParser";
+import { SpreadExpressionPrimaryContext } from "./CanonParser";
 import { IdentifierExpressionContext } from "./CanonParser";
 import { ThisExpressionContext } from "./CanonParser";
 import { IfExpressionContext } from "./CanonParser";
@@ -40,6 +54,12 @@ import { BlockContext } from "./CanonParser";
 import { StatementContext } from "./CanonParser";
 import { PropertyDeclarationContext } from "./CanonParser";
 import { AssignmentStatementContext } from "./CanonParser";
+import { DestructuringAssignmentContext } from "./CanonParser";
+import { DestructuringPatternContext } from "./CanonParser";
+import { ArrayDestructuringPatternContext } from "./CanonParser";
+import { ObjectDestructuringPatternContext } from "./CanonParser";
+import { DestructuringElementContext } from "./CanonParser";
+import { DestructuringPropertyContext } from "./CanonParser";
 import { InitDeclarationContext } from "./CanonParser";
 import { GetterDeclarationContext } from "./CanonParser";
 import { RepeatedDeclarationContext } from "./CanonParser";
@@ -57,6 +77,12 @@ import { StringLiteralContext } from "./CanonParser";
 import { TemplateStringContext } from "./CanonParser";
 import { TemplateStringContentContext } from "./CanonParser";
 import { AnnotationContext } from "./CanonParser";
+import { ListLiteralContext } from "./CanonParser";
+import { LambdaExpressionContext } from "./CanonParser";
+import { LambdaParametersContext } from "./CanonParser";
+import { LambdaBodyContext } from "./CanonParser";
+import { AnonymousFunctionContext } from "./CanonParser";
+import { SpreadExpressionContext } from "./CanonParser";
 
 
 /**
@@ -82,6 +108,22 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitMemberAccessExpression?: (ctx: MemberAccessExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `indexAccessExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitIndexAccessExpression?: (ctx: IndexAccessExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `sliceExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitSliceExpression?: (ctx: SliceExpressionContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `functionCallExpression`
@@ -116,6 +158,22 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitLogicalNotExpression?: (ctx: LogicalNotExpressionContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by the `bitwiseNotExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitBitwiseNotExpression?: (ctx: BitwiseNotExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `powerExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPowerExpression?: (ctx: PowerExpressionContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by the `multiplicativeExpression`
 	 * labeled alternative in `CanonParser.expression`.
 	 * @param ctx the parse tree
@@ -130,6 +188,14 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitAdditiveExpression?: (ctx: AdditiveExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `shiftExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitShiftExpression?: (ctx: ShiftExpressionContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `relationalExpression`
@@ -148,6 +214,30 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitEqualityExpression?: (ctx: EqualityExpressionContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by the `bitwiseAndExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitBitwiseAndExpression?: (ctx: BitwiseAndExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `bitwiseXorExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitBitwiseXorExpression?: (ctx: BitwiseXorExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `bitwiseOrExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitBitwiseOrExpression?: (ctx: BitwiseOrExpressionContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by the `logicalAndExpression`
 	 * labeled alternative in `CanonParser.expression`.
 	 * @param ctx the parse tree
@@ -164,12 +254,60 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitLogicalOrExpression?: (ctx: LogicalOrExpressionContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by the `pipelineExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPipelineExpression?: (ctx: PipelineExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `rangeExpression`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitRangeExpression?: (ctx: RangeExpressionContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by the `literalExpression`
 	 * labeled alternative in `CanonParser.primary`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	visitLiteralExpression?: (ctx: LiteralExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `listLiteralExpression`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitListLiteralExpression?: (ctx: ListLiteralExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `lambdaExpressionPrimary`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLambdaExpressionPrimary?: (ctx: LambdaExpressionPrimaryContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `anonymousFunctionPrimary`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitAnonymousFunctionPrimary?: (ctx: AnonymousFunctionPrimaryContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `spreadExpressionPrimary`
+	 * labeled alternative in `CanonParser.primary`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitSpreadExpressionPrimary?: (ctx: SpreadExpressionPrimaryContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `identifierExpression`
@@ -345,6 +483,48 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitAssignmentStatement?: (ctx: AssignmentStatementContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by `CanonParser.destructuringAssignment`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitDestructuringAssignment?: (ctx: DestructuringAssignmentContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.destructuringPattern`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitDestructuringPattern?: (ctx: DestructuringPatternContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.arrayDestructuringPattern`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitArrayDestructuringPattern?: (ctx: ArrayDestructuringPatternContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.objectDestructuringPattern`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitObjectDestructuringPattern?: (ctx: ObjectDestructuringPatternContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.destructuringElement`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitDestructuringElement?: (ctx: DestructuringElementContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.destructuringProperty`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitDestructuringProperty?: (ctx: DestructuringPropertyContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `CanonParser.initDeclaration`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -462,5 +642,47 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitAnnotation?: (ctx: AnnotationContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.listLiteral`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitListLiteral?: (ctx: ListLiteralContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.lambdaExpression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLambdaExpression?: (ctx: LambdaExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.lambdaParameters`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLambdaParameters?: (ctx: LambdaParametersContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.lambdaBody`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLambdaBody?: (ctx: LambdaBodyContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.anonymousFunction`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitAnonymousFunction?: (ctx: AnonymousFunctionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.spreadExpression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitSpreadExpression?: (ctx: SpreadExpressionContext) => Result;
 }
 

@@ -4,373 +4,48 @@ body:
     kind: val
     name:
       type: Identifier
-      name: x
+      name: invalid
       loc:
         start:
           line: 1
           column: 4
         end:
           line: 1
-          column: 5
-    typeRef: null
-    value:
-      type: IntegerLiteral
-      value: 10
-      raw: '10'
-      loc:
-        start:
-          line: 1
-          column: 8
-        end:
-          line: 1
-          column: 10
-    annotations: []
-    loc:
-      start:
-        line: 1
-        column: 0
-      end:
-        line: 1
-        column: 10
-  - type: VariableDeclaration
-    kind: val
-    name:
-      type: Identifier
-      name: 'y'
-      loc:
-        start:
-          line: 2
-          column: 4
-        end:
-          line: 2
-          column: 5
-    typeRef: null
-    value:
-      type: IntegerLiteral
-      value: 5
-      raw: '5'
-      loc:
-        start:
-          line: 2
-          column: 8
-        end:
-          line: 2
-          column: 9
-    annotations: []
-    loc:
-      start:
-        line: 2
-        column: 0
-      end:
-        line: 2
-        column: 9
-  - type: VariableDeclaration
-    kind: val
-    name:
-      type: Identifier
-      name: result
-      loc:
-        start:
-          line: 3
-          column: 4
-        end:
-          line: 3
-          column: 10
-    typeRef: null
-    value:
-      type: TemplateLiteral
-      parts:
-        - type: TemplateStringPart
-          value: 'The sum of '
-          loc:
-            start:
-              line: 3
-              column: 14
-            end:
-              line: 3
-              column: 25
-        - type: TemplateInterpolation
-          expression:
-            type: Identifier
-            name: x
-            loc:
-              start:
-                line: 3
-                column: 27
-              end:
-                line: 3
-                column: 28
-          loc:
-            start:
-              line: 3
-              column: 25
-            end:
-              line: 3
-              column: 29
-        - type: TemplateStringPart
-          value: ' and '
-          loc:
-            start:
-              line: 3
-              column: 29
-            end:
-              line: 3
-              column: 34
-        - type: TemplateInterpolation
-          expression:
-            type: Identifier
-            name: 'y'
-            loc:
-              start:
-                line: 3
-                column: 36
-              end:
-                line: 3
-                column: 37
-          loc:
-            start:
-              line: 3
-              column: 34
-            end:
-              line: 3
-              column: 38
-        - type: TemplateStringPart
-          value: ' is '
-          loc:
-            start:
-              line: 3
-              column: 38
-            end:
-              line: 3
-              column: 42
-        - type: TemplateInterpolation
-          expression:
-            type: BinaryExpression
-            operator: +
-            left:
-              type: Identifier
-              name: x
-              loc:
-                start:
-                  line: 3
-                  column: 44
-                end:
-                  line: 3
-                  column: 45
-            right:
-              type: Identifier
-              name: 'y'
-              loc:
-                start:
-                  line: 3
-                  column: 48
-                end:
-                  line: 3
-                  column: 49
-            loc:
-              start:
-                line: 3
-                column: 44
-              end:
-                line: 3
-                column: 49
-          loc:
-            start:
-              line: 3
-              column: 42
-            end:
-              line: 3
-              column: 50
-        - type: TemplateStringPart
-          value: .
-          loc:
-            start:
-              line: 3
-              column: 50
-            end:
-              line: 3
-              column: 51
-      loc:
-        start:
-          line: 3
-          column: 13
-        end:
-          line: 3
-          column: 52
-    annotations: []
-    loc:
-      start:
-        line: 3
-        column: 0
-      end:
-        line: 3
-        column: 52
-  - type: VariableDeclaration
-    kind: val
-    name:
-      type: Identifier
-      name: complex
-      loc:
-        start:
-          line: 4
-          column: 4
-        end:
-          line: 4
           column: 11
     typeRef: null
     value:
-      type: TemplateLiteral
-      parts:
-        - type: TemplateStringPart
-          value: 'Result: '
-          loc:
-            start:
-              line: 4
-              column: 15
-            end:
-              line: 4
-              column: 23
-        - type: TemplateInterpolation
-          expression:
-            type: BinaryExpression
-            operator: +
-            left:
-              type: BinaryExpression
-              operator: '*'
-              left:
-                type: Identifier
-                name: x
-                loc:
-                  start:
-                    line: 4
-                    column: 25
-                  end:
-                    line: 4
-                    column: 26
-              right:
-                type: IntegerLiteral
-                value: 2
-                raw: '2'
-                loc:
-                  start:
-                    line: 4
-                    column: 29
-                  end:
-                    line: 4
-                    column: 30
-              loc:
-                start:
-                  line: 4
-                  column: 25
-                end:
-                  line: 4
-                  column: 30
-            right:
-              type: Identifier
-              name: 'y'
-              loc:
-                start:
-                  line: 4
-                  column: 33
-                end:
-                  line: 4
-                  column: 34
-            loc:
-              start:
-                line: 4
-                column: 25
-              end:
-                line: 4
-                column: 34
-          loc:
-            start:
-              line: 4
-              column: 23
-            end:
-              line: 4
-              column: 35
-        - type: TemplateStringPart
-          value: ' (calculated from '
-          loc:
-            start:
-              line: 4
-              column: 35
-            end:
-              line: 4
-              column: 53
-        - type: TemplateInterpolation
-          expression:
-            type: Identifier
-            name: x
-            loc:
-              start:
-                line: 4
-                column: 55
-              end:
-                line: 4
-                column: 56
-          loc:
-            start:
-              line: 4
-              column: 53
-            end:
-              line: 4
-              column: 57
-        - type: TemplateStringPart
-          value: ' * 2 + '
-          loc:
-            start:
-              line: 4
-              column: 57
-            end:
-              line: 4
-              column: 64
-        - type: TemplateInterpolation
-          expression:
-            type: Identifier
-            name: 'y'
-            loc:
-              start:
-                line: 4
-                column: 66
-              end:
-                line: 4
-                column: 67
-          loc:
-            start:
-              line: 4
-              column: 64
-            end:
-              line: 4
-              column: 68
-        - type: TemplateStringPart
-          value: )
-          loc:
-            start:
-              line: 4
-              column: 68
-            end:
-              line: 4
-              column: 69
+      type: LambdaExpression
+      parameters:
+        - x
+      body:
+        type: BlockStatement
+        body: []
+        loc:
+          start:
+            line: 1
+            column: 21
+          end:
+            line: 1
+            column: 20
       loc:
         start:
-          line: 4
+          line: 1
           column: 14
         end:
-          line: 4
-          column: 70
+          line: 1
+          column: 22
     annotations: []
     loc:
       start:
-        line: 4
+        line: 1
         column: 0
       end:
-        line: 4
-        column: 70
+        line: 1
+        column: 22
 loc:
   start:
     line: 1
     column: 0
   end:
-    line: 5
+    line: 2
     column: 5

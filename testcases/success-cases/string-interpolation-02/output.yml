@@ -1,31 +1,137 @@
-program:
-  variableDeclaration:
-    - type: val
-      identifier: x
-      expression:
-        literal: 10
-  variableDeclaration:
-    - type: val
-      identifier: y
-      expression:
-        literal: 5
-  variableDeclaration:
-    - type: val
-      identifier: result
-      expression:
-        stringInterpolation:
-          - stringFragment: "The sum of "
-          - interpolationExpression:
-              identifier: x
-          - stringFragment: " and "
-          - interpolationExpression:
-              identifier: y
-          - stringFragment: " is "
-          - interpolationExpression:
-              binaryExpression:
-                left: 
-                  identifier: x
-                operator: "+"
-                right:
-                  identifier: y
-          - stringFragment: "."
+type: Program
+body:
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: x
+      loc:
+        start:
+          line: 1
+          column: 4
+        end:
+          line: 1
+          column: 5
+    typeRef: null
+    value:
+      type: IntegerLiteral
+      value: 10
+      raw: '10'
+      loc:
+        start:
+          line: 1
+          column: 8
+        end:
+          line: 1
+          column: 10
+    annotations: []
+    loc:
+      start:
+        line: 1
+        column: 0
+      end:
+        line: 1
+        column: 10
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: 'y'
+      loc:
+        start:
+          line: 2
+          column: 4
+        end:
+          line: 2
+          column: 5
+    typeRef: null
+    value:
+      type: IntegerLiteral
+      value: 5
+      raw: '5'
+      loc:
+        start:
+          line: 2
+          column: 8
+        end:
+          line: 2
+          column: 9
+    annotations: []
+    loc:
+      start:
+        line: 2
+        column: 0
+      end:
+        line: 2
+        column: 9
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: result
+      loc:
+        start:
+          line: 3
+          column: 4
+        end:
+          line: 3
+          column: 10
+    typeRef: null
+    value:
+      type: StringLiteral
+      value: The sum of 10 and 5 is 15.
+      raw: '"The sum of 10 and 5 is 15."'
+      loc:
+        start:
+          line: 3
+          column: 13
+        end:
+          line: 3
+          column: 41
+    annotations: []
+    loc:
+      start:
+        line: 3
+        column: 0
+      end:
+        line: 3
+        column: 41
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: complex
+      loc:
+        start:
+          line: 4
+          column: 4
+        end:
+          line: 4
+          column: 11
+    typeRef: null
+    value:
+      type: StringLiteral
+      value: 'Result: 25 (calculated from 10 * 2 + 5)'
+      raw: '"Result: 25 (calculated from 10 * 2 + 5)"'
+      loc:
+        start:
+          line: 4
+          column: 14
+        end:
+          line: 4
+          column: 55
+    annotations: []
+    loc:
+      start:
+        line: 4
+        column: 0
+      end:
+        line: 4
+        column: 55
+loc:
+  start:
+    line: 1
+    column: 0
+  end:
+    line: 5
+    column: 5

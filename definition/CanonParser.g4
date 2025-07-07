@@ -25,6 +25,7 @@ topLevelElement:
     | variableDeclaration
     | functionDeclaration
     | assignmentStatement
+    | destructuringAssignment
     | callExpression;
 
 // Schema declaration
@@ -46,7 +47,7 @@ functionDeclaration: annotation* FUN IDENTIFIER LPAREN parameterList? RPAREN (CO
 variableDeclaration: annotation* (VAL | VAR) IDENTIFIER (COLON type)? ASSIGN expression;
 
 // Union type
-unionType: type (PIPE type)*;
+unionType: type (BIT_OR type)*;
 
 // Type definitions
 type:
@@ -74,7 +75,32 @@ statement:
 propertyDeclaration: annotation* (PRIVATE)? IDENTIFIER ((QUESTION)? COLON type (ASSIGN expression)?)?;
 
 // Assignment statements (covers both property assignments and variable assignments)
-assignmentStatement: (THIS DOT)? IDENTIFIER (ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | MULTIPLY_ASSIGN | DIVIDE_ASSIGN | MODULO_ASSIGN) expression;
+assignmentStatement: (THIS DOT)? IDENTIFIER (ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | MULTIPLY_ASSIGN | DIVIDE_ASSIGN | MODULO_ASSIGN | POWER_ASSIGN) expression;
+
+// Destructuring assignment statements
+destructuringAssignment: destructuringPattern ASSIGN expression;
+
+// Destructuring patterns
+destructuringPattern:
+    arrayDestructuringPattern           // [a, b, c] = ...
+    | objectDestructuringPattern;       // {a, b, c} = ...
+
+    // Array destructuring patterns
+arrayDestructuringPattern: LBRACKET destructuringElement (COMMA destructuringElement)* RBRACKET;
+
+// Object destructuring patterns  
+objectDestructuringPattern: LBRACE destructuringProperty (COMMA destructuringProperty)* RBRACE;
+
+// Elements in array destructuring
+destructuringElement:
+    IDENTIFIER (ASSIGN expression)?    // with optional default value
+    | destructuringPattern             // nested pattern
+    | SPREAD IDENTIFIER;               // rest pattern: ...rest
+
+// Properties in object destructuring
+destructuringProperty:
+    IDENTIFIER (ASSIGN expression)?    // {prop} or {prop = default}
+    | IDENTIFIER COLON IDENTIFIER (ASSIGN expression)?; // {prop: newName} or {prop: newName = default}
 
 // Init declarations
 initDeclaration: annotation* INIT (LPAREN parameterList? RPAREN)? block;
@@ -106,20 +132,34 @@ expressionStatement: expression;
 expression:
     primary                                                     #primaryExpression
     | expression DOT IDENTIFIER                                 #memberAccessExpression
+    | expression LBRACKET expression RBRACKET                   #indexAccessExpression
+    | expression LBRACKET expression? RANGE expression? RBRACKET #sliceExpression
     | expression LPAREN argumentList? RPAREN                    #functionCallExpression
     | expression EXCLAMATION                                    #nonNullAssertionExpression
     | MINUS expression                                          #unaryMinusExpression
     | NOT expression                                            #logicalNotExpression
+    | BIT_NOT expression                                        #bitwiseNotExpression
+    | expression POWER expression                               #powerExpression
     | expression (MULTIPLY | DIVIDE | MODULO) expression       #multiplicativeExpression
     | expression (PLUS | MINUS) expression                     #additiveExpression
+    | expression (LEFT_SHIFT | RIGHT_SHIFT) expression         #shiftExpression
     | expression (LESS_THAN | GREATER_THAN | LESS_EQUALS | GREATER_EQUALS) expression #relationalExpression
     | expression (EQUALS | NOT_EQUALS) expression              #equalityExpression
+    | expression BIT_AND expression                            #bitwiseAndExpression
+    | expression BIT_XOR expression                            #bitwiseXorExpression
+    | expression BIT_OR expression                             #bitwiseOrExpression
     | expression LOGICAL_AND expression                        #logicalAndExpression
-    | expression LOGICAL_OR expression                         #logicalOrExpression;
+    | expression LOGICAL_OR expression                         #logicalOrExpression
+    | expression PIPELINE expression                           #pipelineExpression
+    | expression RANGE expression                              #rangeExpression;
 
 // Primary expressions
 primary:
     literal                                                     #literalExpression
+    | listLiteral                                               #listLiteralExpression
+    | lambdaExpression                                          #lambdaExpressionPrimary
+    | anonymousFunction                                         #anonymousFunctionPrimary
+    | spreadExpression                                          #spreadExpressionPrimary
     | IDENTIFIER                                                #identifierExpression
     | THIS                                                      #thisExpression
     | IF LPAREN expression RPAREN (expression | block) (ELSE (expression | block))? #ifExpression
@@ -149,3 +189,17 @@ templateStringContent:
 
 // Annotations
 annotation: ANNOTATION (LPAREN argumentList? RPAREN | stringLiteral)?;
+
+// List literal
+listLiteral: LBRACKET (expression (COMMA expression)*)? RBRACKET;
+
+// Lambda expression
+lambdaExpression: LBRACE (lambdaParameters ARROW)? lambdaBody RBRACE;
+lambdaParameters: IDENTIFIER (COMMA IDENTIFIER)*;
+lambdaBody: expression | (statement (SEMICOLON statement)*)*;
+
+// Anonymous function
+anonymousFunction: FUN LPAREN parameterList? RPAREN (COLON type)? block;
+
+// Spread expression (for future use)
+spreadExpression: SPREAD expression;
