@@ -1,14 +1,17 @@
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "types": ["node", "jest"],
-    "noEmitOnError": false
-  },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "types": [
+            "node",
+            "jest"
+        ],
+        "noEmitOnError": false
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
 }

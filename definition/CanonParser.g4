@@ -74,7 +74,7 @@ statement:
 propertyDeclaration: annotation* (PRIVATE)? IDENTIFIER ((QUESTION)? COLON type (ASSIGN expression)?)?;
 
 // Assignment statements (covers both property assignments and variable assignments)
-assignmentStatement: (THIS DOT)? IDENTIFIER (ASSIGN | PLUS_ASSIGN) expression;
+assignmentStatement: (THIS DOT)? IDENTIFIER (ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | MULTIPLY_ASSIGN | DIVIDE_ASSIGN | MODULO_ASSIGN) expression;
 
 // Init declarations
 initDeclaration: annotation* INIT (LPAREN parameterList? RPAREN)? block;

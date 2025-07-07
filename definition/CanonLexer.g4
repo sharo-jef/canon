@@ -55,6 +55,10 @@ GREATER_EQUALS: '>=';
 // Assignment
 ASSIGN: '=';
 PLUS_ASSIGN: '+=';
+MINUS_ASSIGN: '-=';
+MULTIPLY_ASSIGN: '*=';
+DIVIDE_ASSIGN: '/=';
+MODULO_ASSIGN: '%=';
 
 // Logical operators
 LOGICAL_AND: '&&';
