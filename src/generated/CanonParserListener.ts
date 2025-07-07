@@ -52,6 +52,8 @@ import { TypeContext } from "./CanonParser";
 import { BaseTypeContext } from "./CanonParser";
 import { PrimitiveTypeContext } from "./CanonParser";
 import { BlockContext } from "./CanonParser";
+import { StructBodyContext } from "./CanonParser";
+import { StructMemberContext } from "./CanonParser";
 import { StatementContext } from "./CanonParser";
 import { ExpressionStatementContext } from "./CanonParser";
 import { PropertyDeclarationContext } from "./CanonParser";
@@ -696,6 +698,28 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitBlock?: (ctx: BlockContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.structBody`.
+	 * @param ctx the parse tree
+	 */
+	enterStructBody?: (ctx: StructBodyContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.structBody`.
+	 * @param ctx the parse tree
+	 */
+	exitStructBody?: (ctx: StructBodyContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.structMember`.
+	 * @param ctx the parse tree
+	 */
+	enterStructMember?: (ctx: StructMemberContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.structMember`.
+	 * @param ctx the parse tree
+	 */
+	exitStructMember?: (ctx: StructMemberContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.statement`.

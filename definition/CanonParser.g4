@@ -33,7 +33,7 @@ topLevelElement
 
 // ───── declarations ─────────────────
 schemaDeclaration        : annotation* SCHEMA  ( block | stringLiteral ) ;
-structDeclaration        : annotation* STRUCT  IDENTIFIER block ;
+structDeclaration        : annotation* STRUCT  IDENTIFIER structBody ;
 unionDeclaration         : annotation* UNION   IDENTIFIER ASSIGN unionType ;
 typeDeclaration          : annotation* TYPE    IDENTIFIER ASSIGN type ;
 functionDeclaration
@@ -59,6 +59,18 @@ primitiveType : STRING_TYPE | INT_TYPE | BOOL_TYPE ;
 // ───── blocks / statements ────────────────────
 block
     : LBRACE ( statement ( SEMICOLON statement )* )* RBRACE
+    ;
+
+structBody
+    : LBRACE ( structMember ( SEMICOLON structMember )* )* RBRACE
+    ;
+
+structMember
+    : propertyDeclaration
+    | initDeclaration
+    | getterDeclaration
+    | methodDeclaration
+    | repeatedDeclaration
     ;
 
 statement
@@ -117,7 +129,7 @@ destructuringProperty
 
 initDeclaration    : annotation* INIT ( LPAREN parameterList? RPAREN )? block ;
 getterDeclaration  : annotation* GET  IDENTIFIER LPAREN RPAREN block ;
-methodDeclaration  : annotation* PRIVATE? IDENTIFIER
+methodDeclaration  : annotation* PRIVATE? FUN IDENTIFIER
                      LPAREN parameterList? RPAREN
                      ( COLON type )?
                      block ;

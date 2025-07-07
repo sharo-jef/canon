@@ -52,6 +52,8 @@ import { TypeContext } from "./CanonParser";
 import { BaseTypeContext } from "./CanonParser";
 import { PrimitiveTypeContext } from "./CanonParser";
 import { BlockContext } from "./CanonParser";
+import { StructBodyContext } from "./CanonParser";
+import { StructMemberContext } from "./CanonParser";
 import { StatementContext } from "./CanonParser";
 import { ExpressionStatementContext } from "./CanonParser";
 import { PropertyDeclarationContext } from "./CanonParser";
@@ -470,6 +472,20 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitBlock?: (ctx: BlockContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.structBody`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStructBody?: (ctx: StructBodyContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.structMember`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStructMember?: (ctx: StructMemberContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.statement`.

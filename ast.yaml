@@ -257,128 +257,129 @@ body:
               line: 18
               column: 20
         defaultValue:
-          type: Identifier
-          name: Version
+          type: CallExpression
+          callee:
+            type: Identifier
+            name: Version
+            loc:
+              start:
+                line: 18
+                column: 23
+              end:
+                line: 18
+                column: 30
+          arguments:
+            - type: LambdaExpression
+              parameters: []
+              body:
+                - type: AssignmentStatement
+                  operator: '='
+                  left:
+                    type: Identifier
+                    name: major
+                    loc:
+                      start:
+                        line: 19
+                        column: 8
+                      end:
+                        line: 19
+                        column: 13
+                  right:
+                    type: IntegerLiteral
+                    value: 0
+                    raw: '0'
+                    loc:
+                      start:
+                        line: 19
+                        column: 16
+                      end:
+                        line: 19
+                        column: 17
+                  loc:
+                    start:
+                      line: 19
+                      column: 8
+                    end:
+                      line: 19
+                      column: 17
+                - type: AssignmentStatement
+                  operator: '='
+                  left:
+                    type: Identifier
+                    name: minor
+                    loc:
+                      start:
+                        line: 20
+                        column: 8
+                      end:
+                        line: 20
+                        column: 13
+                  right:
+                    type: IntegerLiteral
+                    value: 0
+                    raw: '0'
+                    loc:
+                      start:
+                        line: 20
+                        column: 16
+                      end:
+                        line: 20
+                        column: 17
+                  loc:
+                    start:
+                      line: 20
+                      column: 8
+                    end:
+                      line: 20
+                      column: 17
+                - type: AssignmentStatement
+                  operator: '='
+                  left:
+                    type: Identifier
+                    name: patch
+                    loc:
+                      start:
+                        line: 21
+                        column: 8
+                      end:
+                        line: 21
+                        column: 13
+                  right:
+                    type: IntegerLiteral
+                    value: 1
+                    raw: '1'
+                    loc:
+                      start:
+                        line: 21
+                        column: 16
+                      end:
+                        line: 21
+                        column: 17
+                  loc:
+                    start:
+                      line: 21
+                      column: 8
+                    end:
+                      line: 21
+                      column: 17
+              loc:
+                start:
+                  line: 18
+                  column: 31
+                end:
+                  line: 22
+                  column: 5
           loc:
             start:
               line: 18
               column: 23
-            end:
-              line: 18
-              column: 30
-        loc:
-          start:
-            line: 18
-            column: 4
-          end:
-            line: 18
-            column: 30
-      - type: ExpressionStatement
-        expression:
-          type: LambdaExpression
-          parameters: []
-          body:
-            - type: AssignmentStatement
-              operator: '='
-              left:
-                type: Identifier
-                name: major
-                loc:
-                  start:
-                    line: 19
-                    column: 8
-                  end:
-                    line: 19
-                    column: 13
-              right:
-                type: IntegerLiteral
-                value: 0
-                raw: '0'
-                loc:
-                  start:
-                    line: 19
-                    column: 16
-                  end:
-                    line: 19
-                    column: 17
-              loc:
-                start:
-                  line: 19
-                  column: 8
-                end:
-                  line: 19
-                  column: 17
-            - type: AssignmentStatement
-              operator: '='
-              left:
-                type: Identifier
-                name: minor
-                loc:
-                  start:
-                    line: 20
-                    column: 8
-                  end:
-                    line: 20
-                    column: 13
-              right:
-                type: IntegerLiteral
-                value: 0
-                raw: '0'
-                loc:
-                  start:
-                    line: 20
-                    column: 16
-                  end:
-                    line: 20
-                    column: 17
-              loc:
-                start:
-                  line: 20
-                  column: 8
-                end:
-                  line: 20
-                  column: 17
-            - type: AssignmentStatement
-              operator: '='
-              left:
-                type: Identifier
-                name: patch
-                loc:
-                  start:
-                    line: 21
-                    column: 8
-                  end:
-                    line: 21
-                    column: 13
-              right:
-                type: IntegerLiteral
-                value: 1
-                raw: '1'
-                loc:
-                  start:
-                    line: 21
-                    column: 16
-                  end:
-                    line: 21
-                    column: 17
-              loc:
-                start:
-                  line: 21
-                  column: 8
-                end:
-                  line: 21
-                  column: 17
-          loc:
-            start:
-              line: 18
-              column: 31
             end:
               line: 22
               column: 5
         loc:
           start:
             line: 18
-            column: 31
+            column: 4
           end:
             line: 22
             column: 5
@@ -1078,10 +1079,10 @@ body:
           loc:
             start:
               line: 42
-              column: 12
+              column: 16
             end:
               line: 42
-              column: 22
+              column: 26
         annotations: []
         isPrivate: true
         parameters: []

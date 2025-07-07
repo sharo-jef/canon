@@ -175,3 +175,24 @@ success では output.yml と AST が一致するようなテストを、 error 
 
 - regex 関数
   - 環境毎に動作が変わってしまう可能性があるため、 `use` 文で明示的にインポートするようにしようかな
+
+- エラーメッセージの更なる改修(以下の Rust のエラーメッセージのように、どう修正すればよいかを示す)
+
+  ```
+  error[E0384]: cannot assign twice to immutable variable `x`
+  --> src\main.rs:4:5
+    |
+  2 |     let x = 5;
+    |         - first assignment to `x`
+  3 |     println!("The value of x is: {}", x);
+  4 |     x = 6;
+    |     ^^^^^ cannot assign twice to immutable variable
+    |
+  help: consider making this binding mutable
+    |
+  2 |     let mut x = 5;
+    |         +++
+
+  For more information about this error, try `rustc --explain E0384`.
+  error: could not compile `rust-sandbox` (bin "rust-sandbox") due to 1 previous error
+  ```

@@ -12,6 +12,8 @@ import {
   TopLevelElementContext,
   SchemaDeclarationContext,
   StructDeclarationContext,
+  StructBodyContext,
+  StructMemberContext,
   UnionDeclarationContext,
   TypeDeclarationContext,
   VariableDeclarationContext,
@@ -259,7 +261,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         },
       },
     };
-    const body = this.visit(ctx.block());
+    const body = this.visit(ctx.structBody());
 
     return {
       type: 'StructDeclaration',
@@ -268,6 +270,32 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       body: body.body || [],
       loc: this.getLocationInfo(ctx),
     };
+  }
+
+  visitStructBody(ctx: StructBodyContext): ASTNode {
+    const members = ctx.structMember().map((member) => this.visit(member));
+    return {
+      type: 'StructBody',
+      body: members,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitStructMember(ctx: StructMemberContext): ASTNode {
+    // structMember can be one of: propertyDeclaration, initDeclaration, getterDeclaration, methodDeclaration, repeatedDeclaration
+    if (ctx.propertyDeclaration()) {
+      return this.visit(ctx.propertyDeclaration()!);
+    } else if (ctx.initDeclaration()) {
+      return this.visit(ctx.initDeclaration()!);
+    } else if (ctx.getterDeclaration()) {
+      return this.visit(ctx.getterDeclaration()!);
+    } else if (ctx.methodDeclaration()) {
+      return this.visit(ctx.methodDeclaration()!);
+    } else if (ctx.repeatedDeclaration()) {
+      return this.visit(ctx.repeatedDeclaration()!);
+    } else {
+      throw new Error('Unknown struct member type');
+    }
   }
 
   visitUnionDeclaration(ctx: UnionDeclarationContext): ASTNode {

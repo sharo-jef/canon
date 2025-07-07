@@ -1,0 +1,11 @@
+schema {
+  // Range with step - should be special cased
+  range_with_step = 1..10 step 2
+  
+  // Inclusive range with step - should be special cased
+  inclusive_range_with_step = 1..=10 step 3
+  
+  // Non-range with step - should remain as InfixCall
+  some_value = 5
+  stepped_value = some_value step 2
+}
