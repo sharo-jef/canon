@@ -156,6 +156,8 @@ success では output.yml と AST が一致するようなテストを、 error 
 - [x] イテレータ `1..10`
 - [x] 分割代入
 - [x] パイプライン演算子
+- [ ] ラベル付き break/continue
+- [ ] `match` 式
 
 ## 今後の展望
 
@@ -196,3 +198,11 @@ success では output.yml と AST が一致するようなテストを、 error 
   For more information about this error, try `rustc --explain E0384`.
   error: could not compile `rust-sandbox` (bin "rust-sandbox") due to 1 previous error
   ```
+
+- スキーマ定義からリファレンス生成
+  - HTML や Markdown 形式でのドキュメント生成
+
+- VSCode 拡張機能の開発
+  - シンタックスハイライト
+  - スニペット
+  - LSP
