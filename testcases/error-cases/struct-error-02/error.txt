@@ -1,0 +1,12 @@
+error[E0013]: invalid token sequence
+ --> testcases\error-cases\struct-error-02\input.canon:2:17
+  |
+1 | struct InvalidStruct {
+2 |     someFunction()
+  |                 ^
+3 | }
+4 | 
+  |
+  = note: unexpected '(', expected 'init', 'private', 'get', 'repeated', 'fun', '}', ';', annotation, or identifier
+  = note: this combination of tokens is not valid
+  = help: check the syntax and structure of your code

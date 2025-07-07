@@ -1,0 +1,27 @@
+error[E0005]: unexpected token
+ --> testcases\error-cases\struct-error-03\input.canon:2:5
+  |
+1 | struct InvalidStruct {
+2 |     val invalidVar = "test"
+  |     ^
+3 | }
+4 | 
+  |
+  = note: expected 'init', 'private', 'get', 'repeated', 'fun', '}', annotation, or identifier
+  = note: found unexpected token
+  = help: check the syntax around this location
+
+error[E0013]: invalid token sequence
+ --> testcases\error-cases\struct-error-03\input.canon:2:20
+  |
+1 | struct InvalidStruct {
+2 |     val invalidVar = "test"
+  |                    ^
+3 | }
+4 | 
+  |
+  = note: unexpected '=', expected 'init', 'private', 'get', 'repeated', 'fun', '}', ';', annotation, or identifier
+  = note: this combination of tokens is not valid
+  = help: check the syntax and structure of your code
+
+error: aborting due to 2 previous errors

@@ -1,0 +1,1 @@
+Variable declarations with 'val' are not allowed inside struct declarations
