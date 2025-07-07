@@ -1120,10 +1120,12 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   visitRangeExpr(ctx: RangeExprContext): ASTNode {
     const from = this.visit(ctx.expression(0));
     const to = this.visit(ctx.expression(1));
+    const isInclusive = ctx.RANGE_INCLUSIVE() !== undefined;
     return {
       type: 'RangeExpression',
       from,
       to,
+      inclusive: isInclusive,
       loc: this.getLocationInfo(ctx),
     };
   }

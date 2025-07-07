@@ -49,6 +49,7 @@ body:
             end:
               line: 1
               column: 24
+        inclusive: false
         loc:
           start:
             line: 1

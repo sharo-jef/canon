@@ -1,0 +1,115 @@
+type: Program
+body:
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: exclusive_range
+      loc:
+        start:
+          line: 1
+          column: 4
+        end:
+          line: 1
+          column: 19
+    typeRef: null
+    value:
+      type: RangeExpression
+      from:
+        type: IntegerLiteral
+        value: 1
+        raw: '1'
+        loc:
+          start:
+            line: 1
+            column: 22
+          end:
+            line: 1
+            column: 23
+      to:
+        type: IntegerLiteral
+        value: 10
+        raw: '10'
+        loc:
+          start:
+            line: 1
+            column: 25
+          end:
+            line: 1
+            column: 27
+      inclusive: false
+      loc:
+        start:
+          line: 1
+          column: 22
+        end:
+          line: 1
+          column: 27
+    annotations: []
+    loc:
+      start:
+        line: 1
+        column: 0
+      end:
+        line: 1
+        column: 27
+  - type: VariableDeclaration
+    kind: val
+    name:
+      type: Identifier
+      name: inclusive_range
+      loc:
+        start:
+          line: 2
+          column: 4
+        end:
+          line: 2
+          column: 19
+    typeRef: null
+    value:
+      type: RangeExpression
+      from:
+        type: IntegerLiteral
+        value: 1
+        raw: '1'
+        loc:
+          start:
+            line: 2
+            column: 22
+          end:
+            line: 2
+            column: 23
+      to:
+        type: IntegerLiteral
+        value: 10
+        raw: '10'
+        loc:
+          start:
+            line: 2
+            column: 26
+          end:
+            line: 2
+            column: 28
+      inclusive: true
+      loc:
+        start:
+          line: 2
+          column: 22
+        end:
+          line: 2
+          column: 28
+    annotations: []
+    loc:
+      start:
+        line: 2
+        column: 0
+      end:
+        line: 2
+        column: 28
+loc:
+  start:
+    line: 1
+    column: 0
+  end:
+    line: 3
+    column: 5

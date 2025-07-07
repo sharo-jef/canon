@@ -148,7 +148,7 @@ expression
     | expression POWER                           expression #powerExpr
     | expression op=(MULTIPLY | DIVIDE | MODULO) expression #mulDivModExpr
     | expression op=(PLUS | MINUS)               expression #addSubExpr
-    | expression RANGE                           expression #rangeExpr
+    | expression op=(RANGE | RANGE_INCLUSIVE)   expression #rangeExpr
     | expression IDENTIFIER                      expression #infixCallExpr
     | expression op=(LEFT_SHIFT | RIGHT_SHIFT)   expression #shiftExpr
     | expression op=(LESS_THAN|GREATER_THAN|LESS_EQUALS|GREATER_EQUALS) expression #relationalExpr

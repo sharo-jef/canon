@@ -79,6 +79,7 @@ LEFT_SHIFT: '<<';
 RIGHT_SHIFT: '>>';
 
 // Range and spread operators
+RANGE_INCLUSIVE: '..=';
 RANGE: '..';
 SPREAD: '...';
 
