@@ -1,13 +1,19 @@
 import { SourceLocation, SourceSpan } from './ParseError';
+import * as path from 'path';
 
 /**
  * Utilities for highlighting source code in error messages
  */
 export class SourceCodeHighlighter {
+  private readonly displayFilename: string;
+
   constructor(
     private readonly sourceCode: string,
     private readonly filename: string
-  ) {}
+  ) {
+    // Convert absolute path to relative path for display
+    this.displayFilename = path.relative(process.cwd(), filename) || filename;
+  }
 
   /**
    * Gets the lines of source code as an array
@@ -89,7 +95,7 @@ export class SourceCodeHighlighter {
     const result: string[] = [];
 
     // Add the location header
-    result.push(` --> ${this.filename}:${location.line}:${location.column}`);
+    result.push(` --> ${this.displayFilename}:${location.line}:${location.column}`);
 
     // Only add empty line if we have context to show
     if (startLine < targetLine || targetLine < endLine) {
@@ -181,7 +187,7 @@ export class SourceCodeHighlighter {
     const highlightLine = this.createHighlightLine(line, location.column);
 
     return [
-      `--> ${this.filename}:${location.line}:${location.column}`,
+      `--> ${this.displayFilename}:${location.line}:${location.column}`,
       `${emptyPrefix} |`,
       `${linePrefix} | ${line}`,
       `${emptyPrefix} | ${highlightLine}`,

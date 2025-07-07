@@ -1,5 +1,5 @@
 error[E0005]: unexpected token
- --> input.canon:2:5
+ --> testcases\error-cases\struct-error-01\input.canon:2:5
   |
 1 | struct MyStruct
 2 |     name: string
@@ -8,5 +8,5 @@ error[E0005]: unexpected token
 4 | }
   |
   = note: missing '{' at 'name'
-  = note: found unexpected token 'name'
+  = note: found unexpected token
   = help: check the syntax around this location

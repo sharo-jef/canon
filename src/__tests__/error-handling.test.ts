@@ -6,20 +6,6 @@ import { CanonParser } from '../generated/CanonParser';
 import { CanonErrorListener, ErrorFormatter, DEFAULT_FORMATTER_OPTIONS } from '../error';
 
 /**
- * Normalize file paths and error output for consistent testing
- */
-function normalizeErrorOutput(output: string, inputFile: string): string {
-  // Replace absolute paths with just "input" for consistent testing
-  const normalizedOutput = output.replace(
-    new RegExp(inputFile.replace(/\\/g, '\\\\'), 'g'),
-    'input'
-  );
-
-  // Normalize line endings
-  return normalizedOutput.replace(/\r\n/g, '\n').trim();
-}
-
-/**
  * Parse Canon input and return formatted errors or success indicator
  */
 function parseCanonInput(input: string, inputFile: string): { success: boolean; errors?: string } {
@@ -42,10 +28,10 @@ function parseCanonInput(input: string, inputFile: string): { success: boolean; 
       const formatter = new ErrorFormatter(input, inputFile, {
         ...DEFAULT_FORMATTER_OPTIONS,
         showColors: false, // Disable colors for testing
-        contextLines: 1, // Show 1 line before and after for better context
+        contextLines: 2, // Show 2 lines before and after for better context
       });
       const formattedErrors = formatter.formatErrors([...errors.getSortedErrors()]);
-      return { success: false, errors: normalizeErrorOutput(formattedErrors, inputFile) };
+      return { success: false, errors: formattedErrors.replace(/\r\n/g, '\n').trim() };
     } else {
       return { success: true };
     }
@@ -84,10 +70,7 @@ function loadTestCase(testCasePath: string) {
   }
 
   if (fs.existsSync(errorPath)) {
-    testCase.expectedError = normalizeErrorOutput(
-      fs.readFileSync(errorPath, 'utf-8').trim(),
-      inputPath
-    );
+    testCase.expectedError = fs.readFileSync(errorPath, 'utf-8').replace(/\r\n/g, '\n').trim();
   }
 
   if (fs.existsSync(outputPath)) {

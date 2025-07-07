@@ -1,11 +1,11 @@
 error[E0001]: expected expression after '='
- --> input.canon:3:1
+ --> testcases\error-cases\syntax-error-03\input.canon:3:1
   |
 1 | config {
-2 |     name =
+2 |     name = 
 3 | }
   | ^ expected an expression here
-4 |
+4 | 
   |
   = note: assignment expressions require a value on the right side
   = help: try providing a value like: some_variable = "some_value"

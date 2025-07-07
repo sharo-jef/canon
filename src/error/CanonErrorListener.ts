@@ -166,7 +166,37 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
   private determineErrorCode(msg: string, offendingSymbol?: Token): ErrorCode {
     const lowerMsg = msg.toLowerCase();
 
-    // Check for EOF-related errors first
+    // Check for template string errors
+    if (
+      lowerMsg.includes('template_string_end') ||
+      lowerMsg.includes('template_string_part') ||
+      lowerMsg.includes('template_interpolation') ||
+      (lowerMsg.includes('expecting') &&
+        (msg.includes('TEMPLATE_STRING_END') || msg.includes('TEMPLATE_STRING_PART')))
+    ) {
+      return ErrorCode.E0015; // Unterminated template string
+    }
+
+    // Check for function call with missing closing parenthesis
+    if (
+      (lowerMsg.includes('extraneous') && offendingSymbol?.text === '(') ||
+      (lowerMsg.includes('expecting') && msg.includes("')'") && offendingSymbol?.text === '{')
+    ) {
+      return ErrorCode.E0002; // Missing closing parenthesis
+    }
+
+    // Check for semicolon-related errors (be more specific)
+    if (
+      lowerMsg.includes('expecting') &&
+      (msg.includes('IDENTIFIER') || msg.includes('val') || msg.includes('var')) &&
+      (offendingSymbol?.type === Token.EOF || lowerMsg.includes('<eof>')) &&
+      !lowerMsg.includes('extraneous') // Not a bracket/parenthesis issue
+    ) {
+      // This suggests a semicolon was used inappropriately (e.g., at end of line)
+      return ErrorCode.E0016; // Invalid semicolon usage
+    }
+
+    // Check for EOF-related errors
     if (offendingSymbol?.type === Token.EOF || lowerMsg.includes('<eof>')) {
       // Check if this is an incomplete configuration call
       if (this.isIncompleteConfigurationCall(msg, offendingSymbol)) {
@@ -286,82 +316,12 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
   /**
    * Adds contextual notes and help messages based on the error
    */
-  private addContextualNotes(error: ParseError, msg: string, offendingSymbol?: Token): ParseError {
-    const lowerMsg = msg.toLowerCase();
-
-    switch (error.code) {
-      case ErrorCode.E0001: {
-        const variableName = this.findVariableNameInAssignment(error.location);
-        const helpExample = variableName || 'some_variable';
-
-        if (lowerMsg.includes('no viable alternative') && offendingSymbol?.text === '}') {
-          return error
-            .withNote('assignment expressions require a value on the right side')
-            .withNote(`try providing a value like: ${helpExample} = "some_value"`, 'help');
-        }
-        return error
-          .withNote('assignment expressions require a value on the right side')
-          .withNote(`try providing a value like: ${helpExample} = "some_value"`, 'help');
-      }
-
-      case ErrorCode.E0002:
-        if (lowerMsg.includes('no viable alternative') && offendingSymbol?.text === '{') {
-          return error
-            .withNote('parentheses must be properly matched in function calls')
-            .withNote("add the missing ')' before the opening brace '{'", 'help');
-        }
-        return error
-          .withNote('parentheses must be properly matched in function calls')
-          .withNote("add the missing ')' before the opening brace '{'", 'help');
-
-      case ErrorCode.E0003:
-        return error
-          .withNote('braces must be properly matched in block statements')
-          .withNote("add the missing '}' at the end of the block", 'help');
-
-      case ErrorCode.E0004:
-        return error
-          .withNote('brackets must be properly matched in array/index expressions')
-          .withNote("add the missing ']' to close the bracket", 'help');
-
-      case ErrorCode.E0005:
-        if (offendingSymbol) {
-          const tokenText = offendingSymbol.text;
-          if (tokenText === '<EOF>') {
-            return error
-              .withNote('the file ended unexpectedly')
-              .withNote(
-                "check if you're missing closing braces, parentheses, or other delimiters",
-                'help'
-              );
-          } else if (tokenText === '}') {
-            if (lowerMsg.includes('no viable alternative')) {
-              return error
-                .withNote('found closing brace in unexpected location')
-                .withNote("check if you're missing a value in an assignment above", 'help');
-            }
-            return error
-              .withNote(`found unexpected closing brace '${tokenText}'`)
-              .withNote('check the syntax around this location', 'help');
-          } else {
-            return error
-              .withNote(`found unexpected token '${tokenText}'`)
-              .withNote('check the syntax around this location', 'help');
-          }
-        }
-        break;
-
-      case ErrorCode.E0006: {
-        const identifierName = this.getIncompleteIdentifierName();
-        return error
-          .withNote('configuration calls require either parentheses or a body')
-          .withNote(
-            `try adding parentheses: ${identifierName}() or a body: ${identifierName} {}`,
-            'help'
-          );
-      }
-    }
-
+  private addContextualNotes(
+    error: ParseError,
+    _msg: string,
+    _offendingSymbol?: Token
+  ): ParseError {
+    // For now, skip contextual notes to avoid duplication with ErrorFormatter help messages
     return error;
   }
 

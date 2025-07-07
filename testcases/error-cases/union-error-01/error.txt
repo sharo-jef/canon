@@ -1,10 +1,10 @@
 error[E0005]: unexpected token
- --> input.canon:1:15
+ --> testcases\error-cases\union-error-01\input.canon:1:15
   |
 1 | union MyUnion string | int
   |               ^
-2 |
+2 | 
   |
   = note: missing '=' at 'string'
-  = note: found unexpected token 'string'
+  = note: found unexpected token
   = help: check the syntax around this location

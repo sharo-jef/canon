@@ -1,6 +1,11 @@
 import { ParseError } from './ParseError';
 import { SourceCodeHighlighter } from './SourceCodeHighlighter';
-import { ErrorCode, getErrorDescription } from './ErrorCode';
+import {
+  ErrorCode,
+  getErrorDescription,
+  getErrorHelpMessage,
+  getErrorSuggestion,
+} from './ErrorCode';
 
 /**
  * Formatting options for error messages
@@ -128,6 +133,21 @@ export class ErrorFormatter {
     // Add custom error message if different from default
     if (error.message !== getErrorDescription(error.code)) {
       lines.push(this.colorize(`  = note: ${error.message}`, 'cyan'));
+    }
+
+    // Add user-friendly help message (avoid duplication)
+    if (this.options.showHelp) {
+      const helpMessage = getErrorHelpMessage(error.code);
+      const suggestion = getErrorSuggestion(error.code);
+
+      // Only add help message if it's different from the custom message
+      if (helpMessage !== 'no additional help available' && error.message !== helpMessage) {
+        lines.push(this.colorize(`  = note: ${helpMessage}`, 'cyan'));
+      }
+
+      if (suggestion !== 'no suggestions available') {
+        lines.push(this.colorize(`  = help: ${suggestion}`, 'cyan'));
+      }
     }
 
     // Add notes and help messages
