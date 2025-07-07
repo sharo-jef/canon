@@ -327,13 +327,25 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       },
     };
 
+    // Determine the kind of variable declaration
+    let kind: string;
+    if (isVal && isVar) {
+      throw new Error('Variable declaration cannot be both val and var');
+    } else if (isVal) {
+      kind = 'val';
+    } else if (isVar) {
+      kind = 'var';
+    } else {
+      throw new Error('Variable declaration must be either val or var');
+    }
+
     const typeCtx = ctx.type();
     const typeRef = typeCtx ? this.visit(typeCtx) : null;
     const value = this.visit(ctx.expression());
 
     return {
       type: 'VariableDeclaration',
-      kind: isVal ? 'val' : 'var',
+      kind,
       name,
       typeRef,
       value,
