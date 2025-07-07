@@ -1,10 +1,11 @@
 error[E0001]: expected expression after '='
- --> input.canon:3:14
+ --> input.canon:4:1
   |
 2 |     name = "test"
 3 |     version = // missing value - syntax error
-  |              ^ expected an expression here
 4 | }
+  | ^ expected an expression here
+5 |
   |
   = note: assignment expressions require a value on the right side
-  = help: try providing a value like: version = "some_value"
+  = help: try providing a value like: some_variable = "some_value"

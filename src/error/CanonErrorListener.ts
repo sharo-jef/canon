@@ -52,6 +52,14 @@ export class CanonErrorListener implements ANTLRErrorListener<Token> {
   ): SourceLocation {
     const lowerMsg = msg.toLowerCase();
 
+    // If we have an offending symbol, use its position (convert from 0-based to 1-based)
+    if (offendingSymbol && offendingSymbol.charPositionInLine >= 0) {
+      return {
+        line: offendingSymbol.line,
+        column: offendingSymbol.charPositionInLine + 1, // Convert from 0-based to 1-based
+      };
+    }
+
     // For incomplete configuration calls, point to the identifier instead of EOF
     if (this.isIncompleteConfigurationCall(msg, offendingSymbol)) {
       const identifierLocation = this.findIdentifierLocation();

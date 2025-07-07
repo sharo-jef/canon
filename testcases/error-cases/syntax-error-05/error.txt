@@ -1,9 +1,12 @@
 error[E0005]: unexpected token
  --> input.canon:3:5
   |
+1 | config {
 2 |     name = "test"
 3 |     = // missing left side of assignment
-  |     ^ unexpected token '='
+  |     ^
+4 |
   |
+  = note: extraneous input '=' expecting {'init', 'private', 'get', 'repeated', 'if', 'not', 'this', MINUS, RBRACE, LPAREN, STRING_LITERAL, DOUBLE_STRING_LITERAL, TEMPLATE_STRING_START, INTEGER_LITERAL, 'true', 'false', ANNOTATION, IDENTIFIER}
   = note: found unexpected token '='
   = help: check the syntax around this location

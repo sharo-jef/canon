@@ -1,11 +1,10 @@
-error[E0002]: missing closing parenthesis
- --> input.canon:1:23
+error[E0014]: unexpected end of file
+ --> input.canon:1:7
   |
 1 | config(arg1, arg2      {
-  |       -                ^ expected ')' here
-  |       |
-  |       opening parenthesis found here
+  |       ^
 2 |     name = "test"
+3 |     version = "1.0.0"
   |
-  = note: parentheses must be properly matched in function calls
+  = note: extraneous input '(' expecting {<EOF>, '#schema', 'schema', 'struct', 'union', 'type', 'use', ANNOTATION, IDENTIFIER}
   = help: add the missing ')' before the opening brace '{'

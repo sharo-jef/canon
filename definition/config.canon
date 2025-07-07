@@ -8,11 +8,20 @@ PluginHeader {
     version = Version(0, 0, 1)
 }
 
+val goBuild = 'go build'
+var goTest = 'go' + ' ' + 'test'
+
+fun join(a: string, b: string): string {
+    a + b
+}
+
+goTest += ' ' + join(getEnv('PIPELINE_HOME_PATH')!, '/test')
+
 pipeline {
     build {
-        command = 'go build'
+        command = goBuild
     }
     test {
-        script = 'go test ' + getEnv('PIPELINE_HOME_PATH') + '/test'
+        script = goTest
     }
 }

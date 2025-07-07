@@ -1,0 +1,12 @@
+error[E0005]: unexpected token
+ --> input.canon:2:5
+  |
+1 | struct MyStruct
+2 |     name: string
+  |     ^
+3 |     age: int
+4 | }
+  |
+  = note: missing '{' at 'name'
+  = note: found unexpected token 'name'
+  = help: check the syntax around this location

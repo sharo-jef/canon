@@ -1,10 +1,9 @@
-error[E0005]: unexpected token
- --> input:3:0
+error[E0014]: unexpected end of file
+ --> input.canon:1:10
   |
+1 | val name = "Test";
+  |          ^
 2 | val message = `Hello, ${name}!;
-3 | 
-  | ^
+3 |
   |
-  = note: extraneous input '<EOF>' expecting {INTERPOLATION_TEXT, '${', INTERPOLATION_DOLLAR, INTERPOLATION_END}
-  = note: the file ended unexpectedly
-  = help: check if you're missing closing braces, parentheses, or other delimiters
+  = note: extraneous input '=' expecting {<EOF>, '#schema', 'schema', 'struct', 'union', 'type', 'use', ANNOTATION, IDENTIFIER}
