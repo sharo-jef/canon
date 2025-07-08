@@ -1,0 +1,16 @@
+// struct型の定義
+struct MyStruct {
+    name: string = "test"
+    value: int = 42
+}
+
+// struct型のインスタンス
+val myInstance: MyStruct = MyStruct {}
+
+// 正常ケース: struct型を渡す
+print(myInstance)
+
+// エラーケース: プリミティブ型を渡す
+print("Hello, World!")  // string型 - エラーになるべき
+print(42)               // int型 - エラーになるべき
+print(true)             // bool型 - エラーになるべき

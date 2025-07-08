@@ -302,6 +302,25 @@ export class SymbolTable {
       type: 'function',
       dataType: 'function -> FloatRange',
     });
+
+    // 標準ライブラリ関数（use文でインポートが必要）
+    this.define({
+      name: 'getEnv',
+      type: 'function',
+      dataType: 'function', // string -> string?
+    });
+
+    this.define({
+      name: 'random',
+      type: 'function',
+      dataType: 'function', // () -> float
+    });
+
+    this.define({
+      name: 'print',
+      type: 'function',
+      dataType: 'function', // any -> void
+    });
   }
 
   /**

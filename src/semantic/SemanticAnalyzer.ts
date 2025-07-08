@@ -1263,6 +1263,24 @@ export class SemanticAnalyzer {
 
     if (!operatorName) return undefined;
 
+    // print関数の特別処理（InfixCallとして解析された場合）
+    if (operatorName === 'print') {
+      // print関数は引数を1つだけ取る（leftまたはrightのどちらか一方）
+      const argType = rightType || leftType;
+      if (!argType) {
+        this.addError({
+          message: `Function 'print()' expects exactly 1 argument, but got 0`,
+          type: 'TypeError',
+          location: this.getLocation(node),
+        });
+        return 'void';
+      }
+
+      // any型を受け付けるため、型チェックなし
+
+      return 'void'; // print関数は戻り値なし
+    }
+
     // infix演算子の型チェック
     if (leftType && rightType) {
       const infixFunctionName = `${leftType}.${operatorName}`;
@@ -1337,6 +1355,31 @@ export class SemanticAnalyzer {
       }
 
       return funcName; // 型キャスト関数の戻り値型は関数名と同じ
+    }
+
+    // print関数の特別処理（struct型の引数のみ受け入れ）
+    if (funcName === 'print') {
+      if (node.arguments && Array.isArray(node.arguments)) {
+        if (node.arguments.length !== 1) {
+          this.addError({
+            message: `Function 'print()' expects exactly 1 argument, but got ${node.arguments.length}`,
+            type: 'TypeError',
+            location: this.getLocation(node),
+          });
+          return 'void';
+        }
+
+        // 引数の型を評価（型チェックなし、any型を受け付け）
+        await this.visitNode(node.arguments[0]);
+      } else {
+        this.addError({
+          message: `Function 'print()' expects exactly 1 argument, but got 0`,
+          type: 'TypeError',
+          location: this.getLocation(node),
+        });
+      }
+
+      return 'void'; // print関数は戻り値なし
     }
 
     // 通常の関数解決
@@ -1764,5 +1807,39 @@ export class SemanticAnalyzer {
     }
 
     return typeName;
+  }
+
+  /**
+   * 型がstruct型またはstructから派生した型かどうかをチェック
+   */
+  private isStructType(typeName: string): boolean {
+    if (!typeName) return false;
+
+    // 基本型（プリミティブ型）は除外
+    if (['int', 'float', 'string', 'bool'].includes(typeName)) {
+      return false;
+    }
+
+    // null許容型の場合は内部型をチェック
+    if (typeName.endsWith('?')) {
+      const innerType = typeName.slice(0, -1);
+      return this.isStructType(innerType);
+    }
+
+    // 配列型の場合は要素型をチェック
+    if (typeName.endsWith('[]')) {
+      const elementType = typeName.slice(0, -2);
+      return this.isStructType(elementType);
+    }
+
+    // シンボルテーブルから型情報を取得
+    const typeSymbol = this.symbolTable.resolve(typeName);
+    if (typeSymbol && typeSymbol.type === 'struct') {
+      return true;
+    }
+
+    // カスタム構造体型として扱う（未定義でもstruct型として扱う）
+    // これにより、ユーザー定義のstruct型も許可される
+    return true;
   }
 }

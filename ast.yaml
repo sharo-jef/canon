@@ -4,236 +4,67 @@ body:
     kind: val
     name:
       type: Identifier
-      name: optionalString
+      name: message
       loc:
         start:
-          line: 2
+          line: 1
           column: 4
         end:
-          line: 2
-          column: 18
-    typeRef:
-      type: NullableType
-      innerType:
-        type: PrimitiveType
-        name: string
-        loc:
-          start:
-            line: 2
-            column: 20
-          end:
-            line: 2
-            column: 26
-      loc:
-        start:
-          line: 2
-          column: 20
-        end:
-          line: 2
-          column: 27
-    value:
-      type: StringLiteral
-      value: hello
-      raw: '"hello"'
-      loc:
-        start:
-          line: 2
-          column: 30
-        end:
-          line: 2
-          column: 37
-    annotations: []
-    loc:
-      start:
-        line: 2
-        column: 0
-      end:
-        line: 2
-        column: 37
-  - type: VariableDeclaration
-    kind: val
-    name:
-      type: Identifier
-      name: nullableInt
-      loc:
-        start:
-          line: 3
-          column: 4
-        end:
-          line: 3
-          column: 15
-    typeRef:
-      type: NullableType
-      innerType:
-        type: PrimitiveType
-        name: int
-        loc:
-          start:
-            line: 3
-            column: 17
-          end:
-            line: 3
-            column: 20
-      loc:
-        start:
-          line: 3
-          column: 17
-        end:
-          line: 3
-          column: 21
-    value:
-      type: IntegerLiteral
-      value: 42
-      raw: '42'
-      loc:
-        start:
-          line: 3
-          column: 24
-        end:
-          line: 3
-          column: 26
-    annotations: []
-    loc:
-      start:
-        line: 3
-        column: 0
-      end:
-        line: 3
-        column: 26
-  - type: VariableDeclaration
-    kind: val
-    name:
-      type: Identifier
-      name: notNull
-      loc:
-        start:
-          line: 6
-          column: 4
-        end:
-          line: 6
+          line: 1
           column: 11
     typeRef:
       type: PrimitiveType
       name: string
       loc:
         start:
-          line: 6
+          line: 1
           column: 13
         end:
-          line: 6
+          line: 1
           column: 19
     value:
-      type: StringLiteral
-      value: test
-      raw: '"test"'
-      loc:
-        start:
-          line: 6
-          column: 22
-        end:
-          line: 6
-          column: 28
-    annotations: []
-    loc:
-      start:
-        line: 6
-        column: 0
-      end:
-        line: 6
-        column: 28
-  - type: VariableDeclaration
-    kind: val
-    name:
-      type: Identifier
-      name: nullable
-      loc:
-        start:
-          line: 7
-          column: 4
-        end:
-          line: 7
-          column: 12
-    typeRef:
-      type: NullableType
-      innerType:
-        type: PrimitiveType
-        name: string
+      type: InfixCall
+      functionName: print
+      left:
+        type: StringLiteral
+        value: Hello, World!
+        raw: '"Hello, World!"'
         loc:
           start:
-            line: 7
-            column: 14
+            line: 1
+            column: 22
           end:
-            line: 7
-            column: 20
+            line: 1
+            column: 37
+      right:
+        type: Identifier
+        name: message
+        loc:
+          start:
+            line: 4
+            column: 6
+          end:
+            line: 4
+            column: 13
       loc:
         start:
-          line: 7
+          line: 1
+          column: 22
+        end:
+          line: 4
           column: 14
-        end:
-          line: 7
-          column: 21
-    value:
-      type: Identifier
-      name: notNull
-      loc:
-        start:
-          line: 7
-          column: 24
-        end:
-          line: 7
-          column: 31
     annotations: []
     loc:
       start:
-        line: 7
+        line: 1
         column: 0
       end:
-        line: 7
-        column: 31
-  - type: VariableDeclaration
-    kind: val
-    name:
-      type: Identifier
-      name: shouldError
-      loc:
-        start:
-          line: 10
-          column: 4
-        end:
-          line: 10
-          column: 15
-    typeRef:
-      type: PrimitiveType
-      name: string
-      loc:
-        start:
-          line: 10
-          column: 17
-        end:
-          line: 10
-          column: 23
-    value:
-      type: Identifier
-      name: nullable
-      loc:
-        start:
-          line: 10
-          column: 26
-        end:
-          line: 10
-          column: 34
-    annotations: []
-    loc:
-      start:
-        line: 10
-        column: 0
-      end:
-        line: 10
-        column: 34
+        line: 4
+        column: 14
 loc:
   start:
-    line: 2
+    line: 1
     column: 0
   end:
-    line: 11
+    line: 5
     column: 5

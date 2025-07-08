@@ -209,7 +209,7 @@ fun random(): float {
     // 0.0 から 1.0 の間のランダムな浮動小数点数を返す疑似コード
     return Math.random()
 }
-fun print(message: struct) {
+fun print(message: any) {
     // 標準出力にメッセージを出力する疑似コード
     console.log(message.toString())
 }

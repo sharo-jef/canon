@@ -1,0 +1,5 @@
+struct MyData {
+    value: int = 10
+}
+
+val data: MyData = MyData {}
