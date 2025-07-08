@@ -1,0 +1,11 @@
+// Test direct array slicing with embedded range
+
+// Define a list of numbers
+val numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+// This should be parsed as a slice expression
+val slice = numbers[2..5]
+
+// Show the result
+print("Numbers: " + string(numbers))
+print("Slice: " + string(slice))

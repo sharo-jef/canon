@@ -1,0 +1,33 @@
+#schema {
+  name: string,
+  age: int,
+  scores: [int],
+  config: {
+    debug: bool,
+    maxAttempts: int
+  }
+}
+
+struct Person {
+  name: string,
+  age: int
+}
+
+fun calculateAverage(scores: [int]) -> float {
+  val sum = scores.reduce(0, fun(acc, x) -> acc + x)
+  return float(sum) / float(scores.length)
+}
+
+val person = Person { name: "Alice", age: 30 }
+val testScores = [85, 92, 78, 96, 88]
+val avgScore = calculateAverage(testScores)
+
+{
+  name: person.name,
+  age: person.age,
+  scores: testScores,
+  config: {
+    debug: true,
+    maxAttempts: 3
+  }
+}

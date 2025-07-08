@@ -1,0 +1,7 @@
+val x = 5
+val y = 10
+val result = x + y
+val list = [1, 2, 3]
+val double = { x -> x * 2 }
+
+result

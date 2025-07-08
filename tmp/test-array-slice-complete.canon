@@ -1,0 +1,11 @@
+// Simple test for array indexing
+
+// Define a list of numbers
+val numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+// Test direct array indexing
+val element = numbers[2]
+
+// Show the result
+print("Numbers: " + string(numbers))
+print("Element at index 2: " + string(element))
