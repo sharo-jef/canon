@@ -1,0 +1,14 @@
+// 簡単なテスト用Canonファイル
+schema {
+    config: Config
+}
+
+struct Config {
+    name: string = "test"
+    count: int = 42
+}
+
+val result = Config {
+    name = "sample"
+    count = 10
+}

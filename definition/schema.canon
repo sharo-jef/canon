@@ -46,7 +46,7 @@ struct Version {
     minor: int
     patch: int
     private hoge: string
-    get toString() {
+    get toString(): string {
         `$major.$minor.$patch`
     }
 }
