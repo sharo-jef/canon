@@ -1,2 +1,0 @@
-val double = { x -> x * 2 }
-val result = double(5)

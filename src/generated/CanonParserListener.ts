@@ -38,8 +38,11 @@ import { LogicalAndExprContext } from "./CanonParser";
 import { LogicalOrExprContext } from "./CanonParser";
 import { PipelineExprContext } from "./CanonParser";
 import { ProgramContext } from "./CanonParser";
+import { ProgramElementContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { UseStatementContext } from "./CanonParser";
+import { StatementSeparatorContext } from "./CanonParser";
+import { StatementSeparatorsContext } from "./CanonParser";
 import { TopLevelStatementContext } from "./CanonParser";
 import { TopLevelElementContext } from "./CanonParser";
 import { SchemaDeclarationContext } from "./CanonParser";
@@ -549,6 +552,17 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitProgram?: (ctx: ProgramContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `CanonParser.programElement`.
+	 * @param ctx the parse tree
+	 */
+	enterProgramElement?: (ctx: ProgramElementContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.programElement`.
+	 * @param ctx the parse tree
+	 */
+	exitProgramElement?: (ctx: ProgramElementContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `CanonParser.schemaDirective`.
 	 * @param ctx the parse tree
 	 */
@@ -569,6 +583,28 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitUseStatement?: (ctx: UseStatementContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.statementSeparator`.
+	 * @param ctx the parse tree
+	 */
+	enterStatementSeparator?: (ctx: StatementSeparatorContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.statementSeparator`.
+	 * @param ctx the parse tree
+	 */
+	exitStatementSeparator?: (ctx: StatementSeparatorContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.statementSeparators`.
+	 * @param ctx the parse tree
+	 */
+	enterStatementSeparators?: (ctx: StatementSeparatorsContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.statementSeparators`.
+	 * @param ctx the parse tree
+	 */
+	exitStatementSeparators?: (ctx: StatementSeparatorsContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.topLevelStatement`.

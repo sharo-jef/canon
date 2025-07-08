@@ -1,7 +1,0 @@
-schema {
-  // Test with expression as step value
-  step_with_expression = 0..100 step (5 * 2)
-  
-  // Test chaining - step should only apply to the immediate range
-  complex_range = (1..10 step 2) + (20..30 step 3)
-}

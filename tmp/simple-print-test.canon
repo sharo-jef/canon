@@ -1,4 +1,0 @@
-val message: string = "Hello, World!"
-
-// プリミティブ型でprint関数をテスト（エラーになるべき）
-print(message)

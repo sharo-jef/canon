@@ -38,8 +38,11 @@ import { LogicalAndExprContext } from "./CanonParser";
 import { LogicalOrExprContext } from "./CanonParser";
 import { PipelineExprContext } from "./CanonParser";
 import { ProgramContext } from "./CanonParser";
+import { ProgramElementContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { UseStatementContext } from "./CanonParser";
+import { StatementSeparatorContext } from "./CanonParser";
+import { StatementSeparatorsContext } from "./CanonParser";
 import { TopLevelStatementContext } from "./CanonParser";
 import { TopLevelElementContext } from "./CanonParser";
 import { SchemaDeclarationContext } from "./CanonParser";
@@ -378,6 +381,13 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitProgram?: (ctx: ProgramContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by `CanonParser.programElement`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitProgramElement?: (ctx: ProgramElementContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `CanonParser.schemaDirective`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -390,6 +400,20 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitUseStatement?: (ctx: UseStatementContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.statementSeparator`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStatementSeparator?: (ctx: StatementSeparatorContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.statementSeparators`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStatementSeparators?: (ctx: StatementSeparatorsContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.topLevelStatement`.

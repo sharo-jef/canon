@@ -1,8 +1,0 @@
-schema {
-  Person: Person
-}
-
-struct Person {
-  name: string
-  age: int
-}

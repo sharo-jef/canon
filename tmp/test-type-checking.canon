@@ -1,9 +1,0 @@
-infix fun int.add(other: int): int {
-    this + other
-}
-
-
-val goodRange = 1..=10 step 2
-val goodDownTo = 10 downTo 1
-val goodAddition = 1 add 2
-val badDownTo = 10 downTo 1

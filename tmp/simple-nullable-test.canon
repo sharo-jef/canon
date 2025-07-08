@@ -1,2 +1,0 @@
-val optionalString: string? = "hello"
-val nullableInt: int? = 42

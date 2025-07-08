@@ -7,8 +7,10 @@ import { CanonLexer } from './generated/CanonLexer';
 import {
   CanonParser,
   ProgramContext,
+  ProgramElementContext,
   SchemaDirectiveContext,
   UseStatementContext,
+  TopLevelStatementContext,
   TopLevelElementContext,
   SchemaDeclarationContext,
   StructDeclarationContext,
@@ -161,10 +163,14 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     for (let i = 0; i < ctx.childCount; i++) {
       const child = ctx.getChild(i);
       if (child instanceof RuleNode) {
-        const result = this.visit(child);
-        if (result && result.type !== 'Unknown') {
-          children.push(result);
+        const ruleName = child.ruleContext?.constructor.name;
+        if (ruleName === 'ProgramElementContext') {
+          const result = this.visit(child);
+          if (result && result.type !== 'Unknown') {
+            children.push(result);
+          }
         }
+        // Skip StatementSeparatorsContext and newline tokens
       }
     }
 
@@ -215,6 +221,36 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       }
     }
     return this.defaultResult();
+  }
+
+  visitTopLevelStatement(ctx: TopLevelStatementContext): ASTNode {
+    // For TopLevelStatement, we need to visit all its elements
+    // and return them as a wrapper or handle them in visitProgram
+
+    // Since this is a container rule, we'll visit all children
+    // and collect the results, but we need to return a single ASTNode
+    const elements: ASTNode[] = [];
+
+    for (let i = 0; i < ctx.childCount; i++) {
+      const child = ctx.getChild(i);
+      if (child instanceof RuleNode) {
+        const ruleName = child.ruleContext?.constructor.name;
+        if (ruleName === 'TopLevelElementContext') {
+          const result = this.visit(child);
+          if (result && result.type !== 'Unknown') {
+            elements.push(result);
+          }
+        }
+        // Skip StatementSeparatorsContext nodes
+      }
+    }
+
+    // Return the elements as a special container
+    return {
+      type: 'TopLevelStatement',
+      elements: elements,
+      loc: this.getLocationInfo(ctx),
+    };
   }
 
   visitSchemaDeclaration(ctx: SchemaDeclarationContext): ASTNode {
@@ -1781,7 +1817,16 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  // ...existing code...
+  visitProgramElement(ctx: ProgramElementContext): ASTNode {
+    // ProgramElement is a choice rule, so we visit the actual content
+    for (let i = 0; i < ctx.childCount; i++) {
+      const child = ctx.getChild(i);
+      if (child instanceof RuleNode) {
+        return this.visit(child);
+      }
+    }
+    return this.defaultResult();
+  }
 }
 
 /**

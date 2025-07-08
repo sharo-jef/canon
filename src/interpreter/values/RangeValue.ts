@@ -84,10 +84,6 @@ export class IntRangeValue extends CanonValue {
     return this.to;
   }
 
-  getStep(): number {
-    return this.step;
-  }
-
   // stepを設定した新しいレンジを返す
   withStep(step: number): IntRangeValue {
     if (!Number.isInteger(step)) {

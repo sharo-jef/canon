@@ -69,6 +69,13 @@ export class StructValue extends CanonValue {
   }
 
   /**
+   * すべてのフィールドを取得
+   */
+  getFields(): Map<string, CanonValue> {
+    return this.fields;
+  }
+
+  /**
    * フィールド値を設定
    */
   setField(name: string, value: CanonValue): void {

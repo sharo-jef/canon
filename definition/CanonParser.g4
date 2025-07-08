@@ -7,16 +7,36 @@ options { tokenVocab = CanonLexer; }
 
 // ───── entry ──────────────────────────────────
 program
-    : (schemaDirective | useStatement | topLevelStatement)* EOF
+    : NEWLINE* programElement (statementSeparators programElement)* NEWLINE* EOF
+    ;
+
+// ───── program elements ──────────────────────
+programElement
+    : schemaDirective
+    | useStatement
+    | topLevelElement
     ;
 
 // ───── directives / imports ───────────────────
 schemaDirective : SCHEMA_DIRECTIVE stringLiteral ;
 useStatement    : USE IDENTIFIER ;
 
+// ───── statement separators ──────────────────
+statementSeparator
+    : SEMICOLON
+    | NEWLINE
+    | SEMICOLON NEWLINE
+    | NEWLINE SEMICOLON
+    ;
+
+// Allow multiple consecutive separators
+statementSeparators
+    : statementSeparator+
+    ;
+
 // ───── top-level ──────────────────────────────
 topLevelStatement
-    : topLevelElement ( SEMICOLON topLevelElement )*
+    : topLevelElement ( statementSeparators topLevelElement )*
     ;
 
 topLevelElement
@@ -32,19 +52,19 @@ topLevelElement
     ;
 
 // ───── declarations ─────────────────
-schemaDeclaration        : annotation* SCHEMA  ( block | stringLiteral ) ;
-structDeclaration        : annotation* STRUCT  IDENTIFIER structBody ;
-unionDeclaration         : annotation* UNION   IDENTIFIER ASSIGN unionType ;
-typeDeclaration          : annotation* TYPE    IDENTIFIER ASSIGN type ;
+schemaDeclaration        : annotation* NEWLINE* SCHEMA  ( block | stringLiteral ) ;
+structDeclaration        : annotation* NEWLINE* STRUCT  IDENTIFIER structBody ;
+unionDeclaration         : annotation* NEWLINE* UNION   IDENTIFIER ASSIGN unionType ;
+typeDeclaration          : annotation* NEWLINE* TYPE    IDENTIFIER ASSIGN type ;
 functionDeclaration
-    : annotation* (INFIX FUN type DOT IDENTIFIER | FUN IDENTIFIER)
+    : annotation* NEWLINE* (INFIX FUN type DOT IDENTIFIER | FUN IDENTIFIER)
       LPAREN parameterList? RPAREN
       ( COLON type )?
       block
     ;
 
 variableDeclaration
-    : annotation* ( VAL | VAR ) IDENTIFIER
+    : annotation* NEWLINE* ( VAL | VAR ) IDENTIFIER
       ( COLON type )?
       ASSIGN expression
     ;
@@ -58,11 +78,11 @@ primitiveType : STRING_TYPE | INT_TYPE | FLOAT_TYPE | BOOL_TYPE ;
 
 // ───── blocks / statements ────────────────────
 block
-    : LBRACE ( statement ( SEMICOLON statement )* )* RBRACE
+    : LBRACE NEWLINE* ( statement ( statementSeparators statement )* )* NEWLINE* RBRACE
     ;
 
 structBody
-    : LBRACE ( structMember ( SEMICOLON structMember )* )* RBRACE
+    : LBRACE NEWLINE* ( structMember ( statementSeparators structMember )* )* NEWLINE* RBRACE
     ;
 
 structMember
@@ -88,7 +108,7 @@ expressionStatement : expression ;
 
 // ───── members & misc. ────────────────────────
 propertyDeclaration
-    : annotation* PRIVATE? IDENTIFIER
+    : annotation* NEWLINE* PRIVATE? IDENTIFIER
       ( QUESTION? COLON type ( ASSIGN expression )? )?
     ;
 
@@ -127,16 +147,16 @@ destructuringProperty
     | IDENTIFIER COLON IDENTIFIER ( ASSIGN expression )?
     ;
 
-initDeclaration    : annotation* INIT ( LPAREN parameterList? RPAREN )? block ;
-getterDeclaration  : annotation* GET  IDENTIFIER LPAREN RPAREN ( COLON type )? block ;
-methodDeclaration  : annotation* PRIVATE? FUN IDENTIFIER
+initDeclaration    : annotation* NEWLINE* INIT ( LPAREN parameterList? RPAREN )? block ;
+getterDeclaration  : annotation* NEWLINE* GET  IDENTIFIER LPAREN RPAREN ( COLON type )? block ;
+methodDeclaration  : annotation* NEWLINE* PRIVATE? FUN IDENTIFIER
                      LPAREN parameterList? RPAREN
                      ( COLON type )?
                      block ;
-repeatedDeclaration: annotation* REPEATED IDENTIFIER COLON type
+repeatedDeclaration: annotation* NEWLINE* REPEATED IDENTIFIER COLON type
                      mappingBlock?
                      ( ASSIGN expression )? ;
-mappingBlock       : LBRACE mappingEntry* RBRACE ;
+mappingBlock       : LBRACE NEWLINE* (mappingEntry (statementSeparators mappingEntry)*)? NEWLINE* RBRACE ;
 mappingEntry       : IDENTIFIER ARROW IDENTIFIER ;
 
 parameterList : parameter ( COMMA parameter )* ;

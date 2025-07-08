@@ -134,7 +134,7 @@ async function runInterpreter(options: CliOptions): Promise<void> {
   if (debug) {
     console.log('[DEBUG] Running interpreter...');
   }
-  const interpreter = new Interpreter({ debug });
+  const interpreter = new Interpreter({ debug, inputFilePath: inputFile });
   const result = interpreter.evaluate(ast);
 
   if (debug) {

@@ -1,4 +1,0 @@
-// Test array indexing
-val numbers = [1, 2, 3, 4, 5]
-val element = numbers[2]
-print("Element: " + string(element))

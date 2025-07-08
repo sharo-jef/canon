@@ -6,11 +6,11 @@
 
 import { promises as fs } from 'fs';
 import * as path from 'path';
-import { parseCanonFile } from '../parser';
-import { SemanticAnalyzer } from '../semantic/SemanticAnalyzer';
-import { Interpreter } from './Interpreter';
-import { SchemaValidator } from './SchemaValidator';
-import { CanonRuntimeError } from './builtins/ErrorBuiltins';
+import { parseCanonFile } from './parser';
+import { SemanticAnalyzer } from './semantic/SemanticAnalyzer';
+import { Interpreter } from './interpreter/Interpreter';
+import { SchemaValidator } from './interpreter/SchemaValidator';
+// import { CanonRuntimeError } from './builtins/ErrorBuiltins';
 
 interface CliOptions {
   inputFile: string;
@@ -56,10 +56,8 @@ async function main() {
   try {
     await runInterpreter(options);
   } catch (error) {
-    if (error instanceof CanonRuntimeError) {
+    if (error instanceof Error) {
       console.error(`Runtime Error: ${error.message}`);
-    } else if (error instanceof Error) {
-      console.error(`Error: ${error.message}`);
       if (options.debug) {
         console.error(error.stack);
       }

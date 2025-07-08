@@ -82,15 +82,20 @@ export class ErrorFormatter {
     );
 
     sourceLines.forEach((line) => {
+      console.log(`DEBUG: ErrorFormatter processing line: "${line}"`);
       if (line.startsWith(' --> ')) {
         lines.push(this.colorize(line, 'blue'));
       } else if (line.includes(' | ')) {
         if (line.includes('^') || line.includes('~')) {
           // Highlight line with caret or tilde - color everything blue except the ^ or ~
           const parts = line.split(' | ');
+          console.log(`DEBUG: ErrorFormatter caret line split: parts=${JSON.stringify(parts)}`);
           if (parts.length >= 2) {
             const prefix = this.colorize(parts[0] + ' |', 'blue');
-            const content = ' ' + parts.slice(1).join(' | ');
+            const content = parts.slice(1).join(' | ');
+            console.log(
+              `DEBUG: ErrorFormatter caret line: prefix="${parts[0] + ' |'}", content="${content}"`
+            );
 
             // Find caret/tilde positions and color them red
             const caretMatch = content.match(/[\^~]+/);

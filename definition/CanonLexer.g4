@@ -1,7 +1,10 @@
 lexer grammar CanonLexer;
 
-// Skip whitespace and comments
-WS: [ \t\r\n]+ -> skip;
+// Skip whitespace (spaces and tabs only)
+WS: [ \t]+ -> skip;
+
+// Newlines are significant for statement separation
+NEWLINE: [\r\n]+ ;
 
 // Comments
 LINE_COMMENT: '//' ~[\r\n]* -> skip;
@@ -164,4 +167,5 @@ INTERPOLATION_EXCLAMATION: '!' -> type(EXCLAMATION);
 INTERPOLATION_BIT_AND: '&' -> type(BIT_AND);
 INTERPOLATION_BIT_OR: '|' -> type(BIT_OR);
 INTERPOLATION_BIT_XOR: '^' -> type(BIT_XOR);
-INTERPOLATION_WS: [ \t\r\n]+ -> skip;
+INTERPOLATION_WS: [ \t]+ -> skip;
+INTERPOLATION_NEWLINE: [\r\n]+ -> skip; // Newlines are skipped inside interpolation

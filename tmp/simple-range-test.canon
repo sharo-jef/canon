@@ -1,6 +1,0 @@
-// Simple array slicing with range
-val numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-
-// Use a range directly in the print statement
-print("Numbers: " + string(numbers))
-print("Slice [1..3]: " + string(numbers[1..3]))

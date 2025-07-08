@@ -1,1 +1,0 @@
-val simpleStepTest = 1..10 step "hello"

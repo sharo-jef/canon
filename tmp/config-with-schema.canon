@@ -1,6 +1,0 @@
-#schema './tmp/schema.canon'
-
-Person {
-  name = "Alice"
-  age = 30
-}

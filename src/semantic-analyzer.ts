@@ -5,20 +5,21 @@
  */
 
 import { SemanticAnalyzer } from './semantic/SemanticAnalyzer';
-import path from 'path';
 
 async function main() {
   const args = process.argv.slice(2);
-  const astFilePath = args[0] || path.join(__dirname, '..', 'ast.yaml');
+  const astFilePath = 'ast.yaml';
+  const sourceFilePath = args[0] || 'definition/schema.canon';
 
   console.log(`Canon Semantic Analyzer`);
+  console.log(`Source file: ${sourceFilePath}`);
   console.log(`AST file: ${astFilePath}`);
   console.log('='.repeat(50));
 
   const analyzer = new SemanticAnalyzer();
 
   try {
-    const result = await analyzer.analyzeFromFile(astFilePath);
+    const result = await analyzer.analyzeFromFile(astFilePath, sourceFilePath);
 
     if (result.success) {
       console.log('✅ Semantic analysis completed successfully!');

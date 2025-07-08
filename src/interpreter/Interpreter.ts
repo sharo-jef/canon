@@ -109,6 +109,8 @@ export class Interpreter {
         return this.visitSchemaDeclaration(node);
       case 'SchemaDirective':
         return this.visitSchemaDirective(node);
+      case 'UseStatement':
+        return this.visitUseStatement(node);
       case 'SchemaImport':
         return this.visitSchemaImport(node);
       case 'StructDeclaration':
@@ -897,5 +899,49 @@ export class Interpreter {
 
     // Handle other infix operators
     throw new CanonRuntimeError(`Unsupported infix operator: ${node.operator}`);
+  }
+
+  /**
+   * Use文を処理
+   */
+  private visitUseStatement(node: ASTNode): CanonValue {
+    const identifier = node.identifier;
+
+    if (!identifier || !identifier.name) {
+      throw new CanonRuntimeError('Use statement missing identifier');
+    }
+
+    const builtinName = identifier.name;
+
+    // Handle built-in imports
+    switch (builtinName) {
+      case 'print': {
+        const printFunction = new BuiltinFunctionValue('print', (args: CanonValue[]) => {
+          if (args.length === 0) {
+            console.log();
+            return NullValue.getInstance();
+          }
+
+          const output = args
+            .map((arg) => {
+              if (arg.type === 'string') {
+                return arg.toNative();
+              }
+              return arg.toString();
+            })
+            .join(' ');
+
+          console.log(output);
+          return NullValue.getInstance();
+        });
+        this.currentEnv.define('print', printFunction);
+        break;
+      }
+
+      default:
+        throw new CanonRuntimeError(`Unknown built-in: ${builtinName}`);
+    }
+
+    return NullValue.getInstance();
   }
 }

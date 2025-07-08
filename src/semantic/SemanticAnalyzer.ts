@@ -3,8 +3,10 @@
  */
 
 import { SymbolTable } from './SymbolTable';
-import fs from 'fs';
-import yaml from 'js-yaml';
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
+import * as path from 'path';
+import { parseCanonFile } from '../parser';
 
 export interface ASTNode {
   type: string;
@@ -20,10 +22,20 @@ export interface SemanticError {
   type: 'NameError' | 'TypeError' | 'ScopeError' | 'ValidationError';
 }
 
+export interface SchemaProperty {
+  name: string;
+  type: string;
+  isOptional?: boolean;
+  location?: { line: number; column: number };
+}
+
 export class SemanticAnalyzer {
   private symbolTable: SymbolTable;
   private errors: SemanticError[] = [];
   private currentFunctionType?: string;
+  private isInSchema: boolean = false;
+  private schemaDefinition: Map<string, SchemaProperty> = new Map();
+  private currentFilePath?: string;
 
   constructor() {
     this.symbolTable = new SymbolTable();
@@ -32,7 +44,10 @@ export class SemanticAnalyzer {
   /**
    * ASTファイルを読み込んで意味解析を実行
    */
-  async analyzeFromFile(astFilePath: string): Promise<{
+  async analyzeFromFile(
+    astFilePath: string,
+    sourceFilePath?: string
+  ): Promise<{
     success: boolean;
     errors: SemanticError[];
     symbolTable: SymbolTable;
@@ -40,6 +55,24 @@ export class SemanticAnalyzer {
     try {
       const astContent = fs.readFileSync(astFilePath, 'utf8');
       const ast = yaml.load(astContent) as ASTNode;
+
+      // 現在のファイルパスを保存（元のソースファイルパス）
+      this.currentFilePath = sourceFilePath || astFilePath;
+
+      // config.canonファイルが指定されている場合、それも解析してuse文を処理
+      if (sourceFilePath && sourceFilePath.endsWith('.canon')) {
+        try {
+          const configAst = await parseCanonFile(sourceFilePath);
+          if (configAst) {
+            // use文のみを処理
+            await this.processUseStatements(configAst);
+          }
+        } catch (error) {
+          if (process.env.DEBUG) {
+            console.log(`[DEBUG] Failed to parse config file: ${error}`);
+          }
+        }
+      }
 
       await this.analyze(ast);
 
@@ -63,6 +96,35 @@ export class SemanticAnalyzer {
   }
 
   /**
+   * use文のみを処理（config.canonファイルから）
+   */
+  private async processUseStatements(node: ASTNode): Promise<void> {
+    if (!node || typeof node !== 'object') {
+      return;
+    }
+
+    if (node.type === 'UseStatement') {
+      await this.visitUseStatement(node);
+      return;
+    }
+
+    // 子ノードを再帰的に処理
+    for (const [key, value] of Object.entries(node)) {
+      if (key === 'type' || key === 'loc') continue;
+
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          if (item && typeof item === 'object' && item.type) {
+            await this.processUseStatements(item);
+          }
+        }
+      } else if (value && typeof value === 'object' && value.type) {
+        await this.processUseStatements(value);
+      }
+    }
+  }
+
+  /**
    * ASTノードを解析 - 2パス解析を実行
    */
   async analyze(node: ASTNode): Promise<void> {
@@ -76,6 +138,9 @@ export class SemanticAnalyzer {
 
       // Pass 2: 詳細な意味解析
       await this.visitNode(node);
+
+      // Pass 3: Schema completeness validation
+      this.validateSchemaCompleteness();
     } catch (error) {
       this.addError({
         message: `Unexpected error during analysis: ${error}`,
@@ -98,26 +163,26 @@ export class SemanticAnalyzer {
       return;
     }
 
-    // 構造体とユニオンの定義を先に収集
-    if (node.type === 'StructDeclaration') {
-      const structName = node.name?.name;
-      if (structName && !this.symbolTable.isDefined(structName)) {
-        this.symbolTable.define({
-          name: structName,
-          type: 'struct',
-          dataType: structName,
-          location: this.getLocation(node.name),
-        });
-      }
-    } else if (node.type === 'UnionDeclaration') {
-      const unionName = node.name?.name;
-      if (unionName && !this.symbolTable.isDefined(unionName)) {
-        this.symbolTable.define({
-          name: unionName,
-          type: 'union',
-          dataType: unionName,
-          location: this.getLocation(node.name),
-        });
+    switch (node.type) {
+      case 'StructDeclaration':
+      case 'UnionDeclaration': {
+        const typeName = node.name?.name;
+        if (typeName) {
+          try {
+            this.symbolTable.define({
+              name: typeName,
+              type: 'type',
+              dataType: node.type === 'StructDeclaration' ? 'struct' : 'union',
+              location: this.getLocation(node),
+            });
+          } catch {
+            // 重複定義の場合はスキップ
+            if (process.env.DEBUG) {
+              console.log(`[DEBUG] Type already defined: ${typeName}`);
+            }
+          }
+        }
+        break;
       }
     }
 
@@ -142,80 +207,6 @@ export class SemanticAnalyzer {
   }
 
   /**
-   * Pass 2: プロパティ定義を事前に収集
-   */
-  private async collectPropertyDefinitions(node: ASTNode): Promise<void> {
-    if (!node || typeof node !== 'object') {
-      return;
-    }
-
-    if (node.type === 'StructDeclaration') {
-      const structName = node.name?.name;
-      if (structName) {
-        // 構造体スコープに入る
-        this.symbolTable.enterScope(structName);
-
-        // thisを定義
-        this.symbolTable.define({
-          name: 'this',
-          type: 'variable',
-          dataType: structName,
-          location: this.getLocation(node),
-        });
-
-        // プロパティ定義のみを収集
-        if (node.body && Array.isArray(node.body)) {
-          for (const member of node.body) {
-            if (member.type === 'PropertyDeclaration') {
-              await this.collectPropertyDefinition(member);
-            }
-          }
-        }
-
-        this.symbolTable.exitScope();
-      }
-    }
-
-    // 子ノードを再帰的に処理
-    await this.visitChildrenForPropertyCollection(node);
-  }
-
-  private async collectPropertyDefinition(node: ASTNode): Promise<void> {
-    const propName = node.name?.name;
-    if (!propName) return;
-
-    let dataType = 'any';
-    if (node.typeRef) {
-      dataType = node.typeRef.name?.name || node.typeRef.name || 'any';
-    }
-
-    this.symbolTable.define({
-      name: propName,
-      type: 'property',
-      dataType,
-      isPrivate: node.isPrivate || false,
-      isOptional: node.isOptional || false,
-      location: this.getLocation(node.name),
-    });
-  }
-
-  private async visitChildrenForPropertyCollection(node: ASTNode): Promise<void> {
-    for (const [key, value] of Object.entries(node)) {
-      if (key === 'type' || key === 'loc') continue;
-
-      if (Array.isArray(value)) {
-        for (const item of value) {
-          if (item && typeof item === 'object' && item.type) {
-            await this.collectPropertyDefinitions(item);
-          }
-        }
-      } else if (value && typeof value === 'object' && value.type) {
-        await this.collectPropertyDefinitions(value);
-      }
-    }
-  }
-
-  /**
    * ノードタイプに応じて適切な処理メソッドを呼び出す
    */
   private async visitNode(node: ASTNode): Promise<string | undefined> {
@@ -235,8 +226,16 @@ export class SemanticAnalyzer {
     switch (node.type) {
       case 'Program':
         return this.visitProgram(node);
+      case 'SchemaDirective':
+        return this.visitSchemaDirective(node);
+      case 'UseStatement':
+        return this.visitUseStatement(node);
       case 'SchemaDeclaration':
         return this.visitSchemaDeclaration(node);
+      case 'SchemaPropertyDeclaration':
+        return this.visitSchemaPropertyDeclaration(node);
+      case 'SchemaShorthandProperty':
+        return this.visitSchemaShorthandProperty(node);
       case 'StructDeclaration':
         return this.visitStructDeclaration(node);
       case 'UnionDeclaration':
@@ -279,8 +278,32 @@ export class SemanticAnalyzer {
         return this.visitTypeReference(node);
       case 'AssignmentStatement':
         return this.visitAssignmentStatement(node);
+      case 'CallExpression':
+        // CallExpressionは既存のロジックで処理
+        return 'any';
+      case 'LambdaExpression':
+        // LambdaExpressionは既存のロジックで処理
+        return 'function';
+      case 'NonNullAssertionExpression':
+        // NonNullAssertionExpression内の式の型を返す
+        return node.expression ? this.visitNode(node.expression) : undefined;
       case 'IfExpression':
         return this.visitIfExpression(node);
+      case 'RepeatedDeclaration':
+        // 繰り返し宣言の処理
+        return this.visitRepeatedDeclaration(node);
+      case 'MappingBlock':
+        // マッピングブロックの処理
+        return this.visitMappingBlock(node);
+      case 'MappingEntry':
+        // マッピングエントリの処理
+        return this.visitMappingEntry(node);
+      case 'InitDeclaration':
+        // コンストラクタ内の初期化処理
+        return this.visitInitDeclaration(node);
+      case 'Parameter':
+        // 関数パラメータの処理
+        return this.visitParameter(node);
       case 'StringLiteral':
         return 'string';
       case 'TemplateLiteral':
@@ -314,15 +337,141 @@ export class SemanticAnalyzer {
   }
 
   private async visitSchemaDeclaration(node: ASTNode): Promise<string | undefined> {
+    this.isInSchema = true;
+    this.schemaDefinition.clear();
+
     this.symbolTable.enterScope('schema');
 
     if (node.body && Array.isArray(node.body)) {
       for (const child of node.body) {
-        await this.visitNode(child);
+        // Schema内のPropertyDeclarationを処理
+        if (child.type === 'PropertyDeclaration') {
+          // 型が指定されていない場合は、プロパティ名と同じ型を使用
+          const propertyName = child.name?.name;
+          const propertyType = child.typeRef ? await this.visitNode(child.typeRef) : propertyName;
+
+          if (propertyName) {
+            this.schemaDefinition.set(propertyName, {
+              name: propertyName,
+              type: propertyType || 'any',
+              isOptional: child.isOptional || false,
+              location: this.getLocation(child),
+            });
+          }
+        } else {
+          await this.visitNode(child);
+        }
       }
     }
 
+    // スキーマプロパティをグローバルスコープで使用できるようにシンボルテーブルに追加
     this.symbolTable.exitScope();
+    for (const [propertyName, schemaProperty] of this.schemaDefinition) {
+      try {
+        this.symbolTable.define({
+          name: propertyName,
+          type: 'variable',
+          dataType: schemaProperty.type,
+          location: schemaProperty.location,
+        });
+
+        if (process.env.DEBUG) {
+          console.log(
+            `[DEBUG] Schema property added to global scope: ${propertyName}: ${schemaProperty.type}`
+          );
+        }
+      } catch {
+        if (process.env.DEBUG) {
+          console.log(`[DEBUG] Schema property already exists: ${propertyName}`);
+        }
+        // 既に定義されている場合はスキップ（重複定義エラーを避ける）
+      }
+    }
+
+    this.isInSchema = false;
+    return undefined;
+  }
+
+  /**
+   * Schema property declaration: propertyName: Type
+   */
+  private async visitSchemaPropertyDeclaration(node: ASTNode): Promise<string | undefined> {
+    if (!this.isInSchema) {
+      this.addError({
+        message: 'Property declarations are only allowed within schema blocks',
+        type: 'ValidationError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    const propertyName = node.name?.name;
+    const propertyType =
+      node.typeAnnotation || node.typeRef
+        ? await this.visitNode(node.typeAnnotation || node.typeRef)
+        : 'any';
+
+    if (!propertyName) {
+      this.addError({
+        message: 'Schema property declaration missing name',
+        type: 'ValidationError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    // Check if type is valid
+    if (propertyType && !this.symbolTable.isTypeDefined(propertyType)) {
+      this.addError({
+        message: `Undefined type '${propertyType}' in schema property '${propertyName}'`,
+        type: 'TypeError',
+        location: this.getLocation(node),
+      });
+    }
+
+    // Store schema property definition
+    this.schemaDefinition.set(propertyName, {
+      name: propertyName,
+      type: propertyType || 'any',
+      isOptional: node.isOptional || false,
+      location: this.getLocation(node),
+    });
+
+    return undefined;
+  }
+
+  /**
+   * Schema shorthand property: propertyName
+   */
+  private async visitSchemaShorthandProperty(node: ASTNode): Promise<string | undefined> {
+    if (!this.isInSchema) {
+      this.addError({
+        message: 'Property declarations are only allowed within schema blocks',
+        type: 'ValidationError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    const propertyName = node.name?.name || node.name;
+
+    if (!propertyName) {
+      this.addError({
+        message: 'Schema shorthand property missing name',
+        type: 'ValidationError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    // Store schema property definition with inferred type
+    this.schemaDefinition.set(propertyName, {
+      name: propertyName,
+      type: 'any', // Type will be inferred from usage
+      isOptional: node.isOptional || false,
+      location: this.getLocation(node),
+    });
+
     return undefined;
   }
 
@@ -341,114 +490,40 @@ export class SemanticAnalyzer {
     this.symbolTable.enterScope(structName);
 
     // thisキーワードを定義
-    this.symbolTable.define({
-      name: 'this',
-      type: 'variable',
-      dataType: structName,
-      location: this.getLocation(node),
-    });
-
-    // パス1: 構造体メンバーの宣言を収集
-    if (node.body && Array.isArray(node.body)) {
-      for (const member of node.body) {
-        await this.collectStructMemberDeclarations(member);
+    try {
+      this.symbolTable.define({
+        name: 'this',
+        type: 'variable',
+        dataType: structName,
+        location: this.getLocation(node),
+      });
+    } catch {
+      if (process.env.DEBUG) {
+        console.log(`[DEBUG] 'this' already defined in scope: ${structName}`);
       }
     }
 
-    // パス2: 構造体メンバーの実装を処理
+    // 構造体のメンバーを処理
     if (node.body && Array.isArray(node.body)) {
       for (const member of node.body) {
-        await this.processStructMemberBodies(member);
+        await this.visitNode(member);
       }
     }
 
     this.symbolTable.exitScope();
-    return structName;
+    return undefined;
   }
 
-  /**
-   * 構造体メンバーの宣言のみを収集（実装は処理しない）
-   */
-  private async collectStructMemberDeclarations(node: ASTNode): Promise<void> {
-    switch (node.type) {
-      case 'PropertyDeclaration':
-        await this.visitPropertyDeclaration(node);
-        break;
-      case 'MethodDeclaration':
-      case 'GetterDeclaration':
-        // メソッドの宣言のみ処理（ボディは後で処理）
-        await this.visitMethodDeclarationOnly(node);
-        break;
-      case 'FunctionDeclaration':
-        // 関数の宣言のみ処理
-        await this.visitFunctionDeclarationOnly(node);
-        break;
-      case 'VariableDeclaration':
-        // 変数宣言はそのまま処理（値の評価は後で）
-        await this.visitVariableDeclarationOnly(node);
-        break;
-    }
-  }
-
-  /**
-   * 構造体メンバーの実装を処理
-   */
-  private async processStructMemberBodies(node: ASTNode): Promise<void> {
-    switch (node.type) {
-      case 'MethodDeclaration':
-      case 'GetterDeclaration':
-        // メソッドのボディを処理
-        await this.visitMethodBody(node);
-        break;
-      case 'FunctionDeclaration':
-        // 関数のボディを処理
-        await this.visitFunctionBody(node);
-        break;
-      case 'VariableDeclaration':
-        // 変数の初期化子を処理
-        await this.visitVariableInitializer(node);
-        break;
-      case 'InitDeclaration':
-      case 'ExpressionStatement':
-      case 'CallExpression':
-        // その他の文や式を処理
-        await this.visitNode(node);
-        break;
-    }
-  }
-
-  private async visitUnionDeclaration(node: ASTNode): Promise<string | undefined> {
-    const unionName = node.name?.name;
-    if (!unionName) {
-      this.addError({
-        message: 'Union declaration missing name',
-        type: 'ValidationError',
-        location: this.getLocation(node),
-      });
-      return undefined;
-    }
-
-    // ユニオンは既にPass1で登録済みなので、重複登録しない
-    // 型の有効性をチェック
-    if (node.types && Array.isArray(node.types)) {
-      for (const typeRef of node.types) {
-        const typeName = typeRef.name?.name || typeRef.name;
-        if (typeName && !this.symbolTable.isDefined(typeName)) {
-          this.addError({
-            message: `Unknown type '${typeName}' in union '${unionName}'`,
-            type: 'TypeError',
-            location: this.getLocation(typeRef),
-          });
-        }
-      }
-    }
-
-    return unionName;
+  private async visitUnionDeclaration(_node: ASTNode): Promise<string | undefined> {
+    // Union declarations are mainly type definitions
+    return undefined;
   }
 
   private async visitFunctionDeclaration(node: ASTNode): Promise<string | undefined> {
-    const funcName = node.name?.name;
-    if (!funcName) {
+    const functionName = node.name?.name;
+    const returnType = node.returnType ? await this.visitNode(node.returnType) : 'void';
+
+    if (!functionName) {
       this.addError({
         message: 'Function declaration missing name',
         type: 'ValidationError',
@@ -457,47 +532,44 @@ export class SemanticAnalyzer {
       return undefined;
     }
 
-    // infix関数の場合は receiverType.functionName として登録
-    let fullFunctionName = funcName;
-    if (node.isInfix && node.receiverType) {
-      const receiverTypeName = node.receiverType.name;
-      if (receiverTypeName) {
-        fullFunctionName = `${receiverTypeName}.${funcName}`;
-      }
-    }
-
     // 関数をシンボルテーブルに登録
-    let functionType = 'function';
-    if (node.returnType) {
-      const returnTypeName = node.returnType.name?.name || node.returnType.name;
-      if (returnTypeName) {
-        functionType = `function -> ${returnTypeName}`;
+    try {
+      this.symbolTable.define({
+        name: functionName,
+        type: 'function',
+        dataType: returnType || 'void',
+        location: this.getLocation(node),
+      });
+    } catch {
+      if (process.env.DEBUG) {
+        console.log(`[DEBUG] Function already defined: ${functionName}`);
       }
     }
 
-    this.symbolTable.define({
-      name: fullFunctionName,
-      type: 'function',
-      dataType: functionType,
-      isPrivate: node.isPrivate || false,
-      location: this.getLocation(node.name),
-    });
-
-    // 関数内のスコープに入る
-    this.symbolTable.enterScope(fullFunctionName);
-    this.currentFunctionType = functionType;
+    // 関数スコープに入る
+    this.symbolTable.enterScope(functionName);
+    const previousFunctionType = this.currentFunctionType;
+    this.currentFunctionType = returnType;
 
     // パラメータを処理
     if (node.parameters && Array.isArray(node.parameters)) {
       for (const param of node.parameters) {
-        if (param.name?.name) {
-          const paramType = param.typeRef?.name?.name || param.typeRef?.name || 'any';
-          this.symbolTable.define({
-            name: param.name.name,
-            type: 'parameter',
-            dataType: paramType,
-            location: this.getLocation(param.name),
-          });
+        const paramName = param.name?.name;
+        const paramType = param.typeAnnotation ? await this.visitNode(param.typeAnnotation) : 'any';
+
+        if (paramName) {
+          try {
+            this.symbolTable.define({
+              name: paramName,
+              type: 'parameter',
+              dataType: paramType || 'any',
+              location: this.getLocation(param),
+            });
+          } catch {
+            if (process.env.DEBUG) {
+              console.log(`[DEBUG] Parameter already defined: ${paramName}`);
+            }
+          }
         }
       }
     }
@@ -507,14 +579,16 @@ export class SemanticAnalyzer {
       await this.visitNode(node.body);
     }
 
-    this.currentFunctionType = undefined;
+    this.currentFunctionType = previousFunctionType;
     this.symbolTable.exitScope();
-    return functionType;
+    return undefined;
   }
 
   private async visitVariableDeclaration(node: ASTNode): Promise<string | undefined> {
-    const varName = node.name?.name;
-    if (!varName) {
+    const variableName = node.name?.name;
+    let variableType: string | undefined;
+
+    if (!variableName) {
       this.addError({
         message: 'Variable declaration missing name',
         type: 'ValidationError',
@@ -523,66 +597,60 @@ export class SemanticAnalyzer {
       return undefined;
     }
 
-    // 型推論または明示的型チェック
-    let dataType = 'any';
-    let inferredType: string | undefined;
-
-    // 値がある場合は型推論を実行
-    if (node.value) {
-      if (process.env.DEBUG) {
-        console.log(`[DEBUG] Processing variable '${varName}' with value type: ${node.value.type}`);
-      }
-      inferredType = await this.visitNode(node.value);
+    // 型アノテーションがある場合
+    if (node.typeAnnotation) {
+      variableType = await this.visitNode(node.typeAnnotation);
     }
 
-    // 明示型がある場合
-    if (node.typeRef) {
-      let declaredType: string;
+    // 初期化式がある場合
+    if (node.initializer) {
+      const initializerType = await this.visitNode(node.initializer);
 
-      // typeRefも解析対象のASTノードの場合
-      if (node.typeRef.type) {
-        const typeResult = await this.visitNode(node.typeRef);
-        declaredType = typeResult || 'any';
-      } else {
-        // 従来の簡単な形式（PrimitiveTypeの場合など）
-        declaredType = node.typeRef.name?.name || node.typeRef.name || 'any';
+      if (variableType && initializerType) {
+        // 型アノテーションと初期化式の型の互換性をチェック
+        if (!this.isCompatibleType(initializerType, variableType)) {
+          this.addError({
+            message: `Type mismatch: cannot assign '${initializerType}' to '${variableType}'`,
+            type: 'TypeError',
+            location: this.getLocation(node),
+          });
+        }
+      } else if (!variableType) {
+        // 型推論
+        variableType = initializerType;
       }
-
-      if (process.env.DEBUG) {
-        console.log(
-          `[DEBUG] Variable '${varName}': inferred type = ${inferredType || 'none'}, declared type = ${declaredType}`
-        );
-      }
-
-      // 型チェック：推論型と明示型の一致を確認
-      if (inferredType && !this.isCompatibleType(inferredType, declaredType)) {
-        this.addTypeError(
-          inferredType,
-          declaredType,
-          this.getLocation(node.value),
-          `variable '${varName}' initialization`
-        );
-      }
-
-      dataType = declaredType;
-    } else if (inferredType) {
-      // 明示型がない場合は推論型を使用
-      dataType = inferredType;
     }
 
-    this.symbolTable.define({
-      name: varName,
-      type: 'variable',
-      dataType,
-      location: this.getLocation(node.name),
-    });
+    // デフォルト型
+    if (!variableType) {
+      variableType = 'any';
+    }
 
-    return dataType;
+    // Schema validation
+    this.validateAgainstSchema(variableName, variableType, node);
+
+    // 変数をシンボルテーブルに登録
+    try {
+      this.symbolTable.define({
+        name: variableName,
+        type: 'variable',
+        dataType: variableType,
+        location: this.getLocation(node),
+      });
+    } catch {
+      if (process.env.DEBUG) {
+        console.log(`[DEBUG] Variable already defined: ${variableName}`);
+      }
+    }
+
+    return variableType;
   }
 
   private async visitPropertyDeclaration(node: ASTNode): Promise<string | undefined> {
-    const propName = node.name?.name;
-    if (!propName) {
+    const propertyName = node.name?.name;
+    const propertyType = node.typeAnnotation ? await this.visitNode(node.typeAnnotation) : 'any';
+
+    if (!propertyName) {
       this.addError({
         message: 'Property declaration missing name',
         type: 'ValidationError',
@@ -591,41 +659,28 @@ export class SemanticAnalyzer {
       return undefined;
     }
 
-    let dataType = 'any';
-    if (node.typeRef) {
-      dataType = node.typeRef.name?.name || node.typeRef.name || 'any';
-
-      // 型の存在確認
-      if (
-        dataType !== 'any' &&
-        !this.isBuiltinType(dataType) &&
-        !this.symbolTable.isDefined(dataType)
-      ) {
-        this.addError({
-          message: `Unknown type '${dataType}' for property '${propName}'`,
-          type: 'TypeError',
-          location: this.getLocation(node.typeRef),
-        });
+    // プロパティをシンボルテーブルに登録
+    try {
+      this.symbolTable.define({
+        name: propertyName,
+        type: 'property',
+        dataType: propertyType || 'any',
+        isPrivate: node.isPrivate || false,
+        location: this.getLocation(node),
+      });
+    } catch {
+      if (process.env.DEBUG) {
+        console.log(`[DEBUG] Property already defined: ${propertyName}`);
       }
-    } else if (node.initializer) {
-      const inferredType = await this.visitNode(node.initializer);
-      dataType = inferredType || 'any';
     }
 
-    this.symbolTable.define({
-      name: propName,
-      type: 'property',
-      dataType,
-      isPrivate: node.isPrivate || false,
-      isOptional: node.isOptional || false,
-      location: this.getLocation(node.name),
-    });
-
-    return dataType;
+    return propertyType;
   }
 
   private async visitMethodDeclaration(node: ASTNode): Promise<string | undefined> {
     const methodName = node.name?.name;
+    const returnType = node.returnType ? await this.visitNode(node.returnType) : 'void';
+
     if (!methodName) {
       this.addError({
         message: 'Method declaration missing name',
@@ -635,444 +690,446 @@ export class SemanticAnalyzer {
       return undefined;
     }
 
-    if (process.env.DEBUG && methodName === 'toString') {
-      console.log(`[DEBUG] Processing getter '${methodName}', type: ${node.type}`);
-      console.log(`[DEBUG] Node returnType:`, node.returnType);
-      console.log(`[DEBUG] Node body:`, node.body?.type);
-    }
-
-    // メソッドの戻り値型を決定
-    let returnType = 'void';
-    let explicitReturnType: string | undefined = undefined;
-
-    if (node.returnType) {
-      // 明示的に指定された戻り値型
-      const typeStr = node.returnType.name?.name || node.returnType.name || 'void';
-      explicitReturnType = typeStr;
-      returnType = typeStr;
-    }
-
-    // getterの場合は戻り値型を推論
-    if (node.type === 'GetterDeclaration' && node.body) {
-      this.symbolTable.enterScope(methodName);
-      const inferredType = await this.visitNode(node.body);
-      this.symbolTable.exitScope();
-
-      if (process.env.DEBUG && methodName === 'toString') {
-        console.log(`[DEBUG] Inferred type for '${methodName}': ${inferredType}`);
-      }
-
-      if (inferredType) {
-        if (explicitReturnType) {
-          // 明示指定と推論結果を比較
-          if (!this.isCompatibleType(inferredType, explicitReturnType)) {
-            this.addTypeError(
-              inferredType,
-              explicitReturnType,
-              this.getLocation(node.returnType),
-              `getter '${methodName}' return type`
-            );
-          }
-        } else {
-          // 明示指定がない場合は推論結果を使用
-          returnType = inferredType;
-        }
-      }
-    }
-
     // メソッドをシンボルテーブルに登録
-    this.symbolTable.define({
-      name: methodName,
-      type: 'function',
-      dataType: `function -> ${returnType}`,
-      isPrivate: node.isPrivate || false,
-      location: this.getLocation(node.name),
-    });
-
-    // 通常のメソッドの場合は本体を処理
-    if (node.type !== 'GetterDeclaration' || !node.returnType) {
-      // メソッド内のスコープに入る
-      this.symbolTable.enterScope(methodName);
-
-      // パラメータを処理
-      if (node.parameters && Array.isArray(node.parameters)) {
-        for (const param of node.parameters) {
-          if (param.name?.name) {
-            const paramType = param.typeRef?.name?.name || param.typeRef?.name || 'any';
-            this.symbolTable.define({
-              name: param.name.name,
-              type: 'parameter',
-              dataType: paramType,
-              location: this.getLocation(param.name),
-            });
-          }
-        }
+    try {
+      this.symbolTable.define({
+        name: methodName,
+        type: 'function',
+        dataType: returnType || 'void',
+        location: this.getLocation(node),
+      });
+    } catch {
+      if (process.env.DEBUG) {
+        console.log(`[DEBUG] Method already defined: ${methodName}`);
       }
-
-      // メソッド本体を処理
-      if (node.body) {
-        await this.visitNode(node.body);
-      }
-
-      this.symbolTable.exitScope();
     }
 
-    return `function -> ${returnType}`;
+    return returnType;
   }
 
-  /**
-   * メソッド・ゲッターの宣言のみを処理（実装は後で処理）
-   */
-  private async visitMethodDeclarationOnly(node: ASTNode): Promise<void> {
-    const methodName = node.name?.name;
-    if (!methodName) {
+  private async visitIdentifier(node: ASTNode): Promise<string | undefined> {
+    const identifierName = node.name;
+
+    if (!identifierName) {
+      return undefined;
+    }
+
+    const symbol = this.symbolTable.resolve(identifierName);
+    if (!symbol) {
       this.addError({
-        message: 'Method declaration missing name',
+        message: `Undefined identifier '${identifierName}'`,
+        type: 'NameError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    return symbol.dataType;
+  }
+
+  private async visitRangeExpression(node: ASTNode): Promise<string | undefined> {
+    const startType = node.start ? await this.visitNode(node.start) : undefined;
+    const endType = node.end ? await this.visitNode(node.end) : undefined;
+
+    // 範囲の開始と終了が数値型であることを確認
+    if (startType && !this.isNumericType(startType)) {
+      this.addError({
+        message: `Range start must be numeric, got '${startType}'`,
+        type: 'TypeError',
+        location: this.getLocation(node.start),
+      });
+    }
+
+    if (endType && !this.isNumericType(endType)) {
+      this.addError({
+        message: `Range end must be numeric, got '${endType}'`,
+        type: 'TypeError',
+        location: this.getLocation(node.end),
+      });
+    }
+
+    return '[int]'; // 範囲は整数の配列として扱う
+  }
+
+  private async visitInfixFunctionCall(node: ASTNode): Promise<string | undefined> {
+    const leftType = node.left ? await this.visitNode(node.left) : undefined;
+    const rightType = node.right ? await this.visitNode(node.right) : undefined;
+    const operatorName = node.operator?.name || node.operator;
+
+    if (operatorName === 'until' || operatorName === 'to') {
+      // 範囲演算子の場合
+      if (leftType && !this.isNumericType(leftType)) {
+        this.addError({
+          message: `Range start must be numeric, got '${leftType}'`,
+          type: 'TypeError',
+          location: this.getLocation(node.left),
+        });
+      }
+
+      if (rightType && !this.isNumericType(rightType)) {
+        this.addError({
+          message: `Range end must be numeric, got '${rightType}'`,
+          type: 'TypeError',
+          location: this.getLocation(node.right),
+        });
+      }
+
+      return '[int]';
+    }
+
+    // その他の中置演算子の処理
+    return this.inferBinaryOperationType(leftType, rightType, operatorName);
+  }
+
+  private async visitFunctionCall(node: ASTNode): Promise<string | undefined> {
+    const functionName = node.function?.name || node.name?.name;
+
+    if (!functionName) {
+      this.addError({
+        message: 'Function call missing function name',
         type: 'ValidationError',
         location: this.getLocation(node),
       });
-      return;
+      return undefined;
     }
 
-    // 戻り値型の処理
-    let declaredReturnType: string | undefined;
-    if (node.returnType) {
-      declaredReturnType = node.returnType.name?.name || node.returnType.name;
+    const symbol = this.symbolTable.resolve(functionName);
+    if (!symbol) {
+      this.addError({
+        message: `Undefined function '${functionName}'`,
+        type: 'NameError',
+        location: this.getLocation(node),
+      });
+      return undefined;
     }
 
-    // 一時的にシンボルテーブルに登録（本体処理で型を更新する）
-    const functionType = declaredReturnType
-      ? `function -> ${declaredReturnType}`
-      : 'function -> unknown';
-
-    this.symbolTable.define({
-      name: methodName,
-      type: 'function',
-      dataType: functionType,
-      isPrivate: node.isPrivate || false,
-      location: this.getLocation(node.name),
-    });
-
-    if (process.env.DEBUG) {
-      console.log(`[DEBUG] Method declaration: ${methodName} with type: ${functionType}`);
+    if (symbol.type !== 'function' && symbol.type !== 'cast_function') {
+      this.addError({
+        message: `'${functionName}' is not a function`,
+        type: 'TypeError',
+        location: this.getLocation(node),
+      });
+      return undefined;
     }
+
+    // 引数の型チェック
+    if (node.arguments && Array.isArray(node.arguments)) {
+      for (const arg of node.arguments) {
+        await this.visitNode(arg);
+      }
+    }
+
+    return symbol.dataType;
   }
 
-  /**
-   * メソッド・ゲッターの本体を処理
-   */
-  private async visitMethodBody(node: ASTNode): Promise<void> {
-    const methodName = node.name?.name;
-    if (!methodName) return;
+  private async visitBinaryExpression(node: ASTNode): Promise<string | undefined> {
+    const leftType = node.left ? await this.visitNode(node.left) : undefined;
+    const rightType = node.right ? await this.visitNode(node.right) : undefined;
+    const operator = node.operator;
 
-    // メソッドスコープに入る
-    this.symbolTable.enterScope(methodName);
+    return this.inferBinaryOperationType(leftType, rightType, operator);
+  }
 
-    // パラメータを処理
-    if (node.parameters && Array.isArray(node.parameters)) {
-      for (const param of node.parameters) {
-        if (param.name?.name) {
-          const paramType = param.typeRef?.name?.name || param.typeRef?.name || 'any';
-          this.symbolTable.define({
-            name: param.name.name,
-            type: 'parameter',
-            dataType: paramType,
-            location: this.getLocation(param.name),
+  private async visitMemberAccess(node: ASTNode): Promise<string | undefined> {
+    const objectType = node.object ? await this.visitNode(node.object) : undefined;
+    const propertyName = node.property?.name || node.member?.name;
+
+    if (!objectType || !propertyName) {
+      return undefined;
+    }
+
+    // 構造体のメンバアクセスの場合
+    if (this.isStructType(objectType)) {
+      // 構造体の定義からプロパティの型を取得
+      const structScope = this.symbolTable.findTypeScope(objectType);
+      if (structScope) {
+        const propertySymbol = structScope.symbols.get(propertyName);
+        if (propertySymbol) {
+          return propertySymbol.dataType;
+        }
+      }
+
+      this.addError({
+        message: `Property '${propertyName}' does not exist on type '${objectType}'`,
+        type: 'TypeError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    return 'any';
+  }
+
+  private async visitThisExpression(node: ASTNode): Promise<string | undefined> {
+    const thisSymbol = this.symbolTable.resolve('this');
+    if (!thisSymbol) {
+      this.addError({
+        message: "'this' can only be used within struct methods",
+        type: 'ScopeError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    return thisSymbol.dataType;
+  }
+
+  private async visitTypeCastExpression(node: ASTNode): Promise<string | undefined> {
+    const targetType = node.targetType ? await this.visitNode(node.targetType) : undefined;
+    const expressionType = node.expression ? await this.visitNode(node.expression) : undefined;
+
+    if (!targetType) {
+      this.addError({
+        message: 'Type cast missing target type',
+        type: 'ValidationError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    // 型キャストの妥当性をチェック
+    if (expressionType && !this.isValidCast(expressionType, targetType)) {
+      this.addError({
+        message: `Cannot cast '${expressionType}' to '${targetType}'`,
+        type: 'TypeError',
+        location: this.getLocation(node),
+      });
+    }
+
+    return targetType;
+  }
+
+  private async visitNullableType(node: ASTNode): Promise<string | undefined> {
+    const baseType = node.baseType ? await this.visitNode(node.baseType) : 'any';
+    return baseType + '?';
+  }
+
+  private async visitArrayType(node: ASTNode): Promise<string | undefined> {
+    const elementType = node.elementType ? await this.visitNode(node.elementType) : 'any';
+    return `[${elementType}]`;
+  }
+
+  private async visitPrimitiveType(node: ASTNode): Promise<string | undefined> {
+    return node.name || node.typeName;
+  }
+
+  private async visitTypeReference(node: ASTNode): Promise<string | undefined> {
+    const typeName = node.name?.name || node.typeName;
+
+    if (!typeName) {
+      return 'any';
+    }
+
+    // 型が定義されているかチェック
+    if (!this.symbolTable.isTypeDefined(typeName)) {
+      this.addError({
+        message: `Undefined type '${typeName}'`,
+        type: 'TypeError',
+        location: this.getLocation(node),
+      });
+    }
+
+    return typeName;
+  }
+
+  private async visitAssignmentStatement(node: ASTNode): Promise<string | undefined> {
+    const rightType = node.right ? await this.visitNode(node.right) : undefined;
+
+    // 左辺が識別子の場合、変数の定義または代入
+    if (node.left && node.left.type === 'Identifier') {
+      const variableName = node.left.name;
+      const existingSymbol = this.symbolTable.resolve(variableName);
+
+      if (existingSymbol) {
+        // 既存の変数への代入
+        const leftType = existingSymbol.dataType;
+        if (leftType && rightType && !this.isCompatibleType(rightType, leftType)) {
+          this.addError({
+            message: `Type mismatch: cannot assign '${rightType}' to '${leftType}'`,
+            type: 'TypeError',
+            location: this.getLocation(node),
           });
         }
-      }
-    }
+        return leftType;
+      } else {
+        // 新しい変数の定義
+        const variableType = rightType || 'any';
 
-    // 明示的な戻り値型を取得
-    let declaredReturnType: string | undefined;
-    if (node.returnType) {
-      declaredReturnType = node.returnType.name?.name || node.returnType.name;
-    }
+        // Schema validation
+        this.validateAgainstSchema(variableName, variableType, node);
 
-    // 本体を処理して戻り値型を推論
-    let inferredReturnType: string | undefined;
-    if (node.body) {
-      inferredReturnType = await this.visitBlockAndInferReturnType(node.body);
-    }
-
-    // ゲッターの場合、戻り値型の検証を行う
-    if (node.type === 'GetterDeclaration') {
-      if (declaredReturnType && inferredReturnType) {
-        if (!this.isCompatibleType(inferredReturnType, declaredReturnType)) {
-          this.addTypeError(
-            inferredReturnType,
-            declaredReturnType,
-            this.getLocation(node),
-            `getter '${methodName}' return type`
-          );
+        // 変数をシンボルテーブルに登録
+        try {
+          this.symbolTable.define({
+            name: variableName,
+            type: 'variable',
+            dataType: variableType,
+            location: this.getLocation(node.left),
+          });
+        } catch {
+          if (process.env.DEBUG) {
+            console.log(`[DEBUG] Variable already defined in assignment: ${variableName}`);
+          }
         }
-      }
 
-      // 最終的な戻り値型を決定
-      const finalReturnType = declaredReturnType || inferredReturnType || 'void';
-
-      // シンボルテーブルの型情報を更新
-      this.symbolTable.updateType(methodName, `function -> ${finalReturnType}`);
-
-      if (process.env.DEBUG) {
-        console.log(
-          `[DEBUG] Getter '${methodName}': declared=${declaredReturnType}, inferred=${inferredReturnType}, final=${finalReturnType}`
-        );
+        return variableType;
       }
     } else {
-      // 通常のメソッドの場合
-      const finalReturnType = declaredReturnType || inferredReturnType || 'void';
-      this.symbolTable.updateType(methodName, `function -> ${finalReturnType}`);
-    }
+      // 左辺が識別子以外の場合（メンバアクセスなど）
+      const leftType = node.left ? await this.visitNode(node.left) : undefined;
 
-    this.symbolTable.exitScope();
-  }
-
-  /**
-   * ブロックを処理して戻り値型を推論
-   */
-  private async visitBlockAndInferReturnType(
-    block: ASTNode | ASTNode[]
-  ): Promise<string | undefined> {
-    // blockが配列の場合（getterの本体など）
-    if (Array.isArray(block)) {
-      let lastExpressionType: string | undefined;
-
-      for (const stmt of block) {
-        const stmtType = await this.visitNode(stmt);
-        if (stmtType) {
-          lastExpressionType = stmtType;
-        }
+      if (leftType && rightType && !this.isCompatibleType(rightType, leftType)) {
+        this.addError({
+          message: `Type mismatch: cannot assign '${rightType}' to '${leftType}'`,
+          type: 'TypeError',
+          location: this.getLocation(node),
+        });
       }
 
-      return lastExpressionType || 'void';
+      return leftType;
     }
-
-    // blockがASTNodeの場合（通常のblock）
-    if (!block || !block.body || !Array.isArray(block.body)) {
-      return 'void';
-    }
-
-    let lastExpressionType: string | undefined;
-
-    for (const stmt of block.body) {
-      const stmtType = await this.visitNode(stmt);
-      if (stmtType) {
-        lastExpressionType = stmtType;
-      }
-    }
-
-    return lastExpressionType || 'void';
   }
 
-  /**
-   * 関数の宣言のみを処理
-   */
-  private async visitFunctionDeclarationOnly(node: ASTNode): Promise<void> {
-    // 既存のvisitFunctionDeclarationから宣言部分のみ抽出
-    const funcName = node.name?.name;
-    if (!funcName) {
+  private async visitIfExpression(node: ASTNode): Promise<string | undefined> {
+    const conditionType = node.condition ? await this.visitNode(node.condition) : undefined;
+
+    if (conditionType && conditionType !== 'bool') {
       this.addError({
-        message: 'Function declaration missing name',
+        message: `If condition must be boolean, got '${conditionType}'`,
+        type: 'TypeError',
+        location: this.getLocation(node.condition),
+      });
+    }
+
+    // then分岐とelse分岐の型を取得
+    const thenType = node.thenBranch ? await this.visitNode(node.thenBranch) : undefined;
+    const elseType = node.elseBranch ? await this.visitNode(node.elseBranch) : undefined;
+
+    // 両方の分岐の型が同じ場合はその型を返す
+    if (thenType && elseType && this.isCompatibleType(thenType, elseType)) {
+      return thenType;
+    }
+
+    return 'any';
+  }
+
+  /**
+   * Validate a variable declaration against the current schema
+   */
+  private validateAgainstSchema(variableName: string, variableType: string, location?: any): void {
+    if (this.schemaDefinition.size === 0) {
+      return; // No schema defined
+    }
+
+    const schemaProperty = this.schemaDefinition.get(variableName);
+
+    if (!schemaProperty) {
+      this.addError({
+        message: `Property '${variableName}' is not defined in the schema`,
         type: 'ValidationError',
-        location: this.getLocation(node),
+        location: this.getLocation(location),
       });
       return;
     }
 
-    // infix関数の場合は receiverType.functionName として登録
-    let fullFunctionName = funcName;
-    if (node.isInfix && node.receiverType) {
-      const receiverTypeName = node.receiverType.name;
-      if (receiverTypeName) {
-        fullFunctionName = `${receiverTypeName}.${funcName}`;
-      }
-    }
-
-    // 関数をシンボルテーブルに登録
-    let functionType = 'function';
-    if (node.returnType) {
-      const returnTypeName = node.returnType.name?.name || node.returnType.name;
-      if (returnTypeName) {
-        functionType = `function -> ${returnTypeName}`;
-      }
-    }
-
-    this.symbolTable.define({
-      name: fullFunctionName,
-      type: 'function',
-      dataType: functionType,
-      isPrivate: node.isPrivate || false,
-      location: this.getLocation(node.name),
-    });
-  }
-
-  /**
-   * 関数の本体を処理
-   */
-  private async visitFunctionBody(node: ASTNode): Promise<void> {
-    const funcName = node.name?.name;
-    if (!funcName) return;
-
-    // infix関数の場合は receiverType.functionName として処理
-    let fullFunctionName = funcName;
-    if (node.isInfix && node.receiverType) {
-      const receiverTypeName = node.receiverType.name;
-      if (receiverTypeName) {
-        fullFunctionName = `${receiverTypeName}.${funcName}`;
-      }
-    }
-
-    // 関数内のスコープに入る
-    this.symbolTable.enterScope(fullFunctionName);
-    let functionType = 'function';
-    if (node.returnType) {
-      const returnTypeName = node.returnType.name?.name || node.returnType.name;
-      if (returnTypeName) {
-        functionType = `function -> ${returnTypeName}`;
-      }
-    }
-    this.currentFunctionType = functionType;
-
-    // パラメータを処理
-    if (node.parameters && Array.isArray(node.parameters)) {
-      for (const param of node.parameters) {
-        if (param.name?.name) {
-          const paramType = param.typeRef?.name?.name || param.typeRef?.name || 'any';
-          this.symbolTable.define({
-            name: param.name.name,
-            type: 'parameter',
-            dataType: paramType,
-            location: this.getLocation(param.name),
-          });
-        }
-      }
-    }
-
-    // 関数本体を処理
-    if (node.body) {
-      await this.visitNode(node.body);
-    }
-
-    this.currentFunctionType = undefined;
-    this.symbolTable.exitScope();
-  }
-
-  /**
-   * 変数宣言のみを処理（初期化子は後で処理）
-   */
-  private async visitVariableDeclarationOnly(node: ASTNode): Promise<void> {
-    const varName = node.name?.name;
-    if (!varName) {
+    // Check type compatibility
+    if (
+      schemaProperty.type !== 'any' &&
+      !this.isCompatibleType(variableType, schemaProperty.type)
+    ) {
       this.addError({
-        message: 'Variable declaration missing name',
-        type: 'ValidationError',
-        location: this.getLocation(node),
+        message: `Type mismatch: expected '${schemaProperty.type}' but got '${variableType}' for property '${variableName}'`,
+        type: 'TypeError',
+        location: this.getLocation(location),
       });
-      return;
     }
-
-    // 明示的型がある場合はそれを使用、ない場合は一時的に'any'
-    let dataType = 'any';
-    if (node.typeRef) {
-      dataType = node.typeRef.name?.name || node.typeRef.name || 'any';
-    }
-
-    this.symbolTable.define({
-      name: varName,
-      type: 'variable',
-      dataType,
-      location: this.getLocation(node.name),
-    });
   }
 
   /**
-   * 変数の初期化子を処理
+   * Validate that all required schema properties have been declared
    */
-  private async visitVariableInitializer(node: ASTNode): Promise<void> {
-    const varName = node.name?.name;
-    if (!varName || !node.value) return;
+  private validateSchemaCompleteness(): void {
+    const declaredVariables = new Set<string>();
 
-    // 初期化子の型を推論
-    const inferredType = await this.visitNode(node.value);
-
-    if (process.env.DEBUG) {
-      console.log(
-        `[DEBUG] Variable '${varName}': inferred type = ${inferredType}, declared type = ${node.typeRef?.name?.name || node.typeRef?.name || 'none'}`
-      );
-    }
-
-    // 明示型がある場合は型チェック
-    if (node.typeRef && inferredType) {
-      const declaredType = node.typeRef.name?.name || node.typeRef.name;
-      if (declaredType && !this.isCompatibleType(inferredType, declaredType)) {
-        this.addTypeError(
-          inferredType,
-          declaredType,
-          this.getLocation(node.value),
-          `variable '${varName}' initialization`
-        );
+    // Collect all variable names from symbol table
+    const symbols = this.symbolTable.getAllSymbols();
+    for (const symbol of symbols) {
+      if (symbol.type === 'variable') {
+        declaredVariables.add(symbol.name);
       }
     }
 
-    // 型情報を更新（推論型があればそれを、なければ明示型を使用）
-    const finalType = inferredType || node.typeRef?.name?.name || node.typeRef?.name || 'any';
-    this.symbolTable.updateType(varName, finalType);
+    // Check for missing required properties
+    const schemaEntries = Array.from(this.schemaDefinition.entries());
+    for (const [propertyName, schemaProperty] of schemaEntries) {
+      if (!schemaProperty.isOptional && !declaredVariables.has(propertyName)) {
+        this.addError({
+          message: `Required property '${propertyName}' of type '${schemaProperty.type}' is missing`,
+          type: 'ValidationError',
+          location: schemaProperty.location,
+        });
+      }
+    }
   }
 
   /**
-   * 型の互換性をチェックする（厳密型チェック）
+   * Check if two types are compatible
    */
-  private isCompatibleType(actualType: string | undefined, expectedType: string): boolean {
-    if (!actualType) return false;
-    if (actualType === expectedType) return true;
-
-    // any型は全ての型と互換性がある
-    if (actualType === 'any' || expectedType === 'any') return true;
-
-    // null許容型の互換性チェック
-    // 非null型 -> null許容型 は許可（例: string -> string?）
-    if (expectedType.endsWith('?')) {
-      const baseExpectedType = expectedType.slice(0, -1);
-      return this.isCompatibleType(actualType, baseExpectedType);
+  private isCompatibleType(sourceType: string, targetType: string): boolean {
+    // Exact match
+    if (sourceType === targetType) {
+      return true;
     }
 
-    // null許容型 -> 非null型 は禁止（例: string? -> string）
-    if (actualType.endsWith('?') && !expectedType.endsWith('?')) {
-      return false;
+    // Any type is compatible with everything
+    if (targetType === 'any' || sourceType === 'any') {
+      return true;
     }
 
-    // 暗黙的型変換は行わない（型安全性のため）
-    // 型変換が必要な場合は明示的にint(), float(), string(), bool()関数を使用する
+    // Nullable type compatibility
+    if (targetType.endsWith('?')) {
+      const baseTargetType = targetType.slice(0, -1);
+      return this.isCompatibleType(sourceType, baseTargetType) || sourceType === 'null';
+    }
+
+    // Array type compatibility
+    if (sourceType.startsWith('[') && targetType.startsWith('[')) {
+      const sourceElementType = sourceType.slice(1, -1);
+      const targetElementType = targetType.slice(1, -1);
+      return this.isCompatibleType(sourceElementType, targetElementType);
+    }
+
+    // Numeric type compatibility
+    const numericTypes = ['int', 'float', 'number'];
+    if (numericTypes.includes(sourceType) && numericTypes.includes(targetType)) {
+      return true;
+    }
 
     return false;
   }
 
-  /**
-   * 型チェックエラーを報告する
-   */
-  private addTypeError(
-    actualType: string | undefined,
-    expectedType: string,
-    location: any,
-    context: string = ''
-  ): void {
-    const contextMsg = context ? ` in ${context}` : '';
-    this.addError({
-      message: `Type mismatch${contextMsg}: expected '${expectedType}', but got '${actualType || 'unknown'}'`,
-      type: 'TypeError',
-      location,
-    });
+  // Helper methods
+  private async visitChildren(node: ASTNode): Promise<void> {
+    for (const [key, value] of Object.entries(node)) {
+      if (key === 'type' || key === 'loc') continue;
+
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          if (item && typeof item === 'object' && item.type) {
+            await this.visitNode(item);
+          }
+        }
+      } else if (value && typeof value === 'object' && value.type) {
+        await this.visitNode(value);
+      }
+    }
   }
 
-  /**
-   * ヘルパーメソッド群
-   */
   private addError(error: SemanticError): void {
     this.errors.push(error);
   }
 
-  private getLocation(node: ASTNode): { line: number; column: number } | undefined {
+  private getLocation(node: any): { line: number; column: number } | undefined {
     if (node?.loc?.start) {
       return {
         line: node.loc.start.line || 0,
@@ -1082,77 +1139,98 @@ export class SemanticAnalyzer {
     return undefined;
   }
 
-  private getFunctionName(node: ASTNode): string | undefined {
-    if (node?.name) {
-      return node.name;
-    }
-    if (node?.type === 'Identifier') {
-      return node.name;
-    }
-    return undefined;
-  }
-
-  private extractReturnType(functionType: string): string {
-    const match = functionType.match(/function -> (.+)/);
-    return match ? match[1] : 'any';
-  }
-
-  private extractParameterType(functionType: string): string | undefined {
-    // infix関数は通常 "function -> returnType" の形式
-    // パラメータ型情報は関数名から推論する
-
-    // step演算子の場合は int が期待される
-    if (functionType.includes('step') && functionType.includes('function -> IntRange')) {
-      return 'int';
-    } else if (functionType.includes('step') && functionType.includes('function -> FloatRange')) {
-      return 'int'; // step値はintのみ許可
-    }
-    // 一般的なinfix演算子の型を返す
-    else if (functionType.includes('function -> int')) {
-      return 'int'; // 例: int.add(other: int): int
-    } else if (functionType.includes('function -> float')) {
-      return 'float';
-    } else if (functionType.includes('function -> string')) {
-      return 'string';
-    }
-
-    return 'any'; // デフォルト
-  }
-
-  private extractParameterTypeByName(
-    operatorName: string,
-    functionType: string
-  ): string | undefined {
-    // 演算子名を考慮したパラメータ型の推論
-    if (operatorName === 'step') {
-      return 'int'; // step演算子は常にint引数を期待
-    } else if (
-      operatorName === 'add' ||
-      operatorName === 'sub' ||
-      operatorName === 'mul' ||
-      operatorName === 'div'
-    ) {
-      // 算術演算子は左辺と同じ型の引数を期待
-      if (functionType.includes('function -> int')) {
-        return 'int';
-      } else if (functionType.includes('function -> float')) {
-        return 'float';
-      }
-    } else if (operatorName === 'until' || operatorName === 'downTo') {
-      // range演算子は数値型引数を期待
-      return 'int'; // 一般的にはint
-    }
-
-    // フォールバック: 従来のextractParameterTypeを使用
-    return this.extractParameterType(functionType);
-  }
-
-  private isBuiltinType(type: string): boolean {
-    return ['int', 'float', 'string', 'bool', 'any'].includes(type);
-  }
-
   private isNumericType(type: string): boolean {
-    return ['int', 'float'].includes(type);
+    return ['int', 'float', 'number'].includes(type);
+  }
+
+  private isStructType(typeName: string): boolean {
+    // null許容型の場合は内部型をチェック
+    if (typeName.endsWith('?')) {
+      const innerType = typeName.slice(0, -1);
+      return this.isStructType(innerType);
+    }
+
+    // 配列型の場合は要素型をチェック
+    if (typeName.startsWith('[') && typeName.endsWith(']')) {
+      return false; // 配列は構造体ではない
+    }
+
+    // プリミティブ型ではない場合は構造体の可能性
+    const primitiveTypes = ['int', 'float', 'string', 'bool', 'any', 'void'];
+    if (primitiveTypes.includes(typeName)) {
+      return false;
+    }
+
+    // シンボルテーブルで定義されている型かチェック
+    return this.symbolTable.isTypeDefined(typeName);
+  }
+
+  private inferBinaryOperationType(
+    leftType?: string,
+    rightType?: string,
+    operator?: string
+  ): string {
+    if (!leftType || !rightType) {
+      return 'any';
+    }
+
+    // 比較演算子
+    if (['==', '!=', '<', '>', '<=', '>='].includes(operator || '')) {
+      return 'bool';
+    }
+
+    // 論理演算子
+    if (['&&', '||'].includes(operator || '')) {
+      return 'bool';
+    }
+
+    // 算術演算子
+    if (['+', '-', '*', '/', '%'].includes(operator || '')) {
+      if (this.isNumericType(leftType) && this.isNumericType(rightType)) {
+        // 浮動小数点数が含まれていれば float
+        if (leftType === 'float' || rightType === 'float') {
+          return 'float';
+        }
+        return 'int';
+      }
+
+      // 文字列の結合
+      if (operator === '+' && (leftType === 'string' || rightType === 'string')) {
+        return 'string';
+      }
+    }
+
+    return 'any';
+  }
+
+  private isValidCast(fromType: string, toType: string): boolean {
+    // 同じ型の場合は常に有効
+    if (fromType === toType) {
+      return true;
+    }
+
+    // any型は任意の型にキャスト可能
+    if (fromType === 'any' || toType === 'any') {
+      return true;
+    }
+
+    // 数値型間のキャスト
+    const numericTypes = ['int', 'float', 'number'];
+    if (numericTypes.includes(fromType) && numericTypes.includes(toType)) {
+      return true;
+    }
+
+    // null許容型からベース型へのキャスト
+    if (fromType.endsWith('?') && toType === fromType.slice(0, -1)) {
+      return true;
+    }
+
+    // ベース型からnull許容型へのキャスト
+    if (toType.endsWith('?') && fromType === toType.slice(0, -1)) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -1176,670 +1254,157 @@ export class SemanticAnalyzer {
     this.symbolTable.debug();
   }
 
-  /**
-   * 識別子ノードを処理
-   */
-  private async visitIdentifier(node: ASTNode): Promise<string | undefined> {
-    const name = node.name;
-    if (!name) return undefined;
+  private async visitSchemaDirective(node: ASTNode): Promise<string | undefined> {
+    // スキーマディレクティブの処理 - スキーマファイルを読み込む
+    const schemaPath = node.path;
+    if (schemaPath && typeof schemaPath === 'string') {
+      try {
+        // 相対パスの場合は、元のソースファイルのディレクトリから解決
+        let resolvedPath: string;
+        if (this.currentFilePath && !path.isAbsolute(schemaPath)) {
+          const sourceDir = path.dirname(this.currentFilePath);
+          resolvedPath = path.resolve(sourceDir, schemaPath);
+        } else {
+          resolvedPath = path.resolve(schemaPath);
+        }
 
-    const symbol = this.symbolTable.resolve(name);
-    if (!symbol) {
-      this.addError({
-        message: `Undefined identifier '${name}'`,
-        type: 'NameError',
-        location: this.getLocation(node),
-      });
-      return undefined;
+        if (process.env.DEBUG) {
+          console.log('[DEBUG] Schema directive - currentFilePath:', this.currentFilePath);
+          console.log('[DEBUG] Schema directive - schemaPath:', schemaPath);
+          console.log('[DEBUG] Schema directive - resolvedPath:', resolvedPath);
+        }
+
+        // スキーマファイルをパースしてシンボルテーブルに追加
+        const schemaAst = await parseCanonFile(resolvedPath);
+
+        // 型定義のみを収集（重複定義を避けるため）
+        await this.collectTypeDefinitions(schemaAst);
+
+        // スキーマ定義のみを処理（StructDeclarationなどはスキップ）
+        if (schemaAst.body && Array.isArray(schemaAst.body)) {
+          for (const item of schemaAst.body) {
+            if (item.type === 'SchemaDeclaration') {
+              await this.visitSchemaDeclaration(item);
+            }
+          }
+        }
+
+        if (process.env.DEBUG) {
+          console.log('[DEBUG] Schema file loaded:', schemaPath);
+        }
+      } catch (error) {
+        this.addError({
+          message: `Failed to load schema file: ${schemaPath} - ${error}`,
+          type: 'ValidationError',
+          location: this.getLocation(node),
+        });
+      }
     }
-
-    return symbol.dataType;
+    return undefined;
   }
 
-  /**
-   * Range式を処理
-   */
-  private async visitRangeExpression(node: ASTNode): Promise<string | undefined> {
-    // from/to フィールドの型を確認
-    let fromType: string | undefined;
-    let toType: string | undefined;
+  private async visitInitDeclaration(node: ASTNode): Promise<string | undefined> {
+    // コンストラクタ内の初期化処理
+    if (node.target && node.value) {
+      const valueType = await this.visitNode(node.value);
 
-    if (node.from) {
-      fromType = await this.visitNode(node.from);
-    }
-    if (node.to) {
-      toType = await this.visitNode(node.to);
-    }
-
-    // 型チェック: Range式は数値型でのみ使用可能
-    if (fromType && !this.isNumericType(fromType)) {
-      this.addError({
-        message: `Range operator cannot be applied to '${fromType}'. Range expressions require numeric types.`,
-        type: 'TypeError',
-        location: this.getLocation(node.from),
-      });
-    }
-
-    if (toType && !this.isNumericType(toType)) {
-      this.addError({
-        message: `Range operator cannot be applied to '${toType}'. Range expressions require numeric types.`,
-        type: 'TypeError',
-        location: this.getLocation(node.to),
-      });
-    }
-
-    // 型チェック: from と to は互換性のある数値型である必要がある
-    if (fromType && toType && this.isNumericType(fromType) && this.isNumericType(toType)) {
-      if (!this.isCompatibleType(fromType, toType)) {
-        this.addError({
-          message: `Range operator requires compatible numeric types, but got '${fromType}' and '${toType}'.`,
-          type: 'TypeError',
-          location: this.getLocation(node),
-        });
+      // targetが識別子の場合、変数として定義
+      if (node.target.type === 'Identifier') {
+        const targetName = node.target.name;
+        if (targetName) {
+          try {
+            this.symbolTable.define({
+              name: targetName,
+              type: 'variable',
+              dataType: valueType || 'any',
+              location: this.getLocation(node.target),
+            });
+          } catch {
+            // 重複定義の場合はスキップ
+            if (process.env.DEBUG) {
+              console.log(`[DEBUG] Variable already defined: ${targetName}`);
+            }
+          }
+        }
       }
-    }
-
-    // Range型を返す
-    if (fromType === 'float' || toType === 'float') {
-      return 'FloatRange';
-    } else if (fromType === 'int' || toType === 'int') {
-      return 'IntRange';
-    }
-
-    return 'IntRange'; // デフォルト
-  }
-
-  /**
-   * Infix関数呼び出しを処理
-   */
-  private async visitInfixFunctionCall(node: ASTNode): Promise<string | undefined> {
-    const operatorName = node.operator?.name || node.operator || node.functionName;
-    const leftType = node.left ? await this.visitNode(node.left) : undefined;
-    const rightType = node.right ? await this.visitNode(node.right) : undefined;
-
-    if (process.env.DEBUG) {
-      console.log(`[DEBUG] InfixCall: ${operatorName}, left=${leftType}, right=${rightType}`);
-    }
-
-    if (!operatorName) return undefined;
-
-    // print関数の特別処理（InfixCallとして解析された場合）
-    if (operatorName === 'print') {
-      // print関数は引数を1つだけ取る（leftまたはrightのどちらか一方）
-      const argType = rightType || leftType;
-      if (!argType) {
-        this.addError({
-          message: `Function 'print()' expects exactly 1 argument, but got 0`,
-          type: 'TypeError',
-          location: this.getLocation(node),
-        });
-        return 'void';
-      }
-
-      // any型を受け付けるため、型チェックなし
-
-      return 'void'; // print関数は戻り値なし
-    }
-
-    // infix演算子の型チェック
-    if (leftType && rightType) {
-      const infixFunctionName = `${leftType}.${operatorName}`;
-      const infixFunction = this.symbolTable.resolve(infixFunctionName);
-
-      if (process.env.DEBUG) {
-        console.log(
-          `[DEBUG] Looking for infix function: ${infixFunctionName}, found: ${!!infixFunction}`
-        );
-      }
-
-      if (!infixFunction) {
-        this.addError({
-          message: `Unknown infix operator '${operatorName}' for type '${leftType}'`,
-          type: 'TypeError',
-          location: this.getLocation(node),
-        });
-        return 'any';
-      }
-
-      // infix関数のパラメータ型をチェック
-      const expectedParamType = this.extractParameterTypeByName(
-        operatorName,
-        infixFunction.dataType
-      );
-
-      if (process.env.DEBUG) {
-        console.log(`[DEBUG] Expected param type: ${expectedParamType}, got: ${rightType}`);
-      }
-
-      if (expectedParamType && !this.isCompatibleType(rightType, expectedParamType)) {
-        this.addError({
-          message: `Infix operator '${operatorName}' expects parameter of type '${expectedParamType}', but got '${rightType}'`,
-          type: 'TypeError',
-          location: this.getLocation(node.right),
-        });
-      }
-
-      // 戻り値型を抽出
-      return this.extractReturnType(infixFunction.dataType);
     }
 
     return undefined;
   }
 
-  /**
-   * 関数呼び出しを処理
-   */
-  private async visitFunctionCall(node: ASTNode): Promise<string | undefined> {
-    const funcName = node.function?.name || node.function;
-    if (!funcName) return undefined;
+  private async visitParameter(node: ASTNode): Promise<string | undefined> {
+    // 関数パラメータの処理
+    const paramName = node.name?.name;
+    if (paramName) {
+      const paramType = node.typeRef ? await this.visitNode(node.typeRef) : 'any';
 
-    // 型キャスト関数の特別処理（int(), float(), string(), bool()）
-    if (['int', 'float', 'string', 'bool'].includes(funcName)) {
-      // 引数の型チェック
-      if (node.arguments && Array.isArray(node.arguments)) {
-        if (node.arguments.length !== 1) {
-          this.addError({
-            message: `Type cast function '${funcName}()' expects exactly 1 argument, but got ${node.arguments.length}`,
-            type: 'TypeError',
-            location: this.getLocation(node),
-          });
-          return funcName; // 型キャスト関数の戻り値型は関数名と同じ
-        }
-
-        // 引数の型を評価
-        const argType = await this.visitNode(node.arguments[0]);
-        if (argType) {
-          // 明示的型キャストは任意の型から可能（ただし実行時エラーの可能性あり）
-          console.log(`[DEBUG] Type cast: ${argType} -> ${funcName}`);
-        }
-      }
-
-      return funcName; // 型キャスト関数の戻り値型は関数名と同じ
-    }
-
-    // print関数の特別処理（struct型の引数のみ受け入れ）
-    if (funcName === 'print') {
-      if (node.arguments && Array.isArray(node.arguments)) {
-        if (node.arguments.length !== 1) {
-          this.addError({
-            message: `Function 'print()' expects exactly 1 argument, but got ${node.arguments.length}`,
-            type: 'TypeError',
-            location: this.getLocation(node),
-          });
-          return 'void';
-        }
-
-        // 引数の型を評価（型チェックなし、any型を受け付け）
-        await this.visitNode(node.arguments[0]);
-      } else {
-        this.addError({
-          message: `Function 'print()' expects exactly 1 argument, but got 0`,
-          type: 'TypeError',
+      try {
+        this.symbolTable.define({
+          name: paramName,
+          type: 'parameter',
+          dataType: paramType || 'any',
           location: this.getLocation(node),
         });
+      } catch {
+        // 重複定義の場合はスキップ
+        if (process.env.DEBUG) {
+          console.log(`[DEBUG] Parameter already defined: ${paramName}`);
+        }
       }
-
-      return 'void'; // print関数は戻り値なし
-    }
-
-    // 通常の関数解決
-    const func = this.symbolTable.resolve(funcName);
-    if (!func) {
-      this.addError({
-        message: `Undefined function '${funcName}'`,
-        type: 'NameError',
-        location: this.getLocation(node),
-      });
-      return undefined;
-    }
-
-    // 引数の型チェック（簡略化）
-    if (node.arguments && Array.isArray(node.arguments)) {
-      for (const arg of node.arguments) {
-        await this.visitNode(arg);
-      }
-    }
-
-    // 戻り値型を抽出
-    return this.extractReturnType(func.dataType);
-  }
-
-  /**
-   * 二項演算式を処理
-   */
-  private async visitBinaryExpression(node: ASTNode): Promise<string | undefined> {
-    const leftType = node.left ? await this.visitNode(node.left) : undefined;
-    const rightType = node.right ? await this.visitNode(node.right) : undefined;
-    const operator = node.operator;
-
-    if (!operator) return undefined;
-
-    // 演算子に基づく型チェック
-    switch (operator) {
-      case '+':
-        if (leftType && rightType) {
-          // 文字列連結
-          if (leftType === 'string' && rightType === 'string') {
-            return 'string';
-          }
-          // 数値演算
-          else if (this.isNumericType(leftType) && this.isNumericType(rightType)) {
-            return leftType === 'float' || rightType === 'float' ? 'float' : 'int';
-          }
-          // 型不一致エラー
-          else {
-            this.addError({
-              message: `Binary operator '+' cannot be applied to '${leftType}' and '${rightType}'. Both operands must be numeric types or both must be strings.`,
-              type: 'TypeError',
-              location: this.getLocation(node),
-            });
-            return 'any';
-          }
-        }
-        break;
-      case '-':
-      case '*':
-      case '/':
-      case '%':
-        if (leftType && rightType) {
-          if (this.isNumericType(leftType) && this.isNumericType(rightType)) {
-            // 数値型同士の演算
-            return leftType === 'float' || rightType === 'float' ? 'float' : 'int';
-          } else {
-            this.addError({
-              message: `Binary operator '${operator}' cannot be applied to '${leftType}' and '${rightType}'. Both operands must be numeric types.`,
-              type: 'TypeError',
-              location: this.getLocation(node),
-            });
-            return 'any';
-          }
-        }
-        break;
-      case '==':
-      case '!=':
-        // 等価演算子は任意の型で使用可能（ただし型の互換性チェック）
-        if (
-          leftType &&
-          rightType &&
-          !this.isCompatibleType(leftType, rightType) &&
-          !this.isCompatibleType(rightType, leftType)
-        ) {
-          this.addError({
-            message: `Comparison operator '${operator}' cannot be applied to incompatible types '${leftType}' and '${rightType}'.`,
-            type: 'TypeError',
-            location: this.getLocation(node),
-          });
-        }
-        return 'bool';
-      case '<':
-      case '>':
-      case '<=':
-      case '>=':
-        // 比較演算子は数値型または文字列型でのみ使用可能
-        if (leftType && rightType) {
-          if (
-            (this.isNumericType(leftType) && this.isNumericType(rightType)) ||
-            (leftType === 'string' && rightType === 'string')
-          ) {
-            return 'bool';
-          } else {
-            this.addError({
-              message: `Comparison operator '${operator}' cannot be applied to '${leftType}' and '${rightType}'. Both operands must be numeric types or both must be strings.`,
-              type: 'TypeError',
-              location: this.getLocation(node),
-            });
-            return 'bool';
-          }
-        }
-        return 'bool';
-      case '&&':
-      case '||':
-        // 論理演算子はbool型でのみ使用可能
-        if (leftType && rightType) {
-          if (leftType !== 'bool' || rightType !== 'bool') {
-            this.addError({
-              message: `Logical operator '${operator}' cannot be applied to '${leftType}' and '${rightType}'. Both operands must be bool type.`,
-              type: 'TypeError',
-              location: this.getLocation(node),
-            });
-          }
-        }
-        return 'bool';
-      default:
-        return 'any';
     }
 
     return undefined;
   }
 
-  /**
-   * メンバーアクセスを処理
-   */
-  private async visitMemberAccess(node: ASTNode): Promise<string | undefined> {
-    const objectType = node.object ? await this.visitNode(node.object) : undefined;
-    const memberName = node.property?.name || node.property;
+  private async visitRepeatedDeclaration(node: ASTNode): Promise<string | undefined> {
+    // 繰り返し宣言の処理
+    if (node.target && node.declarations) {
+      const targetType = await this.visitNode(node.target);
 
-    if (!objectType || !memberName) return undefined;
-
-    // オブジェクトの型に基づいてメンバーの型を推論
-    // まず直接のメンバーアクセスをチェック（例: Version.major）
-    const directMemberSymbol = this.symbolTable.resolve(`${objectType}.${memberName}`);
-    if (directMemberSymbol) {
-      return directMemberSymbol.dataType;
-    }
-
-    // 構造体のスコープ内でプロパティを検索
-    const objectScope = this.findScopeByName(objectType);
-    if (objectScope) {
-      const memberSymbol = objectScope.symbols.get(memberName);
-      if (memberSymbol) {
-        return memberSymbol.dataType;
-      }
-    }
-
-    // 現在のスコープでプロパティを検索（thisアクセスの場合）
-    if (objectType === this.symbolTable.getCurrentScope().name) {
-      const memberSymbol = this.symbolTable.resolve(memberName);
-      if (memberSymbol && memberSymbol.type === 'property') {
-        return memberSymbol.dataType;
-      }
-    }
-
-    return 'any';
-  }
-
-  /**
-   * this式を処理
-   */
-  private async visitThisExpression(node: ASTNode): Promise<string | undefined> {
-    // 現在のスコープから 'this' の型を取得
-    const thisSymbol = this.symbolTable.resolve('this');
-    if (thisSymbol) {
-      return thisSymbol.dataType;
-    }
-
-    // thisが見つからない場合、現在のクラス/構造体のスコープ名を返す
-    const currentScope = this.symbolTable.getCurrentScope();
-    if (currentScope && currentScope.name !== 'global') {
-      return currentScope.name;
-    }
-
-    this.addError({
-      message: `'this' is not available in the current context`,
-      type: 'TypeError',
-      location: this.getLocation(node),
-    });
-
-    return 'any';
-  }
-
-  /**
-   * 代入文を処理
-   */
-  private async visitAssignmentStatement(node: ASTNode): Promise<string | undefined> {
-    const leftType = node.left ? await this.visitNode(node.left) : undefined;
-    const rightType = node.right ? await this.visitNode(node.right) : undefined;
-
-    if (leftType && rightType && !this.isCompatibleType(rightType, leftType)) {
-      this.addError({
-        message: `Cannot assign value of type '${rightType}' to variable of type '${leftType}'`,
-        type: 'TypeError',
-        location: this.getLocation(node),
-      });
-    }
-
-    return leftType; // 代入式の型は左辺の型
-  }
-
-  /**
-   * if式を処理
-   */
-  private async visitIfExpression(node: ASTNode): Promise<string | undefined> {
-    // 条件式の型をチェック
-    if (node.condition) {
-      const conditionType = await this.visitNode(node.condition);
-      if (conditionType && conditionType !== 'bool') {
-        this.addError({
-          message: `Condition in if expression must be of type 'bool', but got '${conditionType}'`,
-          type: 'TypeError',
-          location: this.getLocation(node.condition),
-        });
-      }
-    }
-
-    // then節とelse節の型をチェック
-    let thenType: string | undefined;
-    let elseType: string | undefined;
-
-    if (node.then) {
-      thenType = await this.visitNode(node.then);
-    }
-
-    if (node.else) {
-      elseType = await this.visitNode(node.else);
-    }
-
-    // if式の型は、then節とelse節の共通上位型
-    if (thenType && elseType) {
-      if (this.isCompatibleType(thenType, elseType)) {
-        return elseType;
-      } else if (this.isCompatibleType(elseType, thenType)) {
-        return thenType;
-      } else {
-        // 型が一致しない場合は警告
-        this.addError({
-          message: `If expression branches have incompatible types: '${thenType}' and '${elseType}'`,
-          type: 'TypeError',
-          location: this.getLocation(node),
-        });
-        return 'any';
-      }
-    }
-
-    return thenType || elseType || 'any';
-  }
-
-  /**
-   * 型キャスト式を処理
-   */
-  private async visitTypeCastExpression(node: ASTNode): Promise<string | undefined> {
-    // 被キャスト式の型を評価
-    const sourceType = node.expression ? await this.visitNode(node.expression) : undefined;
-    const targetType = node.targetType;
-
-    if (!targetType) {
-      this.addError({
-        message: 'Type cast expression missing target type',
-        type: 'TypeError',
-        location: this.getLocation(node),
-      });
-      return 'any';
-    }
-
-    // 基本型の検証
-    if (!this.isBuiltinType(targetType)) {
-      this.addError({
-        message: `Invalid cast target type '${targetType}'. Only built-in types (int, float, string, bool) are supported for casting`,
-        type: 'TypeError',
-        location: this.getLocation(node),
-      });
-      return 'any';
-    }
-
-    if (sourceType) {
-      console.log(`[DEBUG] Type cast: ${sourceType} -> ${targetType}`);
-
-      // 型キャストの妥当性チェック（警告レベル）
-      if (sourceType === targetType) {
-        // 同じ型への無意味なキャスト
-        console.log(`[DEBUG] Warning: Unnecessary cast from ${sourceType} to ${targetType}`);
-      }
-    }
-
-    // 型キャストは常に成功する（実行時エラーの可能性はあるが）
-    return targetType;
-  }
-
-  /**
-   * 子ノードを再帰的に処理
-   */
-  private async visitChildren(node: ASTNode): Promise<void> {
-    if (!node || typeof node !== 'object') return;
-
-    for (const [key, value] of Object.entries(node)) {
-      if (key === 'type' || key === 'loc') continue;
-
-      if (Array.isArray(value)) {
-        for (const item of value) {
-          if (item && typeof item === 'object' && item.type) {
-            await this.visitNode(item);
-          }
+      if (Array.isArray(node.declarations)) {
+        for (const decl of node.declarations) {
+          await this.visitNode(decl);
         }
-      } else if (value && typeof value === 'object' && value.type) {
-        await this.visitNode(value);
+      }
+
+      return targetType;
+    }
+
+    return undefined;
+  }
+
+  private async visitMappingBlock(node: ASTNode): Promise<string | undefined> {
+    // マッピングブロックの処理
+    if (node.entries && Array.isArray(node.entries)) {
+      for (const entry of node.entries) {
+        await this.visitNode(entry);
       }
     }
+
+    return 'object';
   }
 
-  /**
-   * スコープ名でスコープを検索する
-   */
-  private findScopeByName(scopeName: string): any {
-    // SymbolTableの全スコープを検索してスコープ名が一致するものを見つける
-    return this.symbolTable.findScopeByName(scopeName);
+  private async visitMappingEntry(node: ASTNode): Promise<string | undefined> {
+    // マッピングエントリの処理
+    if (node.key && node.value) {
+      await this.visitNode(node.key);
+      const valueType = await this.visitNode(node.value);
+      return valueType;
+    }
+
+    return undefined;
   }
 
-  /**
-   * null許容型の型推論
-   */
-  private async visitNullableType(node: ASTNode): Promise<string | undefined> {
-    if (!node.innerType) {
-      this.addError({
-        message: 'Nullable type must have an inner type',
-        type: 'TypeError',
-        location: this.getLocation(node),
-      });
-      return undefined;
+  private async visitUseStatement(node: ASTNode): Promise<string | undefined> {
+    // use文の処理 - 標準ライブラリ関数をインポート
+    const identifier = node.identifier?.name;
+    if (identifier && typeof identifier === 'string') {
+      this.symbolTable.defineStandardLibraryFunction(identifier);
+
+      if (process.env.DEBUG) {
+        console.log('[DEBUG] Use statement - imported:', identifier);
+      }
     }
-
-    const innerType = await this.visitNode(node.innerType);
-    if (!innerType) {
-      return undefined;
-    }
-
-    // null許容型は型名の後に?を付けて表現
-    return `${innerType}?`;
-  }
-
-  /**
-   * 配列型の型推論
-   */
-  private async visitArrayType(node: ASTNode): Promise<string | undefined> {
-    if (!node.elementType) {
-      this.addError({
-        message: 'Array type must have an element type',
-        type: 'TypeError',
-        location: this.getLocation(node),
-      });
-      return undefined;
-    }
-
-    const elementType = await this.visitNode(node.elementType);
-    if (!elementType) {
-      return undefined;
-    }
-
-    // 配列の次元数を考慮
-    const dimensions = node.dimensions || 1;
-    let arrayType = elementType;
-    for (let i = 0; i < dimensions; i++) {
-      arrayType = `${arrayType}[]`;
-    }
-
-    return arrayType;
-  }
-
-  /**
-   * プリミティブ型の型推論
-   */
-  private async visitPrimitiveType(node: ASTNode): Promise<string | undefined> {
-    // プリミティブ型はnameプロパティに型名が格納されている
-    return node.name || undefined;
-  }
-
-  /**
-   * 型参照の型推論
-   */
-  private async visitTypeReference(node: ASTNode): Promise<string | undefined> {
-    if (!node.name) {
-      this.addError({
-        message: 'Type reference must have a name',
-        type: 'TypeError',
-        location: this.getLocation(node),
-      });
-      return undefined;
-    }
-
-    // 識別子ノードから型名を取得
-    let typeName: string;
-    if (typeof node.name === 'string') {
-      typeName = node.name;
-    } else if (node.name.name) {
-      typeName = node.name.name;
-    } else {
-      this.addError({
-        message: 'Invalid type reference name',
-        type: 'TypeError',
-        location: this.getLocation(node),
-      });
-      return undefined;
-    }
-
-    // 型が定義されているかチェック
-    const typeInfo = this.symbolTable.resolve(typeName);
-    if (!typeInfo) {
-      this.addError({
-        message: `Unknown type: ${typeName}`,
-        type: 'TypeError',
-        location: this.getLocation(node),
-      });
-      return undefined;
-    }
-
-    return typeName;
-  }
-
-  /**
-   * 型がstruct型またはstructから派生した型かどうかをチェック
-   */
-  private isStructType(typeName: string): boolean {
-    if (!typeName) return false;
-
-    // 基本型（プリミティブ型）は除外
-    if (['int', 'float', 'string', 'bool'].includes(typeName)) {
-      return false;
-    }
-
-    // null許容型の場合は内部型をチェック
-    if (typeName.endsWith('?')) {
-      const innerType = typeName.slice(0, -1);
-      return this.isStructType(innerType);
-    }
-
-    // 配列型の場合は要素型をチェック
-    if (typeName.endsWith('[]')) {
-      const elementType = typeName.slice(0, -2);
-      return this.isStructType(elementType);
-    }
-
-    // シンボルテーブルから型情報を取得
-    const typeSymbol = this.symbolTable.resolve(typeName);
-    if (typeSymbol && typeSymbol.type === 'struct') {
-      return true;
-    }
-
-    // カスタム構造体型として扱う（未定義でもstruct型として扱う）
-    // これにより、ユーザー定義のstruct型も許可される
-    return true;
+    return undefined;
   }
 }
