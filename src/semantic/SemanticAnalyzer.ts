@@ -626,8 +626,11 @@ export class SemanticAnalyzer {
       variableType = 'any';
     }
 
-    // Schema validation
-    this.validateAgainstSchema(variableName, variableType, node);
+    // Schema validation - 設計原則に従い、schemaで定義されたプロパティのインスタンス生成のみ検証
+    // 自由な変数宣言（val example = ...）は検証対象外
+    if (this.isSchemaPropertyAssignment(variableName)) {
+      this.validateAgainstSchema(variableName, variableType, node);
+    }
 
     // 変数をシンボルテーブルに登録
     try {
@@ -955,8 +958,10 @@ export class SemanticAnalyzer {
         // 新しい変数の定義
         const variableType = rightType || 'any';
 
-        // Schema validation
-        this.validateAgainstSchema(variableName, variableType, node);
+        // Schema validation - 設計原則に従い、schemaで定義されたプロパティのインスタンス生成のみ検証
+        if (this.isSchemaPropertyAssignment(variableName)) {
+          this.validateAgainstSchema(variableName, variableType, node);
+        }
 
         // 変数をシンボルテーブルに登録
         try {
@@ -1017,6 +1022,26 @@ export class SemanticAnalyzer {
    * Validate a variable declaration against the current schema
    */
   private validateAgainstSchema(variableName: string, variableType: string, location?: any): void {
+    // Schema検証は設計原則に従い、以下の条件でのみ適用する：
+    // 1. configファイルでの変数宣言の場合のみ
+    // 2. schemaファイル内での変数宣言は自由に許可される
+    
+    if (process.env.DEBUG) {
+      console.log(
+        `[DEBUG] validateAgainstSchema called for variable '${variableName}', currentFilePath: '${this.currentFilePath}'`
+      );
+    }
+    
+    // 現在解析中のファイルがschemaファイル（ast.yamlの元ファイル）の場合は検証をスキップ
+    if (!this.currentFilePath || !this.currentFilePath.includes('config.canon')) {
+      if (process.env.DEBUG) {
+        console.log(
+          `[DEBUG] Skipping schema validation for variable '${variableName}' in schema file`
+        );
+      }
+      return;
+    }
+
     if (this.schemaDefinition.size === 0) {
       return; // No schema defined
     }
@@ -1406,5 +1431,29 @@ export class SemanticAnalyzer {
       }
     }
     return undefined;
+  }
+
+  /**
+   * Check if a variable assignment is for a schema-defined property
+   * Returns true only for schema property assignments, not for free variable declarations
+   */
+  private isSchemaPropertyAssignment(variableName: string): boolean {
+    // Schema validation should only apply to variables that are defined in the schema
+    // and are at the top level (not inside functions, structs, etc.)
+    
+    // Check if this variable is defined in the schema
+    const schemaProperty = this.schemaDefinition.get(variableName);
+    if (!schemaProperty) {
+      return false; // Not a schema property, so it's a free variable declaration
+    }
+    
+    // Additional check: only validate if we're in a config file
+    if (!this.currentFilePath || !this.currentFilePath.includes('config.canon')) {
+      return false;
+    }
+    
+    // TODO: In the future, we might want to check if we're at the top level
+    // For now, we assume all schema property assignments are valid for validation
+    return true;
   }
 }
