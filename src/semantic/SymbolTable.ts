@@ -269,5 +269,68 @@ export class SymbolTable {
       type: 'function',
       dataType: 'function -> FloatRange',
     });
+
+    // Range演算子の追加定義
+    this.define({
+      name: 'int.until',
+      type: 'function',
+      dataType: 'function -> IntRange',
+    });
+
+    this.define({
+      name: 'int.downTo',
+      type: 'function',
+      dataType: 'function -> IntRange',
+    });
+
+    this.define({
+      name: 'float.until',
+      type: 'function',
+      dataType: 'function -> FloatRange',
+    });
+
+    this.define({
+      name: 'float.downTo',
+      type: 'function',
+      dataType: 'function -> FloatRange',
+    });
+  }
+
+  /**
+   * 既存シンボルの型を更新
+   */
+  updateType(name: string, newDataType: string): boolean {
+    // 現在のスコープチェーンで検索して更新
+    for (let i = this.scopes.length - 1; i >= 0; i--) {
+      const scope = this.scopes[i];
+      const symbol = scope.symbols.get(name);
+      if (symbol) {
+        symbol.dataType = newDataType;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * スコープ名でスコープを検索する
+   */
+  findScopeByName(scopeName: string): Scope | undefined {
+    const searchInScope = (scope: Scope): Scope | undefined => {
+      if (scope.name === scopeName) {
+        return scope;
+      }
+
+      for (const child of scope.children) {
+        const found = searchInScope(child);
+        if (found) {
+          return found;
+        }
+      }
+
+      return undefined;
+    };
+
+    return searchInScope(this.globalScope);
   }
 }

@@ -1093,123 +1093,123 @@ body:
               type: IfExpression
               condition:
                 type: BinaryExpression
-                operator: '=='
+                operator: '&&'
                 left:
-                  type: MemberAccessExpression
-                  object:
+                  type: BinaryExpression
+                  operator: '&&'
+                  left:
                     type: BinaryExpression
-                    operator: '&&'
+                    operator: '=='
                     left:
-                      type: BinaryExpression
-                      operator: '=='
-                      left:
-                        type: MemberAccessExpression
-                        object:
-                          type: BinaryExpression
-                          operator: '&&'
-                          left:
-                            type: BinaryExpression
-                            operator: '=='
-                            left:
-                              type: MemberAccessExpression
-                              object:
-                                type: ThisExpression
-                                loc:
-                                  start:
-                                    line: 43
-                                    column: 12
-                                  end:
-                                    line: 43
-                                    column: 16
-                              property:
-                                type: Identifier
-                                name: major
-                                loc:
-                                  start:
-                                    line: 43
-                                    column: 17
-                                  end:
-                                    line: 43
-                                    column: 22
-                              computed: false
-                              loc:
-                                start:
-                                  line: 43
-                                  column: 12
-                                end:
-                                  line: 43
-                                  column: 22
-                            right:
-                              type: IntegerLiteral
-                              value: 0
-                              raw: '0'
-                              loc:
-                                start:
-                                  line: 43
-                                  column: 26
-                                end:
-                                  line: 43
-                                  column: 27
-                            loc:
-                              start:
-                                line: 43
-                                column: 12
-                              end:
-                                line: 43
-                                column: 27
-                          right:
-                            type: ThisExpression
-                            loc:
-                              start:
-                                line: 43
-                                column: 31
-                              end:
-                                line: 43
-                                column: 35
-                          loc:
-                            start:
-                              line: 43
-                              column: 12
-                            end:
-                              line: 43
-                              column: 35
-                        property:
-                          type: Identifier
-                          name: minor
-                          loc:
-                            start:
-                              line: 43
-                              column: 36
-                            end:
-                              line: 43
-                              column: 41
-                        computed: false
+                      type: MemberAccessExpression
+                      object:
+                        type: ThisExpression
                         loc:
                           start:
                             line: 43
                             column: 12
                           end:
                             line: 43
-                            column: 41
-                      right:
-                        type: IntegerLiteral
-                        value: 0
-                        raw: '0'
+                            column: 16
+                      property:
+                        type: Identifier
+                        name: major
                         loc:
                           start:
                             line: 43
-                            column: 45
+                            column: 17
                           end:
                             line: 43
-                            column: 46
+                            column: 22
+                      computed: false
                       loc:
                         start:
                           line: 43
                           column: 12
                         end:
                           line: 43
-                          column: 46
+                          column: 22
                     right:
+                      type: IntegerLiteral
+                      value: 0
+                      raw: '0'
+                      loc:
+                        start:
+                          line: 43
+                          column: 26
+                        end:
+                          line: 43
+                          column: 27
+                    loc:
+                      start:
+                        line: 43
+                        column: 12
+                      end:
+                        line: 43
+                        column: 27
+                  right:
+                    type: BinaryExpression
+                    operator: '=='
+                    left:
+                      type: MemberAccessExpression
+                      object:
+                        type: ThisExpression
+                        loc:
+                          start:
+                            line: 43
+                            column: 31
+                          end:
+                            line: 43
+                            column: 35
+                      property:
+                        type: Identifier
+                        name: minor
+                        loc:
+                          start:
+                            line: 43
+                            column: 36
+                          end:
+                            line: 43
+                            column: 41
+                      computed: false
+                      loc:
+                        start:
+                          line: 43
+                          column: 31
+                        end:
+                          line: 43
+                          column: 41
+                    right:
+                      type: IntegerLiteral
+                      value: 0
+                      raw: '0'
+                      loc:
+                        start:
+                          line: 43
+                          column: 45
+                        end:
+                          line: 43
+                          column: 46
+                    loc:
+                      start:
+                        line: 43
+                        column: 31
+                      end:
+                        line: 43
+                        column: 46
+                  loc:
+                    start:
+                      line: 43
+                      column: 12
+                    end:
+                      line: 43
+                      column: 46
+                right:
+                  type: BinaryExpression
+                  operator: '=='
+                  left:
+                    type: MemberAccessExpression
+                    object:
                       type: ThisExpression
                       loc:
                         start:
@@ -1218,39 +1218,39 @@ body:
                         end:
                           line: 43
                           column: 54
+                    property:
+                      type: Identifier
+                      name: patch
+                      loc:
+                        start:
+                          line: 43
+                          column: 55
+                        end:
+                          line: 43
+                          column: 60
+                    computed: false
                     loc:
                       start:
                         line: 43
-                        column: 12
-                      end:
-                        line: 43
-                        column: 54
-                  property:
-                    type: Identifier
-                    name: patch
-                    loc:
-                      start:
-                        line: 43
-                        column: 55
+                        column: 50
                       end:
                         line: 43
                         column: 60
-                  computed: false
+                  right:
+                    type: IntegerLiteral
+                    value: 0
+                    raw: '0'
+                    loc:
+                      start:
+                        line: 43
+                        column: 64
+                      end:
+                        line: 43
+                        column: 65
                   loc:
                     start:
                       line: 43
-                      column: 12
-                    end:
-                      line: 43
-                      column: 60
-                right:
-                  type: IntegerLiteral
-                  value: 0
-                  raw: '0'
-                  loc:
-                    start:
-                      line: 43
-                      column: 64
+                      column: 50
                     end:
                       line: 43
                       column: 65
@@ -1398,22 +1398,31 @@ body:
         isPrivate: false
         isOptional: false
         typeRef:
-          type: PrimitiveType
-          name: int
+          type: TypeReference
+          name:
+            type: Identifier
+            name: float
+            loc:
+              start:
+                line: 47
+                column: 11
+              end:
+                line: 47
+                column: 16
           loc:
             start:
               line: 47
               column: 11
             end:
               line: 47
-              column: 14
+              column: 16
         loc:
           start:
             line: 47
             column: 4
           end:
             line: 47
-            column: 14
+            column: 16
       - type: PropertyDeclaration
         name:
           type: Identifier
@@ -1457,6 +1466,16 @@ body:
               line: 49
               column: 16
         annotations: []
+        returnType:
+          type: PrimitiveType
+          name: string
+          loc:
+            start:
+              line: 49
+              column: 20
+            end:
+              line: 49
+              column: 26
         body:
           - type: ExpressionStatement
             expression:
@@ -1854,6 +1873,113 @@ body:
       end:
         line: 66
         column: 1
+  - type: FunctionDeclaration
+    isInfix: true
+    receiverType:
+      type: PrimitiveType
+      name: int
+      loc:
+        start:
+          line: 68
+          column: 10
+        end:
+          line: 68
+          column: 13
+    name:
+      type: Identifier
+      name: add
+      loc:
+        start:
+          line: 68
+          column: 14
+        end:
+          line: 68
+          column: 17
+    annotations: []
+    parameters:
+      - type: Parameter
+        name:
+          type: Identifier
+          name: other
+          loc:
+            start:
+              line: 68
+              column: 18
+            end:
+              line: 68
+              column: 23
+        typeRef:
+          type: PrimitiveType
+          name: int
+          loc:
+            start:
+              line: 68
+              column: 25
+            end:
+              line: 68
+              column: 28
+        loc:
+          start:
+            line: 68
+            column: 18
+          end:
+            line: 68
+            column: 28
+    returnType:
+      type: PrimitiveType
+      name: int
+      loc:
+        start:
+          line: 68
+          column: 31
+        end:
+          line: 68
+          column: 34
+    body:
+      - type: ExpressionStatement
+        expression:
+          type: BinaryExpression
+          operator: +
+          left:
+            type: ThisExpression
+            loc:
+              start:
+                line: 69
+                column: 4
+              end:
+                line: 69
+                column: 8
+          right:
+            type: Identifier
+            name: other
+            loc:
+              start:
+                line: 69
+                column: 11
+              end:
+                line: 69
+                column: 16
+          loc:
+            start:
+              line: 69
+              column: 4
+            end:
+              line: 69
+              column: 16
+        loc:
+          start:
+            line: 69
+            column: 4
+          end:
+            line: 69
+            column: 16
+    loc:
+      start:
+        line: 68
+        column: 0
+      end:
+        line: 70
+        column: 1
   - type: VariableDeclaration
     kind: val
     name:
@@ -1861,10 +1987,10 @@ body:
       name: example
       loc:
         start:
-          line: 69
+          line: 72
           column: 4
         end:
-          line: 69
+          line: 72
           column: 11
     typeRef: null
     value:
@@ -1876,10 +2002,10 @@ body:
         raw: '1'
         loc:
           start:
-            line: 69
+            line: 72
             column: 14
           end:
-            line: 69
+            line: 72
             column: 15
       right:
         type: InfixCall
@@ -1890,10 +2016,10 @@ body:
           raw: '1'
           loc:
             start:
-              line: 69
+              line: 72
               column: 21
             end:
-              line: 69
+              line: 72
               column: 22
         right:
           type: IntegerLiteral
@@ -1901,32 +2027,32 @@ body:
           raw: '1'
           loc:
             start:
-              line: 69
+              line: 72
               column: 27
             end:
-              line: 69
+              line: 72
               column: 28
         loc:
           start:
-            line: 69
+            line: 72
             column: 21
           end:
-            line: 69
+            line: 72
             column: 28
       loc:
         start:
-          line: 69
+          line: 72
           column: 14
         end:
-          line: 69
+          line: 72
           column: 29
     annotations: []
     loc:
       start:
-        line: 69
+        line: 72
         column: 0
       end:
-        line: 69
+        line: 72
         column: 29
   - type: VariableDeclaration
     kind: val
@@ -1935,10 +2061,10 @@ body:
       name: rangeExample
       loc:
         start:
-          line: 70
+          line: 73
           column: 4
         end:
-          line: 70
+          line: 73
           column: 16
     typeRef: null
     value:
@@ -1952,10 +2078,10 @@ body:
           raw: '1'
           loc:
             start:
-              line: 70
+              line: 73
               column: 19
             end:
-              line: 70
+              line: 73
               column: 20
         to:
           type: IntegerLiteral
@@ -1963,18 +2089,18 @@ body:
           raw: '10'
           loc:
             start:
-              line: 70
+              line: 73
               column: 23
             end:
-              line: 70
+              line: 73
               column: 25
         inclusive: true
         loc:
           start:
-            line: 70
+            line: 73
             column: 19
           end:
-            line: 70
+            line: 73
             column: 25
       right:
         type: IntegerLiteral
@@ -1982,25 +2108,25 @@ body:
         raw: '2'
         loc:
           start:
-            line: 70
+            line: 73
             column: 31
           end:
-            line: 70
+            line: 73
             column: 32
       loc:
         start:
-          line: 70
+          line: 73
           column: 19
         end:
-          line: 70
+          line: 73
           column: 32
     annotations: []
     loc:
       start:
-        line: 70
+        line: 73
         column: 0
       end:
-        line: 70
+        line: 73
         column: 32
   - type: VariableDeclaration
     kind: val
@@ -2009,10 +2135,10 @@ body:
       name: rangeExample2
       loc:
         start:
-          line: 71
+          line: 74
           column: 4
         end:
-          line: 71
+          line: 74
           column: 17
     typeRef: null
     value:
@@ -2029,10 +2155,10 @@ body:
             raw: '1'
             loc:
               start:
-                line: 71
+                line: 74
                 column: 20
               end:
-                line: 71
+                line: 74
                 column: 21
           to:
             type: IntegerLiteral
@@ -2040,18 +2166,18 @@ body:
             raw: '10'
             loc:
               start:
-                line: 71
+                line: 74
                 column: 24
               end:
-                line: 71
+                line: 74
                 column: 26
           inclusive: true
           loc:
             start:
-              line: 71
+              line: 74
               column: 20
             end:
-              line: 71
+              line: 74
               column: 26
         right:
           type: IntegerLiteral
@@ -2059,17 +2185,17 @@ body:
           raw: '2'
           loc:
             start:
-              line: 71
+              line: 74
               column: 32
             end:
-              line: 71
+              line: 74
               column: 33
         loc:
           start:
-            line: 71
+            line: 74
             column: 20
           end:
-            line: 71
+            line: 74
             column: 33
       right:
         type: IntegerLiteral
@@ -2077,25 +2203,25 @@ body:
         raw: '3'
         loc:
           start:
-            line: 71
+            line: 74
             column: 39
           end:
-            line: 71
+            line: 74
             column: 40
       loc:
         start:
-          line: 71
+          line: 74
           column: 20
         end:
-          line: 71
+          line: 74
           column: 40
     annotations: []
     loc:
       start:
-        line: 71
+        line: 74
         column: 0
       end:
-        line: 71
+        line: 74
         column: 40
   - type: VariableDeclaration
     kind: val
@@ -2104,10 +2230,10 @@ body:
       name: rangeExample3
       loc:
         start:
-          line: 72
+          line: 75
           column: 4
         end:
-          line: 72
+          line: 75
           column: 17
     typeRef: null
     value:
@@ -2119,10 +2245,10 @@ body:
         raw: '1'
         loc:
           start:
-            line: 72
+            line: 75
             column: 20
           end:
-            line: 72
+            line: 75
             column: 21
       right:
         type: IntegerLiteral
@@ -2130,25 +2256,25 @@ body:
         raw: '10'
         loc:
           start:
-            line: 72
+            line: 75
             column: 28
           end:
-            line: 72
+            line: 75
             column: 30
       loc:
         start:
-          line: 72
+          line: 75
           column: 20
         end:
-          line: 72
+          line: 75
           column: 30
     annotations: []
     loc:
       start:
-        line: 72
+        line: 75
         column: 0
       end:
-        line: 72
+        line: 75
         column: 30
   - type: VariableDeclaration
     kind: val
@@ -2157,10 +2283,10 @@ body:
       name: rangeExample4
       loc:
         start:
-          line: 73
+          line: 76
           column: 4
         end:
-          line: 73
+          line: 76
           column: 17
     typeRef: null
     value:
@@ -2175,10 +2301,10 @@ body:
           raw: '1'
           loc:
             start:
-              line: 73
+              line: 76
               column: 20
             end:
-              line: 73
+              line: 76
               column: 21
         right:
           type: IntegerLiteral
@@ -2186,17 +2312,17 @@ body:
           raw: '10'
           loc:
             start:
-              line: 73
+              line: 76
               column: 28
             end:
-              line: 73
+              line: 76
               column: 30
         loc:
           start:
-            line: 73
+            line: 76
             column: 20
           end:
-            line: 73
+            line: 76
             column: 30
       right:
         type: IntegerLiteral
@@ -2204,25 +2330,25 @@ body:
         raw: '2'
         loc:
           start:
-            line: 73
+            line: 76
             column: 36
           end:
-            line: 73
+            line: 76
             column: 37
       loc:
         start:
-          line: 73
+          line: 76
           column: 20
         end:
-          line: 73
+          line: 76
           column: 37
     annotations: []
     loc:
       start:
-        line: 73
+        line: 76
         column: 0
       end:
-        line: 73
+        line: 76
         column: 37
   - type: VariableDeclaration
     kind: val
@@ -2231,10 +2357,10 @@ body:
       name: rangeExample5
       loc:
         start:
-          line: 74
+          line: 77
           column: 4
         end:
-          line: 74
+          line: 77
           column: 17
     typeRef: null
     value:
@@ -2246,10 +2372,10 @@ body:
         raw: '10'
         loc:
           start:
-            line: 74
+            line: 77
             column: 20
           end:
-            line: 74
+            line: 77
             column: 22
       right:
         type: IntegerLiteral
@@ -2257,25 +2383,25 @@ body:
         raw: '1'
         loc:
           start:
-            line: 74
+            line: 77
             column: 30
           end:
-            line: 74
+            line: 77
             column: 31
       loc:
         start:
-          line: 74
+          line: 77
           column: 20
         end:
-          line: 74
+          line: 77
           column: 31
     annotations: []
     loc:
       start:
-        line: 74
+        line: 77
         column: 0
       end:
-        line: 74
+        line: 77
         column: 31
   - type: VariableDeclaration
     kind: val
@@ -2284,10 +2410,10 @@ body:
       name: rangeExample6
       loc:
         start:
-          line: 75
+          line: 78
           column: 4
         end:
-          line: 75
+          line: 78
           column: 17
     typeRef: null
     value:
@@ -2302,10 +2428,10 @@ body:
           raw: '10'
           loc:
             start:
-              line: 75
+              line: 78
               column: 20
             end:
-              line: 75
+              line: 78
               column: 22
         right:
           type: IntegerLiteral
@@ -2313,17 +2439,17 @@ body:
           raw: '1'
           loc:
             start:
-              line: 75
+              line: 78
               column: 30
             end:
-              line: 75
+              line: 78
               column: 31
         loc:
           start:
-            line: 75
+            line: 78
             column: 20
           end:
-            line: 75
+            line: 78
             column: 31
       right:
         type: IntegerLiteral
@@ -2331,133 +2457,26 @@ body:
         raw: '2'
         loc:
           start:
-            line: 75
+            line: 78
             column: 37
           end:
-            line: 75
+            line: 78
             column: 38
       loc:
         start:
-          line: 75
+          line: 78
           column: 20
         end:
-          line: 75
+          line: 78
           column: 38
     annotations: []
     loc:
       start:
-        line: 75
-        column: 0
-      end:
-        line: 75
-        column: 38
-  - type: FunctionDeclaration
-    isInfix: true
-    receiverType:
-      type: PrimitiveType
-      name: int
-      loc:
-        start:
-          line: 76
-          column: 10
-        end:
-          line: 76
-          column: 13
-    name:
-      type: Identifier
-      name: add
-      loc:
-        start:
-          line: 76
-          column: 14
-        end:
-          line: 76
-          column: 17
-    annotations: []
-    parameters:
-      - type: Parameter
-        name:
-          type: Identifier
-          name: other
-          loc:
-            start:
-              line: 76
-              column: 18
-            end:
-              line: 76
-              column: 23
-        typeRef:
-          type: PrimitiveType
-          name: int
-          loc:
-            start:
-              line: 76
-              column: 25
-            end:
-              line: 76
-              column: 28
-        loc:
-          start:
-            line: 76
-            column: 18
-          end:
-            line: 76
-            column: 28
-    returnType:
-      type: PrimitiveType
-      name: int
-      loc:
-        start:
-          line: 76
-          column: 31
-        end:
-          line: 76
-          column: 34
-    body:
-      - type: ExpressionStatement
-        expression:
-          type: BinaryExpression
-          operator: +
-          left:
-            type: ThisExpression
-            loc:
-              start:
-                line: 77
-                column: 4
-              end:
-                line: 77
-                column: 8
-          right:
-            type: Identifier
-            name: other
-            loc:
-              start:
-                line: 77
-                column: 11
-              end:
-                line: 77
-                column: 16
-          loc:
-            start:
-              line: 77
-              column: 4
-            end:
-              line: 77
-              column: 16
-        loc:
-          start:
-            line: 77
-            column: 4
-          end:
-            line: 77
-            column: 16
-    loc:
-      start:
-        line: 76
+        line: 78
         column: 0
       end:
         line: 78
-        column: 1
+        column: 38
 loc:
   start:
     line: 7

@@ -182,3 +182,18 @@ infix fun float.downTo(to: float) FloatRange {
     }
 }
 ```
+
+## 標準ライブラリ
+
+`use` 文でインポートする必要のある標準ライブラリは以下の通り。
+
+```kotlin
+fun getEnv(key: string): string? {
+    // 環境変数を取得する疑似コード
+    return process.env[key] ?: null
+}
+fun random(): float {
+    // 0.0 から 1.0 の間のランダムな浮動小数点数を返す疑似コード
+    return Math.random()
+}
+```

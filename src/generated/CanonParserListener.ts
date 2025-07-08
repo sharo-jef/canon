@@ -17,6 +17,11 @@ import { PrimaryExprContext } from "./CanonParser";
 import { UnaryMinusExprContext } from "./CanonParser";
 import { LogicalNotExprContext } from "./CanonParser";
 import { BitwiseNotExprContext } from "./CanonParser";
+import { MemberAccessExprContext } from "./CanonParser";
+import { IndexAccessExprContext } from "./CanonParser";
+import { SliceExprContext } from "./CanonParser";
+import { FuncCallExprContext } from "./CanonParser";
+import { NonNullAssertExprContext } from "./CanonParser";
 import { PowerExprContext } from "./CanonParser";
 import { MulDivModExprContext } from "./CanonParser";
 import { AddSubExprContext } from "./CanonParser";
@@ -31,11 +36,6 @@ import { BitwiseOrExprContext } from "./CanonParser";
 import { LogicalAndExprContext } from "./CanonParser";
 import { LogicalOrExprContext } from "./CanonParser";
 import { PipelineExprContext } from "./CanonParser";
-import { MemberAccessExprContext } from "./CanonParser";
-import { IndexAccessExprContext } from "./CanonParser";
-import { SliceExprContext } from "./CanonParser";
-import { FuncCallExprContext } from "./CanonParser";
-import { NonNullAssertExprContext } from "./CanonParser";
 import { ProgramContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { UseStatementContext } from "./CanonParser";
@@ -277,6 +277,71 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitBitwiseNotExpr?: (ctx: BitwiseNotExprContext) => void;
 
 	/**
+	 * Enter a parse tree produced by the `memberAccessExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterMemberAccessExpr?: (ctx: MemberAccessExprContext) => void;
+	/**
+	 * Exit a parse tree produced by the `memberAccessExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitMemberAccessExpr?: (ctx: MemberAccessExprContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `indexAccessExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterIndexAccessExpr?: (ctx: IndexAccessExprContext) => void;
+	/**
+	 * Exit a parse tree produced by the `indexAccessExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitIndexAccessExpr?: (ctx: IndexAccessExprContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `sliceExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterSliceExpr?: (ctx: SliceExprContext) => void;
+	/**
+	 * Exit a parse tree produced by the `sliceExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitSliceExpr?: (ctx: SliceExprContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `funcCallExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterFuncCallExpr?: (ctx: FuncCallExprContext) => void;
+	/**
+	 * Exit a parse tree produced by the `funcCallExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitFuncCallExpr?: (ctx: FuncCallExprContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `nonNullAssertExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterNonNullAssertExpr?: (ctx: NonNullAssertExprContext) => void;
+	/**
+	 * Exit a parse tree produced by the `nonNullAssertExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitNonNullAssertExpr?: (ctx: NonNullAssertExprContext) => void;
+
+	/**
 	 * Enter a parse tree produced by the `powerExpr`
 	 * labeled alternative in `CanonParser.expression`.
 	 * @param ctx the parse tree
@@ -457,71 +522,6 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitPipelineExpr?: (ctx: PipelineExprContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `memberAccessExpr`
-	 * labeled alternative in `CanonParser.expression`.
-	 * @param ctx the parse tree
-	 */
-	enterMemberAccessExpr?: (ctx: MemberAccessExprContext) => void;
-	/**
-	 * Exit a parse tree produced by the `memberAccessExpr`
-	 * labeled alternative in `CanonParser.expression`.
-	 * @param ctx the parse tree
-	 */
-	exitMemberAccessExpr?: (ctx: MemberAccessExprContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `indexAccessExpr`
-	 * labeled alternative in `CanonParser.expression`.
-	 * @param ctx the parse tree
-	 */
-	enterIndexAccessExpr?: (ctx: IndexAccessExprContext) => void;
-	/**
-	 * Exit a parse tree produced by the `indexAccessExpr`
-	 * labeled alternative in `CanonParser.expression`.
-	 * @param ctx the parse tree
-	 */
-	exitIndexAccessExpr?: (ctx: IndexAccessExprContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `sliceExpr`
-	 * labeled alternative in `CanonParser.expression`.
-	 * @param ctx the parse tree
-	 */
-	enterSliceExpr?: (ctx: SliceExprContext) => void;
-	/**
-	 * Exit a parse tree produced by the `sliceExpr`
-	 * labeled alternative in `CanonParser.expression`.
-	 * @param ctx the parse tree
-	 */
-	exitSliceExpr?: (ctx: SliceExprContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `funcCallExpr`
-	 * labeled alternative in `CanonParser.expression`.
-	 * @param ctx the parse tree
-	 */
-	enterFuncCallExpr?: (ctx: FuncCallExprContext) => void;
-	/**
-	 * Exit a parse tree produced by the `funcCallExpr`
-	 * labeled alternative in `CanonParser.expression`.
-	 * @param ctx the parse tree
-	 */
-	exitFuncCallExpr?: (ctx: FuncCallExprContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `nonNullAssertExpr`
-	 * labeled alternative in `CanonParser.expression`.
-	 * @param ctx the parse tree
-	 */
-	enterNonNullAssertExpr?: (ctx: NonNullAssertExprContext) => void;
-	/**
-	 * Exit a parse tree produced by the `nonNullAssertExpr`
-	 * labeled alternative in `CanonParser.expression`.
-	 * @param ctx the parse tree
-	 */
-	exitNonNullAssertExpr?: (ctx: NonNullAssertExprContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.program`.

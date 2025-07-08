@@ -128,7 +128,7 @@ destructuringProperty
     ;
 
 initDeclaration    : annotation* INIT ( LPAREN parameterList? RPAREN )? block ;
-getterDeclaration  : annotation* GET  IDENTIFIER LPAREN RPAREN block ;
+getterDeclaration  : annotation* GET  IDENTIFIER LPAREN RPAREN ( COLON type )? block ;
 methodDeclaration  : annotation* PRIVATE? FUN IDENTIFIER
                      LPAREN parameterList? RPAREN
                      ( COLON type )?
@@ -157,6 +157,12 @@ expression
     | MINUS         expression                     #unaryMinusExpr
     | NOT           expression                     #logicalNotExpr
     | BIT_NOT       expression                     #bitwiseNotExpr
+    | expression DOT IDENTIFIER                      #memberAccessExpr
+    | expression LBRACKET expression RBRACKET        #indexAccessExpr
+    | expression LBRACKET expression? RANGE expression? RBRACKET
+                                                #sliceExpr
+    | expression LPAREN argumentList? RPAREN         #funcCallExpr
+    | expression EXCLAMATION                         #nonNullAssertExpr
     | expression POWER                           expression #powerExpr
     | expression op=(MULTIPLY | DIVIDE | MODULO) expression #mulDivModExpr
     | expression op=(PLUS | MINUS)               expression #addSubExpr
@@ -171,12 +177,6 @@ expression
     | expression LOGICAL_AND            expression #logicalAndExpr
     | expression LOGICAL_OR             expression #logicalOrExpr
     | expression PIPELINE               expression #pipelineExpr
-    | expression DOT IDENTIFIER                      #memberAccessExpr
-    | expression LBRACKET expression RBRACKET        #indexAccessExpr
-    | expression LBRACKET expression? RANGE expression? RBRACKET
-                                                #sliceExpr
-    | expression LPAREN argumentList? RPAREN         #funcCallExpr
-    | expression EXCLAMATION                         #nonNullAssertExpr
     ;
 
 // ───── primaries ───────────────────────────────

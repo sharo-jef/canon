@@ -1,0 +1,13 @@
+struct TestStruct {
+    value: int
+    
+    // 型不一致テスト：戻り値型をstringに指定しているが、実際はintを返す
+    get getValue(): string {
+        value  // これはintなので、stringとの型不一致エラーが発生すべき
+    }
+    
+    // 正しい例：型が一致している
+    get getStringValue(): string {
+        "hello world"
+    }
+}

@@ -748,10 +748,14 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
     const body = this.visit(ctx.block());
 
+    // Handle return type if specified
+    const returnType = ctx.type() ? this.visit(ctx.type()!) : undefined;
+
     return {
       type: 'GetterDeclaration',
       name,
       annotations,
+      returnType,
       body: body.body || [],
       loc: this.getLocationInfo(ctx),
     };

@@ -1,0 +1,13 @@
+infix fun string.invalidAdd(other: int): string {
+    this + other  // string + int は型エラーになるべき
+}
+
+val example1 = "hello" invalidAdd 42  // 戻り値型はstringだが、型不一致の可能性
+
+// Range式の型チェック
+val intRange = 1..10
+val stringRange = "a".."z"  // stringでのRange式は型エラーになるべき
+
+// step演算子の型チェック
+val validStepRange = 1..10 step 2
+val invalidStepRange = 1..10 step "hello"  // step演算子にstringは型エラーになるべき
