@@ -786,7 +786,7 @@ export class SemanticAnalyzer {
   }
 
   private async visitFunctionCall(node: ASTNode): Promise<string | undefined> {
-    const functionName = node.function?.name || node.name?.name;
+    const functionName = node.function?.name || node.name?.name || node.callee?.name;
 
     if (!functionName) {
       this.addError({
@@ -1089,9 +1089,11 @@ export class SemanticAnalyzer {
     // Check for missing required properties
     const schemaEntries = Array.from(this.schemaDefinition.entries());
     for (const [propertyName, schemaProperty] of schemaEntries) {
-      if (!schemaProperty.isOptional && 
-          !declaredVariables.has(propertyName) && 
-          !instantiatedProperties.has(propertyName)) {
+      if (
+        !schemaProperty.isOptional &&
+        !declaredVariables.has(propertyName) &&
+        !instantiatedProperties.has(propertyName)
+      ) {
         this.addError({
           message: `Required property '${propertyName}' of type '${schemaProperty.type}' is missing`,
           type: 'ValidationError',
@@ -1466,7 +1468,7 @@ export class SemanticAnalyzer {
    */
   private async visitCallExpression(node: ASTNode): Promise<string | undefined> {
     const calleeName = node.callee?.name;
-    
+
     if (!calleeName) {
       return 'any';
     }
@@ -1475,18 +1477,18 @@ export class SemanticAnalyzer {
     if (this.schemaDefinition.has(calleeName)) {
       // This is a schema property instantiation like PluginHeader { ... }
       this.schemaPropertyInstances.add(calleeName);
-      
+
       if (process.env.DEBUG) {
         console.log(`[DEBUG] Schema property instantiated: ${calleeName}`);
       }
-      
+
       // Process the lambda expression arguments if present
       if (node.arguments && Array.isArray(node.arguments)) {
         for (const arg of node.arguments) {
           await this.visitNode(arg);
         }
       }
-      
+
       return calleeName; // Return the type of the instantiated struct
     }
 
