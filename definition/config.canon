@@ -1,7 +1,5 @@
 #schema './schema.canon'
 
-use getEnv
-
 PluginHeader {
     name = 'Plugin1'
     description = 'Description of plugin1'

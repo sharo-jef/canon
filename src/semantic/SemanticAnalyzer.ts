@@ -36,6 +36,7 @@ export class SemanticAnalyzer {
   private isInSchema: boolean = false;
   private schemaDefinition: Map<string, SchemaProperty> = new Map();
   private currentFilePath?: string;
+  private schemaPropertyInstances: Set<string> = new Set(); // Track instantiated schema properties
 
   constructor() {
     this.symbolTable = new SymbolTable();
@@ -279,8 +280,8 @@ export class SemanticAnalyzer {
       case 'AssignmentStatement':
         return this.visitAssignmentStatement(node);
       case 'CallExpression':
-        // CallExpressionは既存のロジックで処理
-        return 'any';
+        // CallExpressionを詳細に処理し、schema property instantiationを検出
+        return this.visitCallExpression(node);
       case 'LambdaExpression':
         // LambdaExpressionは既存のロジックで処理
         return 'function';
@@ -1025,13 +1026,13 @@ export class SemanticAnalyzer {
     // Schema検証は設計原則に従い、以下の条件でのみ適用する：
     // 1. configファイルでの変数宣言の場合のみ
     // 2. schemaファイル内での変数宣言は自由に許可される
-    
+
     if (process.env.DEBUG) {
       console.log(
         `[DEBUG] validateAgainstSchema called for variable '${variableName}', currentFilePath: '${this.currentFilePath}'`
       );
     }
-    
+
     // 現在解析中のファイルがschemaファイル（ast.yamlの元ファイル）の場合は検証をスキップ
     if (!this.currentFilePath || !this.currentFilePath.includes('config.canon')) {
       if (process.env.DEBUG) {
@@ -1075,6 +1076,7 @@ export class SemanticAnalyzer {
    */
   private validateSchemaCompleteness(): void {
     const declaredVariables = new Set<string>();
+    const instantiatedProperties = new Set<string>(this.schemaPropertyInstances);
 
     // Collect all variable names from symbol table
     const symbols = this.symbolTable.getAllSymbols();
@@ -1087,7 +1089,9 @@ export class SemanticAnalyzer {
     // Check for missing required properties
     const schemaEntries = Array.from(this.schemaDefinition.entries());
     for (const [propertyName, schemaProperty] of schemaEntries) {
-      if (!schemaProperty.isOptional && !declaredVariables.has(propertyName)) {
+      if (!schemaProperty.isOptional && 
+          !declaredVariables.has(propertyName) && 
+          !instantiatedProperties.has(propertyName)) {
         this.addError({
           message: `Required property '${propertyName}' of type '${schemaProperty.type}' is missing`,
           type: 'ValidationError',
@@ -1440,20 +1444,53 @@ export class SemanticAnalyzer {
   private isSchemaPropertyAssignment(variableName: string): boolean {
     // Schema validation should only apply to variables that are defined in the schema
     // and are at the top level (not inside functions, structs, etc.)
-    
+
     // Check if this variable is defined in the schema
     const schemaProperty = this.schemaDefinition.get(variableName);
     if (!schemaProperty) {
       return false; // Not a schema property, so it's a free variable declaration
     }
-    
+
     // Additional check: only validate if we're in a config file
     if (!this.currentFilePath || !this.currentFilePath.includes('config.canon')) {
       return false;
     }
-    
+
     // TODO: In the future, we might want to check if we're at the top level
     // For now, we assume all schema property assignments are valid for validation
     return true;
+  }
+
+  /**
+   * Visit CallExpression - handle function calls and struct instantiation
+   */
+  private async visitCallExpression(node: ASTNode): Promise<string | undefined> {
+    const calleeName = node.callee?.name;
+    
+    if (!calleeName) {
+      return 'any';
+    }
+
+    // Check if this is a schema property instantiation
+    if (this.schemaDefinition.has(calleeName)) {
+      // This is a schema property instantiation like PluginHeader { ... }
+      this.schemaPropertyInstances.add(calleeName);
+      
+      if (process.env.DEBUG) {
+        console.log(`[DEBUG] Schema property instantiated: ${calleeName}`);
+      }
+      
+      // Process the lambda expression arguments if present
+      if (node.arguments && Array.isArray(node.arguments)) {
+        for (const arg of node.arguments) {
+          await this.visitNode(arg);
+        }
+      }
+      
+      return calleeName; // Return the type of the instantiated struct
+    }
+
+    // Handle regular function calls
+    return this.visitFunctionCall(node);
   }
 }
