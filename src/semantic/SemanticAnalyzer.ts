@@ -267,6 +267,16 @@ export class SemanticAnalyzer {
         return this.visitMemberAccess(node);
       case 'ThisExpression':
         return this.visitThisExpression(node);
+      case 'TypeCastExpression':
+        return this.visitTypeCastExpression(node);
+      case 'NullableType':
+        return this.visitNullableType(node);
+      case 'ArrayType':
+        return this.visitArrayType(node);
+      case 'PrimitiveType':
+        return this.visitPrimitiveType(node);
+      case 'TypeReference':
+        return this.visitTypeReference(node);
       case 'AssignmentStatement':
         return this.visitAssignmentStatement(node);
       case 'IfExpression':
@@ -515,14 +525,49 @@ export class SemanticAnalyzer {
 
     // 型推論または明示的型チェック
     let dataType = 'any';
-    if (node.typeRef) {
-      dataType = node.typeRef.name?.name || node.typeRef.name || 'any';
-    } else if (node.value) {
+    let inferredType: string | undefined;
+
+    // 値がある場合は型推論を実行
+    if (node.value) {
       if (process.env.DEBUG) {
         console.log(`[DEBUG] Processing variable '${varName}' with value type: ${node.value.type}`);
       }
-      const inferredType = await this.visitNode(node.value);
-      dataType = inferredType || 'any';
+      inferredType = await this.visitNode(node.value);
+    }
+
+    // 明示型がある場合
+    if (node.typeRef) {
+      let declaredType: string;
+
+      // typeRefも解析対象のASTノードの場合
+      if (node.typeRef.type) {
+        const typeResult = await this.visitNode(node.typeRef);
+        declaredType = typeResult || 'any';
+      } else {
+        // 従来の簡単な形式（PrimitiveTypeの場合など）
+        declaredType = node.typeRef.name?.name || node.typeRef.name || 'any';
+      }
+
+      if (process.env.DEBUG) {
+        console.log(
+          `[DEBUG] Variable '${varName}': inferred type = ${inferredType || 'none'}, declared type = ${declaredType}`
+        );
+      }
+
+      // 型チェック：推論型と明示型の一致を確認
+      if (inferredType && !this.isCompatibleType(inferredType, declaredType)) {
+        this.addTypeError(
+          inferredType,
+          declaredType,
+          this.getLocation(node.value),
+          `variable '${varName}' initialization`
+        );
+      }
+
+      dataType = declaredType;
+    } else if (inferredType) {
+      // 明示型がない場合は推論型を使用
+      dataType = inferredType;
     }
 
     this.symbolTable.define({
@@ -951,6 +996,12 @@ export class SemanticAnalyzer {
     // 初期化子の型を推論
     const inferredType = await this.visitNode(node.value);
 
+    if (process.env.DEBUG) {
+      console.log(
+        `[DEBUG] Variable '${varName}': inferred type = ${inferredType}, declared type = ${node.typeRef?.name?.name || node.typeRef?.name || 'none'}`
+      );
+    }
+
     // 明示型がある場合は型チェック
     if (node.typeRef && inferredType) {
       const declaredType = node.typeRef.name?.name || node.typeRef.name;
@@ -970,7 +1021,7 @@ export class SemanticAnalyzer {
   }
 
   /**
-   * 型の互換性をチェックする
+   * 型の互換性をチェックする（厳密型チェック）
    */
   private isCompatibleType(actualType: string | undefined, expectedType: string): boolean {
     if (!actualType) return false;
@@ -979,13 +1030,20 @@ export class SemanticAnalyzer {
     // any型は全ての型と互換性がある
     if (actualType === 'any' || expectedType === 'any') return true;
 
-    // 数値型の互換性（intとfloatは相互変換可能）
-    if (
-      (actualType === 'int' && expectedType === 'float') ||
-      (actualType === 'float' && expectedType === 'int')
-    ) {
-      return true;
+    // null許容型の互換性チェック
+    // 非null型 -> null許容型 は許可（例: string -> string?）
+    if (expectedType.endsWith('?')) {
+      const baseExpectedType = expectedType.slice(0, -1);
+      return this.isCompatibleType(actualType, baseExpectedType);
     }
+
+    // null許容型 -> 非null型 は禁止（例: string? -> string）
+    if (actualType.endsWith('?') && !expectedType.endsWith('?')) {
+      return false;
+    }
+
+    // 暗黙的型変換は行わない（型安全性のため）
+    // 型変換が必要な場合は明示的にint(), float(), string(), bool()関数を使用する
 
     return false;
   }
@@ -1257,6 +1315,31 @@ export class SemanticAnalyzer {
     const funcName = node.function?.name || node.function;
     if (!funcName) return undefined;
 
+    // 型キャスト関数の特別処理（int(), float(), string(), bool()）
+    if (['int', 'float', 'string', 'bool'].includes(funcName)) {
+      // 引数の型チェック
+      if (node.arguments && Array.isArray(node.arguments)) {
+        if (node.arguments.length !== 1) {
+          this.addError({
+            message: `Type cast function '${funcName}()' expects exactly 1 argument, but got ${node.arguments.length}`,
+            type: 'TypeError',
+            location: this.getLocation(node),
+          });
+          return funcName; // 型キャスト関数の戻り値型は関数名と同じ
+        }
+
+        // 引数の型を評価
+        const argType = await this.visitNode(node.arguments[0]);
+        if (argType) {
+          // 明示的型キャストは任意の型から可能（ただし実行時エラーの可能性あり）
+          console.log(`[DEBUG] Type cast: ${argType} -> ${funcName}`);
+        }
+      }
+
+      return funcName; // 型キャスト関数の戻り値型は関数名と同じ
+    }
+
+    // 通常の関数解決
     const func = this.symbolTable.resolve(funcName);
     if (!func) {
       this.addError({
@@ -1514,6 +1597,47 @@ export class SemanticAnalyzer {
   }
 
   /**
+   * 型キャスト式を処理
+   */
+  private async visitTypeCastExpression(node: ASTNode): Promise<string | undefined> {
+    // 被キャスト式の型を評価
+    const sourceType = node.expression ? await this.visitNode(node.expression) : undefined;
+    const targetType = node.targetType;
+
+    if (!targetType) {
+      this.addError({
+        message: 'Type cast expression missing target type',
+        type: 'TypeError',
+        location: this.getLocation(node),
+      });
+      return 'any';
+    }
+
+    // 基本型の検証
+    if (!this.isBuiltinType(targetType)) {
+      this.addError({
+        message: `Invalid cast target type '${targetType}'. Only built-in types (int, float, string, bool) are supported for casting`,
+        type: 'TypeError',
+        location: this.getLocation(node),
+      });
+      return 'any';
+    }
+
+    if (sourceType) {
+      console.log(`[DEBUG] Type cast: ${sourceType} -> ${targetType}`);
+
+      // 型キャストの妥当性チェック（警告レベル）
+      if (sourceType === targetType) {
+        // 同じ型への無意味なキャスト
+        console.log(`[DEBUG] Warning: Unnecessary cast from ${sourceType} to ${targetType}`);
+      }
+    }
+
+    // 型キャストは常に成功する（実行時エラーの可能性はあるが）
+    return targetType;
+  }
+
+  /**
    * 子ノードを再帰的に処理
    */
   private async visitChildren(node: ASTNode): Promise<void> {
@@ -1540,5 +1664,105 @@ export class SemanticAnalyzer {
   private findScopeByName(scopeName: string): any {
     // SymbolTableの全スコープを検索してスコープ名が一致するものを見つける
     return this.symbolTable.findScopeByName(scopeName);
+  }
+
+  /**
+   * null許容型の型推論
+   */
+  private async visitNullableType(node: ASTNode): Promise<string | undefined> {
+    if (!node.innerType) {
+      this.addError({
+        message: 'Nullable type must have an inner type',
+        type: 'TypeError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    const innerType = await this.visitNode(node.innerType);
+    if (!innerType) {
+      return undefined;
+    }
+
+    // null許容型は型名の後に?を付けて表現
+    return `${innerType}?`;
+  }
+
+  /**
+   * 配列型の型推論
+   */
+  private async visitArrayType(node: ASTNode): Promise<string | undefined> {
+    if (!node.elementType) {
+      this.addError({
+        message: 'Array type must have an element type',
+        type: 'TypeError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    const elementType = await this.visitNode(node.elementType);
+    if (!elementType) {
+      return undefined;
+    }
+
+    // 配列の次元数を考慮
+    const dimensions = node.dimensions || 1;
+    let arrayType = elementType;
+    for (let i = 0; i < dimensions; i++) {
+      arrayType = `${arrayType}[]`;
+    }
+
+    return arrayType;
+  }
+
+  /**
+   * プリミティブ型の型推論
+   */
+  private async visitPrimitiveType(node: ASTNode): Promise<string | undefined> {
+    // プリミティブ型はnameプロパティに型名が格納されている
+    return node.name || undefined;
+  }
+
+  /**
+   * 型参照の型推論
+   */
+  private async visitTypeReference(node: ASTNode): Promise<string | undefined> {
+    if (!node.name) {
+      this.addError({
+        message: 'Type reference must have a name',
+        type: 'TypeError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    // 識別子ノードから型名を取得
+    let typeName: string;
+    if (typeof node.name === 'string') {
+      typeName = node.name;
+    } else if (node.name.name) {
+      typeName = node.name.name;
+    } else {
+      this.addError({
+        message: 'Invalid type reference name',
+        type: 'TypeError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    // 型が定義されているかチェック
+    const typeInfo = this.symbolTable.resolve(typeName);
+    if (!typeInfo) {
+      this.addError({
+        message: `Unknown type: ${typeName}`,
+        type: 'TypeError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
+    return typeName;
   }
 }

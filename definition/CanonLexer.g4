@@ -36,6 +36,7 @@ INFIX: 'infix';
 // Built-in types
 STRING_TYPE: 'string';
 INT_TYPE: 'int';
+FLOAT_TYPE: 'float';
 BOOL_TYPE: 'bool';
 
 // Operators

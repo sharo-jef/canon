@@ -17,6 +17,7 @@ import { PrimaryExprContext } from "./CanonParser";
 import { UnaryMinusExprContext } from "./CanonParser";
 import { LogicalNotExprContext } from "./CanonParser";
 import { BitwiseNotExprContext } from "./CanonParser";
+import { TypeCastExprContext } from "./CanonParser";
 import { MemberAccessExprContext } from "./CanonParser";
 import { IndexAccessExprContext } from "./CanonParser";
 import { SliceExprContext } from "./CanonParser";
@@ -275,6 +276,19 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitBitwiseNotExpr?: (ctx: BitwiseNotExprContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `typeCastExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterTypeCastExpr?: (ctx: TypeCastExprContext) => void;
+	/**
+	 * Exit a parse tree produced by the `typeCastExpr`
+	 * labeled alternative in `CanonParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitTypeCastExpr?: (ctx: TypeCastExprContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `memberAccessExpr`

@@ -1,0 +1,26 @@
+val optionalString: string? = "hello"
+val nullableInt: int? = null
+val maybeFloat: float? = 3.14
+
+// null許容型の代入テスト
+val notNull: string = "test"
+val nullable: string? = notNull  // string -> string? は許可されるべき
+
+// null許容型から非null型への代入（エラーになるべき）
+// val shouldError: string = nullable  // string? -> string は禁止されるべき
+
+// 配列とnull許容型の組み合わせ
+val nullableArray: string[]? = ["a", "b"]
+val arrayOfNullables: string?[] = [null, "hello"]
+
+// 関数の戻り値型にnull許容型
+fun getOptionalValue(): string? {
+    return "maybe"
+}
+
+fun requiresNonNull(value: string) {
+    // 何もしない
+}
+
+// null許容型のメンバーアクセス（今後実装予定）
+// val result = optionalString?.length

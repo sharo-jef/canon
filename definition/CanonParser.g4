@@ -52,9 +52,9 @@ variableDeclaration
 // ───── type system ────────────────────────────
 unionType : type ( BIT_OR type )* ;
 
-type      : baseType ( LBRACKET RBRACKET )* ;
+type      : baseType ( LBRACKET RBRACKET )* QUESTION? ;
 baseType  : primitiveType | IDENTIFIER ;
-primitiveType : STRING_TYPE | INT_TYPE | BOOL_TYPE ;
+primitiveType : STRING_TYPE | INT_TYPE | FLOAT_TYPE | BOOL_TYPE ;
 
 // ───── blocks / statements ────────────────────
 block
@@ -157,6 +157,10 @@ expression
     | MINUS         expression                     #unaryMinusExpr
     | NOT           expression                     #logicalNotExpr
     | BIT_NOT       expression                     #bitwiseNotExpr
+    | INT_TYPE LPAREN expression RPAREN           #typeCastExpr
+    | FLOAT_TYPE LPAREN expression RPAREN         #typeCastExpr
+    | STRING_TYPE LPAREN expression RPAREN        #typeCastExpr
+    | BOOL_TYPE LPAREN expression RPAREN          #typeCastExpr
     | expression DOT IDENTIFIER                      #memberAccessExpr
     | expression LBRACKET expression RBRACKET        #indexAccessExpr
     | expression LBRACKET expression? RANGE expression? RBRACKET

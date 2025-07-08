@@ -80,6 +80,7 @@ import {
   PowerExprContext,
   RangeExprContext,
   InfixCallExprContext,
+  TypeCastExprContext,
 } from './generated/CanonParser';
 import { CanonParserVisitor } from './generated/CanonParserVisitor';
 import { CanonErrorListener } from './error/CanonErrorListener';
@@ -408,8 +409,25 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     const baseType = this.visit(ctx.baseType());
     const arrayDimensions = ctx.LBRACKET().length;
 
+    // デバッグ: QUESTION()の値を確認
+    const questionToken = ctx.QUESTION();
+    const isNullable = questionToken !== null && questionToken !== undefined;
+
+    // デバッグ出力
+    if (process.env.DEBUG) {
+      console.log(
+        `[DEBUG visitType] questionToken: ${questionToken}, type: ${typeof questionToken}, isNullable: ${isNullable}`
+      );
+      console.log(
+        `[DEBUG visitType] baseType: ${JSON.stringify(baseType)}, arrayDimensions: ${arrayDimensions}`
+      );
+    }
+
+    let resultType = baseType;
+
+    // Handle array dimensions
     if (arrayDimensions > 0) {
-      return {
+      resultType = {
         type: 'ArrayType',
         elementType: baseType,
         dimensions: arrayDimensions,
@@ -417,7 +435,20 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       };
     }
 
-    return baseType;
+    // Handle nullable type
+    if (isNullable) {
+      resultType = {
+        type: 'NullableType',
+        innerType: resultType,
+        loc: this.getLocationInfo(ctx),
+      };
+    }
+
+    if (process.env.DEBUG) {
+      console.log(`[DEBUG visitType] resultType: ${JSON.stringify(resultType)}`);
+    }
+
+    return resultType;
   }
 
   visitBaseType(ctx: BaseTypeContext): ASTNode {
@@ -1107,6 +1138,30 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       type: 'UnaryExpression',
       operator: 'not',
       operand,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitTypeCastExpr(ctx: TypeCastExprContext): ASTNode {
+    const expression = this.visit(ctx.expression());
+
+    let targetType: string;
+    if (ctx.INT_TYPE()) {
+      targetType = 'int';
+    } else if (ctx.FLOAT_TYPE()) {
+      targetType = 'float';
+    } else if (ctx.STRING_TYPE()) {
+      targetType = 'string';
+    } else if (ctx.BOOL_TYPE()) {
+      targetType = 'bool';
+    } else {
+      targetType = 'unknown';
+    }
+
+    return {
+      type: 'TypeCastExpression',
+      targetType,
+      expression,
       loc: this.getLocationInfo(ctx),
     };
   }

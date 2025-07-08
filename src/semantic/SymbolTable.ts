@@ -2,7 +2,15 @@
  * シンボルテーブル - スコープ管理とシンボル解決のためのデータ構造
  */
 
-export type SymbolType = 'variable' | 'function' | 'struct' | 'union' | 'parameter' | 'property';
+export type SymbolType =
+  | 'variable'
+  | 'function'
+  | 'struct'
+  | 'union'
+  | 'parameter'
+  | 'property'
+  | 'type'
+  | 'cast_function';
 
 export interface Symbol {
   name: string;
@@ -165,7 +173,7 @@ export class SymbolTable {
    * 事前定義されたシンボル（組み込み関数・型など）を初期化
    */
   private initializePredefinedSymbols(): void {
-    // 基本型
+    // 基本型は型として定義
     this.define({
       name: 'int',
       type: 'struct',

@@ -104,6 +104,19 @@ struct math {
         return x - y * Math.floor(x / y)
     }
 }
+// 型関連
+fun int(value: any): int {
+    // キャスト
+}
+fun float(value: any): float {
+    // キャスト
+}
+fun string(value: any): string {
+    // キャスト
+}
+fun bool(value: any): bool {
+    // キャスト
+}
 ```
 
 ## Range
@@ -195,5 +208,9 @@ fun getEnv(key: string): string? {
 fun random(): float {
     // 0.0 から 1.0 の間のランダムな浮動小数点数を返す疑似コード
     return Math.random()
+}
+fun print(message: struct) {
+    // 標準出力にメッセージを出力する疑似コード
+    console.log(message.toString())
 }
 ```
