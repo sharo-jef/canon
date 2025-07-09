@@ -1,2 +1,0 @@
-val lambda1 = {}
-val lambda2 = { -> "hello" }

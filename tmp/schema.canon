@@ -1,3 +1,78 @@
+// comment
+# comment
+/*
+    comment
+*/
+
 schema {
-    // empty schema for testing
+    // Same as `PluginHeader: PluginHeader`
+    @description 'A plugin header'
+    PluginHeader
+    pipeline: Pipeline
 }
+
+@description("Plugin header struct")
+struct PluginHeader {
+    name: string
+    description?: string
+    version: Version = Version {
+        major = 0
+        minor = 0
+        patch = 1
+    }
+}
+
+struct Version {
+    init {
+        validation()
+    }
+    init(major: int) {
+        val m = major + 1
+        var ma = m - 3
+        ma += 1 + 1
+        this.major = ma
+        minor = 0
+        patch = 0
+        validation()
+    }
+    init(this.major, this.minor, this.patch) {
+        `${major + minor + patch}あいうえお$majorほげ${this.major}`
+        validation()
+    }
+    private fun validation() {
+        if (this.major == 0 && this.minor == 0 && this.patch == 0) error('Given version is not valid')
+    }
+    major: int
+    minor: int
+    patch: int
+    private hoge: string
+    get toString(): string {
+        `$major.$minor.$patch`
+    }
+}
+
+struct Pipeline {
+    repeated steps: Step[] {
+        build -> BuildStep
+        test -> TestStep
+    }
+}
+union Step = BuildStep | TestStep
+struct BuildStep {
+    command: string
+}
+struct TestStep {
+    script: string
+}
+
+infix fun int.add(other: int): int {
+    this + other
+}
+
+val example = 1 add (1 add 1)
+val rangeExample = 1..=10 step 2
+val rangeExample2 = 1..=10 step 2 step 3
+val rangeExample3 = 1 until 10
+val rangeExample4 = 1 until 10 step 2
+val rangeExample5 = 10 downTo 1
+val rangeExample6 = 10 downTo 1 step 2
