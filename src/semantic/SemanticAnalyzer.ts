@@ -36,6 +36,7 @@ export class SemanticAnalyzer {
   private schemaDefinition: Map<string, SchemaProperty> = new Map();
   private currentFilePath?: string;
   private schemaPropertyInstances: Set<string> = new Set(); // Track instantiated schema properties
+  private hasSchemaDirective: boolean = false; // Track if file has #schema directive
 
   constructor() {
     this.symbolTable = new SymbolTable();
@@ -51,6 +52,10 @@ export class SemanticAnalyzer {
     symbolTable: SymbolTable;
   }> {
     try {
+      // Reset state for each file analysis
+      this.schemaPropertyInstances.clear();
+      this.errors = [];
+      
       // 現在のファイルパスを保存
       this.currentFilePath = sourceFilePath;
       
@@ -171,6 +176,9 @@ export class SemanticAnalyzer {
     if (!node || typeof node !== 'object') {
       return;
     }
+
+    // Reset schema directive flag for each file analysis
+    this.hasSchemaDirective = false;
 
     try {
       // Pass 1: 型定義の収集（前方宣言対応）
@@ -378,6 +386,16 @@ export class SemanticAnalyzer {
   }
 
   private async visitSchemaDeclaration(node: ASTNode): Promise<string | undefined> {
+    // Check if this file has a schema directive - if so, schema declarations are not allowed
+    if (this.hasSchemaDirective) {
+      this.addError({
+        message: 'Schema declarations are not allowed in files that have a #schema directive',
+        type: 'ValidationError',
+        location: this.getLocation(node),
+      });
+      return undefined;
+    }
+
     this.isInSchema = true;
     this.schemaDefinition.clear();
 
@@ -1340,6 +1358,8 @@ export class SemanticAnalyzer {
 
   private async visitSchemaDirective(node: ASTNode): Promise<string | undefined> {
     // スキーマディレクティブの処理 - スキーマファイルを読み込む
+    this.hasSchemaDirective = true; // Mark that this file has a schema directive
+    
     const schemaPath = node.path;
     if (schemaPath && typeof schemaPath === 'string') {
       try {

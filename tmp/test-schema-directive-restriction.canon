@@ -1,0 +1,16 @@
+#schema './schema.canon'
+
+// これは許可されるべき
+struct MyStruct {
+    name: string
+}
+
+// これは許可されるべき
+union MyUnion = string | int
+
+// これはエラーになるべき
+schema {
+    someProperty: string
+}
+
+val test = 'test'
