@@ -6,12 +6,6 @@ PluginHeader {
     version = Version(0, 0, 1)
 }
 
-PluginHeader {
-    name = 'Plugin2'
-    description = 'Description of plugin2'
-    version = Version(0, 0, 2)
-}
-
 val goBuild = 'go build'
 var goTest = 'go' + ' ' + 'test'
 
@@ -24,6 +18,14 @@ fun empty() {}
 goTest += ' ' + join(getEnv('PIPELINE_HOME_PATH')!, '/test')
 
 pipeline {
+    build {
+        command = goBuild
+    }
+    test {
+        script = goTest
+    }
+}
+Pipeline {
     build {
         command = goBuild
     }

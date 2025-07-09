@@ -1,0 +1,19 @@
+#schema '../definition/schema.canon'
+
+PluginHeader {
+    name = 'First Plugin'
+    description = 'First plugin description'
+    version = Version(1, 0, 0)
+}
+
+PluginHeader {
+    name = 'Second Plugin'
+    description = 'Second plugin description'
+    version = Version(2, 0, 0)
+}
+
+pipeline {
+    build {
+        command = 'echo "Hello World"'
+    }
+}

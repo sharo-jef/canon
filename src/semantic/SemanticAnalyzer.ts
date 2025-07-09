@@ -1606,6 +1606,16 @@ export class SemanticAnalyzer {
 
     // Check if this is a schema property instantiation
     if (this.schemaDefinition.has(calleeName)) {
+      // Check if this schema property has already been instantiated
+      if (this.schemaPropertyInstances.has(calleeName)) {
+        this.addError({
+          message: `Schema property '${calleeName}' can only be instantiated once, but found multiple instances`,
+          type: 'ValidationError',
+          location: this.getLocation(node.location),
+        });
+        return calleeName;
+      }
+
       // This is a schema property instantiation like PluginHeader { ... }
       this.schemaPropertyInstances.add(calleeName);
 

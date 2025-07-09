@@ -1,0 +1,13 @@
+#schema '../definition/schema.canon'
+
+PluginHeader {
+    name = 'Single Plugin'
+    description = 'Only one plugin description'
+    version = Version(1, 0, 0)
+}
+
+pipeline {
+    build {
+        command = 'echo "Hello World"'
+    }
+}
