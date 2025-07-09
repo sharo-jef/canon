@@ -257,7 +257,8 @@ lambdaExpression
     | LBRACE lambdaParameters ARROW lambdaBody RBRACE
     | LBRACE lambdaBody RBRACE
     ;
-lambdaParameters : IDENTIFIER ( COMMA IDENTIFIER )* ;
+lambdaParameters : lambdaParameter ( COMMA lambdaParameter )* ;
+lambdaParameter  : IDENTIFIER ( COLON type )? ;
 lambdaBody       : expression | ( statement ( SEMICOLON statement )* )+ ;
 
 anonymousFunction

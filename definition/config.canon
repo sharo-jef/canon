@@ -32,4 +32,11 @@ pipeline {
     }
 }
 val a = {}
-a()
+a{
+val b = { x -> x + 2 }
+val c = { x: int -> x + 2 }
+val d = { x: int, y: int -> x + y }
+val e = { -> "hello" }
+val f = { x: int -> }
+val g = {->}
+}

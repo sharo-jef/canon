@@ -88,6 +88,7 @@ import { AnnotationContext } from "./CanonParser";
 import { ListLiteralContext } from "./CanonParser";
 import { LambdaExpressionContext } from "./CanonParser";
 import { LambdaParametersContext } from "./CanonParser";
+import { LambdaParameterContext } from "./CanonParser";
 import { LambdaBodyContext } from "./CanonParser";
 import { AnonymousFunctionContext } from "./CanonParser";
 import { SpreadExpressionContext } from "./CanonParser";
@@ -1100,6 +1101,17 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitLambdaParameters?: (ctx: LambdaParametersContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.lambdaParameter`.
+	 * @param ctx the parse tree
+	 */
+	enterLambdaParameter?: (ctx: LambdaParameterContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.lambdaParameter`.
+	 * @param ctx the parse tree
+	 */
+	exitLambdaParameter?: (ctx: LambdaParameterContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.lambdaBody`.

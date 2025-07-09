@@ -88,6 +88,7 @@ import { AnnotationContext } from "./CanonParser";
 import { ListLiteralContext } from "./CanonParser";
 import { LambdaExpressionContext } from "./CanonParser";
 import { LambdaParametersContext } from "./CanonParser";
+import { LambdaParameterContext } from "./CanonParser";
 import { LambdaBodyContext } from "./CanonParser";
 import { AnonymousFunctionContext } from "./CanonParser";
 import { SpreadExpressionContext } from "./CanonParser";
@@ -729,6 +730,13 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitLambdaParameters?: (ctx: LambdaParametersContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.lambdaParameter`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLambdaParameter?: (ctx: LambdaParameterContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.lambdaBody`.

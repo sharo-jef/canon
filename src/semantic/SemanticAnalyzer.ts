@@ -852,6 +852,22 @@ export class SemanticAnalyzer {
     }
 
     if (symbol.type !== 'function' && symbol.type !== 'cast_function') {
+      // Check if it's a variable with a lambda type
+      if (symbol.type === 'variable' && symbol.dataType && symbol.dataType.includes('->')) {
+        // This is a lambda variable being called as a function
+        // Extract return type from lambda signature (e.g., "() -> void" -> "void")
+        const returnType = symbol.dataType.split('->')[1]?.trim() || 'any';
+
+        // 引数の型チェック
+        if (node.arguments && Array.isArray(node.arguments)) {
+          for (const arg of node.arguments) {
+            await this.visitNode(arg);
+          }
+        }
+
+        return returnType;
+      }
+
       this.addError({
         message: `'${functionName}' is not a function`,
         type: 'TypeError',

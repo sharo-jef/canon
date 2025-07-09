@@ -65,6 +65,7 @@ import {
   ListLiteralExprContext,
   LambdaExpressionContext,
   LambdaParametersContext,
+  LambdaParameterContext,
   LambdaBodyContext,
   LambdaExprContext,
   AnonymousFunctionContext,
@@ -1571,12 +1572,10 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   // Lambda expression visitors
   visitLambdaExpression(ctx: LambdaExpressionContext): ASTNode {
-    let parameters: string[] = [];
+    let parameters: ASTNode[] = [];
     if (ctx.lambdaParameters()) {
-      parameters = ctx
-        .lambdaParameters()!
-        .IDENTIFIER()
-        .map((id) => id.text);
+      const lambdaParams = this.visit(ctx.lambdaParameters()!);
+      parameters = lambdaParams.parameters || [];
     }
 
     let body: ASTNode[] = [];
@@ -1606,9 +1605,22 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitLambdaParameters(ctx: LambdaParametersContext): ASTNode {
+    const parameters = ctx.lambdaParameter().map((param) => this.visit(param));
     return {
       type: 'LambdaParameters',
-      parameters: ctx.IDENTIFIER().map((id) => id.text),
+      parameters,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitLambdaParameter(ctx: LambdaParameterContext): ASTNode {
+    const name = ctx.IDENTIFIER().text;
+    const typeAnnotation = ctx.type() ? this.visit(ctx.type()!) : null;
+
+    return {
+      type: 'LambdaParameter',
+      name,
+      typeAnnotation,
       loc: this.getLocationInfo(ctx),
     };
   }
