@@ -38,6 +38,7 @@ export class SemanticAnalyzer {
   private currentFilePath?: string;
   private schemaPropertyInstances: Set<string> = new Set(); // Track instantiated schema properties
   private hasSchemaDirective: boolean = false; // Track if file has #schema directive
+  private isInStructInstantiation: boolean = false; // Track if we're inside a struct instantiation
 
   constructor() {
     this.symbolTable = new SymbolTable();
@@ -1294,7 +1295,14 @@ export class SemanticAnalyzer {
     rightType?: string,
     operator?: string
   ): string {
-    if (!leftType || !rightType) {
+    if (!leftType || !rightType || !operator) {
+      if (operator) {
+        this.addError({
+          message: `Unsupported operation '${operator}' between types '${leftType || 'undefined'}' and '${rightType || 'undefined'}'`,
+          type: 'TypeError',
+          location: this.getLocation({}),
+        });
+      }
       return 'any';
     }
 
@@ -1323,6 +1331,13 @@ export class SemanticAnalyzer {
         return 'string';
       }
     }
+
+    // 適切な型が見つからない場合
+    this.addError({
+      message: `Unsupported operation '${operator}' between types '${leftType}' and '${rightType}'`,
+      type: 'TypeError',
+      location: this.getLocation({}),
+    });
 
     return 'any';
   }
@@ -1598,12 +1613,19 @@ export class SemanticAnalyzer {
         console.log(`[DEBUG] Schema property instantiated: ${calleeName}`);
       }
 
+      // Set struct instantiation flag
+      const previousStructInstantiation = this.isInStructInstantiation;
+      this.isInStructInstantiation = true;
+
       // Process the lambda expression arguments if present
       if (node.arguments && Array.isArray(node.arguments)) {
         for (const arg of node.arguments) {
           await this.visitNode(arg);
         }
       }
+
+      // Restore struct instantiation flag
+      this.isInStructInstantiation = previousStructInstantiation;
 
       return calleeName; // Return the type of the instantiated struct
     }
@@ -1617,13 +1639,25 @@ export class SemanticAnalyzer {
       console.log(`[DEBUG] visitLambdaExpression called for node:`, JSON.stringify(node, null, 2));
     }
 
-    // パラメータの型を推論
+    // パラメータの型を推論（型注釈なしの場合はエラーを出す）
     const parameterTypes: string[] = [];
 
     if (node.parameters && Array.isArray(node.parameters)) {
       for (const param of node.parameters) {
-        const paramType = await this.visitParameter(param);
-        parameterTypes.push(paramType || 'any');
+        if (param.typeAnnotation) {
+          const paramType = await this.visitNode(param.typeAnnotation);
+          parameterTypes.push(paramType || 'undefined');
+        } else {
+          // 型注釈がない場合はエラー
+          if (!this.isInStructInstantiation && param.name) {
+            this.addError({
+              message: `Lambda parameter '${param.name}' requires an explicit type annotation`,
+              type: 'TypeError',
+              location: this.getLocation(param),
+            });
+          }
+          parameterTypes.push('undefined');
+        }
       }
     }
 
@@ -1634,12 +1668,15 @@ export class SemanticAnalyzer {
     if (node.parameters && Array.isArray(node.parameters)) {
       for (const param of node.parameters) {
         if (param.name) {
-          const paramType = await this.visitParameter(param);
+          // 型注釈から直接型を取得
+          const paramType = param.typeAnnotation
+            ? await this.visitNode(param.typeAnnotation)
+            : undefined;
           try {
             this.symbolTable.define({
               name: param.name,
               type: 'variable',
-              dataType: paramType || 'any',
+              dataType: paramType || 'undefined',
               location: this.getLocation(param),
             });
           } catch {
@@ -1669,6 +1706,40 @@ export class SemanticAnalyzer {
     }
 
     return functionType;
+  }
+
+  private async visitLambdaParameter(node: ASTNode): Promise<string | undefined> {
+    // ラムダパラメータの処理
+    const paramName = node.name;
+    if (!paramName) {
+      return undefined;
+    }
+
+    let paramType: string | undefined;
+
+    // 型注釈がある場合は型を推論
+    if (node.typeAnnotation) {
+      paramType = await this.visitNode(node.typeAnnotation);
+    } else {
+      // 構造体インスタンス化中でない場合のみ型注釈エラーを出す
+      if (!this.isInStructInstantiation) {
+        // 型注釈がない場合はエラー（1つのエラーメッセージのみ）
+        this.addError({
+          message: `Lambda parameter '${paramName}' requires an explicit type annotation`,
+          type: 'TypeError',
+          location: this.getLocation(node),
+        });
+      }
+      return undefined;
+    }
+
+    if (process.env.DEBUG) {
+      console.log(
+        `[DEBUG] visitLambdaParameter: name=${paramName}, typeAnnotation=${JSON.stringify(node.typeAnnotation)}, paramType=${paramType}`
+      );
+    }
+
+    return paramType;
   }
 
   /**

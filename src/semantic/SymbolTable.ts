@@ -164,7 +164,7 @@ export class SymbolTable {
    * プリミティブ型かどうかを判定
    */
   private isPrimitiveType(typeName: string): boolean {
-    return ['int', 'float', 'string', 'bool', 'any'].includes(typeName);
+    return ['int', 'float', 'string', 'bool'].includes(typeName);
   }
 
   /**

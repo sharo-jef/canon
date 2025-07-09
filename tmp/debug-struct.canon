@@ -1,0 +1,4 @@
+PluginHeader {
+    name = 'Plugin1'
+    description = 'Description of plugin1'
+}

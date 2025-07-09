@@ -6,11 +6,11 @@ PluginHeader {
     version = Version(0, 0, 1)
 }
 
-// PluginHeader {
-//     name = 'Plugin2'
-//     description = 'Description of plugin2'
-//     version = Version(0, 0, 2)
-// }
+PluginHeader {
+    name = 'Plugin2'
+    description = 'Description of plugin2'
+    version = Version(0, 0, 2)
+}
 
 val goBuild = 'go build'
 var goTest = 'go' + ' ' + 'test'
@@ -32,11 +32,9 @@ pipeline {
     }
 }
 val a = {}
-a{
-val b = { x -> x + 2 }
+// val b = { x -> x + 2 }
 val c = { x: int -> x + 2 }
 val d = { x: int, y: int -> x + y }
 val e = { -> "hello" }
 val f = { x: int -> }
 val g = {->}
-}

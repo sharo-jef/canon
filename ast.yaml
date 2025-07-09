@@ -1,24 +1,15 @@
 type: Program
 body:
-  - type: SchemaDirective
-    path: ./schema.canon
-    loc:
-      start:
-        line: 1
-        column: 0
-      end:
-        line: 1
-        column: 24
   - type: CallExpression
     callee:
       type: Identifier
       name: PluginHeader
       loc:
         start:
-          line: 3
+          line: 1
           column: 0
         end:
-          line: 3
+          line: 1
           column: 12
     arguments:
       - type: LambdaExpression
@@ -31,10 +22,10 @@ body:
               name: name
               loc:
                 start:
-                  line: 4
+                  line: 2
                   column: 4
                 end:
-                  line: 4
+                  line: 2
                   column: 8
             right:
               type: StringLiteral
@@ -42,17 +33,17 @@ body:
               raw: '''Plugin1'''
               loc:
                 start:
-                  line: 4
+                  line: 2
                   column: 11
                 end:
-                  line: 4
+                  line: 2
                   column: 20
             loc:
               start:
-                line: 4
+                line: 2
                 column: 4
               end:
-                line: 4
+                line: 2
                 column: 20
           - type: AssignmentStatement
             operator: '='
@@ -61,10 +52,10 @@ body:
               name: description
               loc:
                 start:
-                  line: 5
+                  line: 3
                   column: 4
                 end:
-                  line: 5
+                  line: 3
                   column: 15
             right:
               type: StringLiteral
@@ -72,665 +63,36 @@ body:
               raw: '''Description of plugin1'''
               loc:
                 start:
-                  line: 5
+                  line: 3
                   column: 18
                 end:
-                  line: 5
+                  line: 3
                   column: 42
             loc:
               start:
-                line: 5
+                line: 3
                 column: 4
               end:
-                line: 5
+                line: 3
                 column: 42
-          - type: AssignmentStatement
-            operator: '='
-            left:
-              type: Identifier
-              name: version
-              loc:
-                start:
-                  line: 6
-                  column: 4
-                end:
-                  line: 6
-                  column: 11
-            right:
-              type: CallExpression
-              callee:
-                type: Identifier
-                name: Version
-                loc:
-                  start:
-                    line: 6
-                    column: 14
-                  end:
-                    line: 6
-                    column: 21
-              arguments:
-                - type: IntegerLiteral
-                  value: 0
-                  raw: '0'
-                  loc:
-                    start:
-                      line: 6
-                      column: 22
-                    end:
-                      line: 6
-                      column: 23
-                - type: IntegerLiteral
-                  value: 0
-                  raw: '0'
-                  loc:
-                    start:
-                      line: 6
-                      column: 25
-                    end:
-                      line: 6
-                      column: 26
-                - type: IntegerLiteral
-                  value: 1
-                  raw: '1'
-                  loc:
-                    start:
-                      line: 6
-                      column: 28
-                    end:
-                      line: 6
-                      column: 29
-              loc:
-                start:
-                  line: 6
-                  column: 14
-                end:
-                  line: 6
-                  column: 30
-            loc:
-              start:
-                line: 6
-                column: 4
-              end:
-                line: 6
-                column: 30
         loc:
           start:
-            line: 3
+            line: 1
             column: 13
           end:
-            line: 7
+            line: 4
             column: 1
     loc:
       start:
-        line: 3
+        line: 1
         column: 0
       end:
-        line: 7
+        line: 4
         column: 1
-  - type: VariableDeclaration
-    kind: val
-    name:
-      type: Identifier
-      name: goBuild
-      loc:
-        start:
-          line: 15
-          column: 4
-        end:
-          line: 15
-          column: 11
-    typeRef: null
-    value:
-      type: StringLiteral
-      value: go build
-      raw: '''go build'''
-      loc:
-        start:
-          line: 15
-          column: 14
-        end:
-          line: 15
-          column: 24
-    annotations: []
-    loc:
-      start:
-        line: 15
-        column: 0
-      end:
-        line: 15
-        column: 24
-  - type: VariableDeclaration
-    kind: var
-    name:
-      type: Identifier
-      name: goTest
-      loc:
-        start:
-          line: 16
-          column: 4
-        end:
-          line: 16
-          column: 10
-    typeRef: null
-    value:
-      type: BinaryExpression
-      operator: +
-      left:
-        type: BinaryExpression
-        operator: +
-        left:
-          type: StringLiteral
-          value: go
-          raw: '''go'''
-          loc:
-            start:
-              line: 16
-              column: 13
-            end:
-              line: 16
-              column: 17
-        right:
-          type: StringLiteral
-          value: ' '
-          raw: ''' '''
-          loc:
-            start:
-              line: 16
-              column: 20
-            end:
-              line: 16
-              column: 23
-        loc:
-          start:
-            line: 16
-            column: 13
-          end:
-            line: 16
-            column: 23
-      right:
-        type: StringLiteral
-        value: test
-        raw: '''test'''
-        loc:
-          start:
-            line: 16
-            column: 26
-          end:
-            line: 16
-            column: 32
-      loc:
-        start:
-          line: 16
-          column: 13
-        end:
-          line: 16
-          column: 32
-    annotations: []
-    loc:
-      start:
-        line: 16
-        column: 0
-      end:
-        line: 16
-        column: 32
-  - type: FunctionDeclaration
-    isInfix: false
-    receiverType: null
-    name:
-      type: Identifier
-      name: join
-      loc:
-        start:
-          line: 18
-          column: 4
-        end:
-          line: 18
-          column: 8
-    annotations: []
-    parameters:
-      - type: Parameter
-        name:
-          type: Identifier
-          name: a
-          loc:
-            start:
-              line: 18
-              column: 9
-            end:
-              line: 18
-              column: 10
-        typeRef:
-          type: PrimitiveType
-          name: string
-          loc:
-            start:
-              line: 18
-              column: 12
-            end:
-              line: 18
-              column: 18
-        loc:
-          start:
-            line: 18
-            column: 9
-          end:
-            line: 18
-            column: 18
-      - type: Parameter
-        name:
-          type: Identifier
-          name: b
-          loc:
-            start:
-              line: 18
-              column: 20
-            end:
-              line: 18
-              column: 21
-        typeRef:
-          type: PrimitiveType
-          name: string
-          loc:
-            start:
-              line: 18
-              column: 23
-            end:
-              line: 18
-              column: 29
-        loc:
-          start:
-            line: 18
-            column: 20
-          end:
-            line: 18
-            column: 29
-    returnType:
-      type: PrimitiveType
-      name: string
-      loc:
-        start:
-          line: 18
-          column: 32
-        end:
-          line: 18
-          column: 38
-    body:
-      - type: ExpressionStatement
-        expression:
-          type: BinaryExpression
-          operator: +
-          left:
-            type: Identifier
-            name: a
-            loc:
-              start:
-                line: 19
-                column: 4
-              end:
-                line: 19
-                column: 5
-          right:
-            type: Identifier
-            name: b
-            loc:
-              start:
-                line: 19
-                column: 8
-              end:
-                line: 19
-                column: 9
-          loc:
-            start:
-              line: 19
-              column: 4
-            end:
-              line: 19
-              column: 9
-        loc:
-          start:
-            line: 19
-            column: 4
-          end:
-            line: 19
-            column: 9
-    loc:
-      start:
-        line: 18
-        column: 0
-      end:
-        line: 20
-        column: 1
-  - type: FunctionDeclaration
-    isInfix: false
-    receiverType: null
-    name:
-      type: Identifier
-      name: empty
-      loc:
-        start:
-          line: 22
-          column: 4
-        end:
-          line: 22
-          column: 9
-    annotations: []
-    parameters: []
-    returnType: null
-    body: []
-    loc:
-      start:
-        line: 22
-        column: 0
-      end:
-        line: 22
-        column: 14
-  - type: AssignmentStatement
-    operator: +=
-    left:
-      type: Identifier
-      name: goTest
-      loc:
-        start:
-          line: 24
-          column: 0
-        end:
-          line: 24
-          column: 6
-    right:
-      type: BinaryExpression
-      operator: +
-      left:
-        type: StringLiteral
-        value: ' '
-        raw: ''' '''
-        loc:
-          start:
-            line: 24
-            column: 10
-          end:
-            line: 24
-            column: 13
-      right:
-        type: CallExpression
-        callee:
-          type: Identifier
-          name: join
-          loc:
-            start:
-              line: 24
-              column: 16
-            end:
-              line: 24
-              column: 20
-        arguments:
-          - type: NonNullAssertionExpression
-            operand:
-              type: CallExpression
-              callee:
-                type: Identifier
-                name: getEnv
-                loc:
-                  start:
-                    line: 24
-                    column: 21
-                  end:
-                    line: 24
-                    column: 27
-              arguments:
-                - type: StringLiteral
-                  value: PIPELINE_HOME_PATH
-                  raw: '''PIPELINE_HOME_PATH'''
-                  loc:
-                    start:
-                      line: 24
-                      column: 28
-                    end:
-                      line: 24
-                      column: 48
-              loc:
-                start:
-                  line: 24
-                  column: 21
-                end:
-                  line: 24
-                  column: 49
-            loc:
-              start:
-                line: 24
-                column: 21
-              end:
-                line: 24
-                column: 50
-          - type: StringLiteral
-            value: /test
-            raw: '''/test'''
-            loc:
-              start:
-                line: 24
-                column: 52
-              end:
-                line: 24
-                column: 59
-        loc:
-          start:
-            line: 24
-            column: 16
-          end:
-            line: 24
-            column: 60
-      loc:
-        start:
-          line: 24
-          column: 10
-        end:
-          line: 24
-          column: 60
-    loc:
-      start:
-        line: 24
-        column: 0
-      end:
-        line: 24
-        column: 60
-  - type: CallExpression
-    callee:
-      type: Identifier
-      name: pipeline
-      loc:
-        start:
-          line: 26
-          column: 0
-        end:
-          line: 26
-          column: 8
-    arguments:
-      - type: LambdaExpression
-        parameters: []
-        body:
-          - type: ExpressionStatement
-            expression:
-              type: CallExpression
-              callee:
-                type: Identifier
-                name: build
-                loc:
-                  start:
-                    line: 27
-                    column: 4
-                  end:
-                    line: 27
-                    column: 9
-              arguments:
-                - type: LambdaExpression
-                  parameters: []
-                  body:
-                    - type: AssignmentStatement
-                      operator: '='
-                      left:
-                        type: Identifier
-                        name: command
-                        loc:
-                          start:
-                            line: 28
-                            column: 8
-                          end:
-                            line: 28
-                            column: 15
-                      right:
-                        type: Identifier
-                        name: goBuild
-                        loc:
-                          start:
-                            line: 28
-                            column: 18
-                          end:
-                            line: 28
-                            column: 25
-                      loc:
-                        start:
-                          line: 28
-                          column: 8
-                        end:
-                          line: 28
-                          column: 25
-                  loc:
-                    start:
-                      line: 27
-                      column: 10
-                    end:
-                      line: 29
-                      column: 5
-              loc:
-                start:
-                  line: 27
-                  column: 4
-                end:
-                  line: 29
-                  column: 5
-            loc:
-              start:
-                line: 27
-                column: 4
-              end:
-                line: 29
-                column: 5
-          - type: ExpressionStatement
-            expression:
-              type: CallExpression
-              callee:
-                type: Identifier
-                name: test
-                loc:
-                  start:
-                    line: 30
-                    column: 4
-                  end:
-                    line: 30
-                    column: 8
-              arguments:
-                - type: LambdaExpression
-                  parameters: []
-                  body:
-                    - type: AssignmentStatement
-                      operator: '='
-                      left:
-                        type: Identifier
-                        name: script
-                        loc:
-                          start:
-                            line: 31
-                            column: 8
-                          end:
-                            line: 31
-                            column: 14
-                      right:
-                        type: Identifier
-                        name: goTest
-                        loc:
-                          start:
-                            line: 31
-                            column: 17
-                          end:
-                            line: 31
-                            column: 23
-                      loc:
-                        start:
-                          line: 31
-                          column: 8
-                        end:
-                          line: 31
-                          column: 23
-                  loc:
-                    start:
-                      line: 30
-                      column: 9
-                    end:
-                      line: 32
-                      column: 5
-              loc:
-                start:
-                  line: 30
-                  column: 4
-                end:
-                  line: 32
-                  column: 5
-            loc:
-              start:
-                line: 30
-                column: 4
-              end:
-                line: 32
-                column: 5
-        loc:
-          start:
-            line: 26
-            column: 9
-          end:
-            line: 33
-            column: 1
-    loc:
-      start:
-        line: 26
-        column: 0
-      end:
-        line: 33
-        column: 1
-  - type: VariableDeclaration
-    kind: val
-    name:
-      type: Identifier
-      name: a
-      loc:
-        start:
-          line: 34
-          column: 4
-        end:
-          line: 34
-          column: 5
-    typeRef: null
-    value:
-      type: LambdaExpression
-      parameters: []
-      body: []
-      loc:
-        start:
-          line: 34
-          column: 8
-        end:
-          line: 34
-          column: 10
-    annotations: []
-    loc:
-      start:
-        line: 34
-        column: 0
-      end:
-        line: 34
-        column: 10
 loc:
   start:
     line: 1
     column: 0
   end:
-    line: 35
+    line: 5
     column: 5
