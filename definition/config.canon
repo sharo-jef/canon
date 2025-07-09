@@ -6,6 +6,12 @@ PluginHeader {
     version = Version(0, 0, 1)
 }
 
+// PluginHeader {
+//     name = 'Plugin2'
+//     description = 'Description of plugin2'
+//     version = Version(0, 0, 2)
+// }
+
 val goBuild = 'go build'
 var goTest = 'go' + ' ' + 'test'
 

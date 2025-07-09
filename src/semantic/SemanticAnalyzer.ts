@@ -4,7 +4,6 @@
 
 import { SymbolTable } from './SymbolTable';
 import * as fs from 'fs';
-import * as yaml from 'js-yaml';
 import * as path from 'path';
 import { parseCanonFile } from '../parser';
 
@@ -43,39 +42,79 @@ export class SemanticAnalyzer {
   }
 
   /**
-   * ASTファイルを読み込んで意味解析を実行
+   * Canonファイルを読み込んで意味解析を実行
+   * config.canonが指定された場合、同じディレクトリのschema.canonも自動的に解析
    */
-  async analyzeFromFile(
-    astFilePath: string,
-    sourceFilePath?: string
-  ): Promise<{
+  async analyzeFromFile(sourceFilePath: string): Promise<{
     success: boolean;
     errors: SemanticError[];
     symbolTable: SymbolTable;
   }> {
     try {
-      const astContent = fs.readFileSync(astFilePath, 'utf8');
-      const ast = yaml.load(astContent) as ASTNode;
-
-      // 現在のファイルパスを保存（元のソースファイルパス）
-      this.currentFilePath = sourceFilePath || astFilePath;
-
-      // config.canonファイルが指定されている場合、それも解析してuse文を処理
-      if (sourceFilePath && sourceFilePath.endsWith('.canon')) {
-        try {
-          const configAst = await parseCanonFile(sourceFilePath);
-          if (configAst) {
-            // use文のみを処理
-            await this.processUseStatements(configAst);
+      // 現在のファイルパスを保存
+      this.currentFilePath = sourceFilePath;
+      
+      if (sourceFilePath.endsWith('.canon')) {
+        const directory = path.dirname(sourceFilePath);
+        const filename = path.basename(sourceFilePath);
+        
+        // config.canonの場合、schema.canonも探す
+        if (filename === 'config.canon') {
+          const schemaPath = path.join(directory, 'schema.canon');
+          
+          if (fs.existsSync(schemaPath)) {
+            // 1. schema.canonを解析（型定義のため、validationはスキップ）
+            try {
+              const schemaAst = await parseCanonFile(schemaPath);
+              if (schemaAst) {
+                if (process.env.DEBUG) {
+                  console.log(`[DEBUG] Analyzing schema.canon first`);
+                }
+                await this.analyze(schemaAst, true);
+              }
+            } catch (error) {
+              this.addError({
+                message: `Failed to parse schema.canon: ${error}`,
+                type: 'ValidationError',
+              });
+            }
           }
-        } catch (error) {
-          if (process.env.DEBUG) {
-            console.log(`[DEBUG] Failed to parse config file: ${error}`);
+          
+          // 2. config.canonを解析（validationを実行）
+          try {
+            const configAst = await parseCanonFile(sourceFilePath);
+            if (configAst) {
+              if (process.env.DEBUG) {
+                console.log(`[DEBUG] Analyzing config.canon with validation`);
+              }
+              await this.analyze(configAst, false);
+            }
+          } catch (error) {
+            this.addError({
+              message: `Failed to parse config.canon: ${error}`,
+              type: 'ValidationError',
+            });
+          }
+        } else {
+          // schema.canonのみの場合
+          try {
+            const ast = await parseCanonFile(sourceFilePath);
+            if (ast) {
+              await this.analyze(ast, true); // schema.canonではvalidationをスキップ
+            }
+          } catch (error) {
+            this.addError({
+              message: `Failed to parse ${sourceFilePath}: ${error}`,
+              type: 'ValidationError',
+            });
           }
         }
+      } else {
+        this.addError({
+          message: `Unsupported file type: ${sourceFilePath}. Only .canon files are supported.`,
+          type: 'ValidationError',
+        });
       }
-
-      await this.analyze(ast);
 
       return {
         success: this.errors.length === 0,
@@ -84,7 +123,7 @@ export class SemanticAnalyzer {
       };
     } catch (error) {
       this.addError({
-        message: `Failed to read or parse AST file: ${error}`,
+        message: `Failed to analyze file: ${error}`,
         type: 'ValidationError',
       });
 
@@ -128,7 +167,7 @@ export class SemanticAnalyzer {
   /**
    * ASTノードを解析 - 2パス解析を実行
    */
-  async analyze(node: ASTNode): Promise<void> {
+  async analyze(node: ASTNode, skipValidation: boolean = false): Promise<void> {
     if (!node || typeof node !== 'object') {
       return;
     }
@@ -140,8 +179,10 @@ export class SemanticAnalyzer {
       // Pass 2: 詳細な意味解析
       await this.visitNode(node);
 
-      // Pass 3: Schema completeness validation
-      this.validateSchemaCompleteness();
+      // Pass 3: Schema completeness validation (config.canonでのみ実行)
+      if (!skipValidation) {
+        this.validateSchemaCompleteness();
+      }
     } catch (error) {
       this.addError({
         message: `Unexpected error during analysis: ${error}`,
@@ -283,8 +324,7 @@ export class SemanticAnalyzer {
         // CallExpressionを詳細に処理し、schema property instantiationを検出
         return this.visitCallExpression(node);
       case 'LambdaExpression':
-        // LambdaExpressionは既存のロジックで処理
-        return 'function';
+        return this.visitLambdaExpression(node);
       case 'NonNullAssertionExpression':
         // NonNullAssertionExpression内の式の型を返す
         return node.expression ? this.visitNode(node.expression) : undefined;
@@ -555,23 +595,7 @@ export class SemanticAnalyzer {
     // パラメータを処理
     if (node.parameters && Array.isArray(node.parameters)) {
       for (const param of node.parameters) {
-        const paramName = param.name?.name;
-        const paramType = param.typeAnnotation ? await this.visitNode(param.typeAnnotation) : 'any';
-
-        if (paramName) {
-          try {
-            this.symbolTable.define({
-              name: paramName,
-              type: 'parameter',
-              dataType: paramType || 'any',
-              location: this.getLocation(param),
-            });
-          } catch {
-            if (process.env.DEBUG) {
-              console.log(`[DEBUG] Parameter already defined: ${paramName}`);
-            }
-          }
-        }
+        await this.visitParameter(param);
       }
     }
 
@@ -604,8 +628,8 @@ export class SemanticAnalyzer {
     }
 
     // 初期化式がある場合
-    if (node.initializer) {
-      const initializerType = await this.visitNode(node.initializer);
+    if (node.value) {
+      const initializerType = await this.visitNode(node.value);
 
       if (variableType && initializerType) {
         // 型アノテーションと初期化式の型の互換性をチェック
@@ -1078,6 +1102,13 @@ export class SemanticAnalyzer {
     const declaredVariables = new Set<string>();
     const instantiatedProperties = new Set<string>(this.schemaPropertyInstances);
 
+    if (process.env.DEBUG) {
+      console.log(
+        `[DEBUG] validateSchemaCompleteness: instantiated properties:`,
+        Array.from(instantiatedProperties)
+      );
+    }
+
     // Collect all variable names from symbol table
     const symbols = this.symbolTable.getAllSymbols();
     for (const symbol of symbols) {
@@ -1086,14 +1117,36 @@ export class SemanticAnalyzer {
       }
     }
 
+    if (process.env.DEBUG) {
+      console.log(`[DEBUG] declaredVariables:`, Array.from(declaredVariables));
+    }
+
     // Check for missing required properties
     const schemaEntries = Array.from(this.schemaDefinition.entries());
     for (const [propertyName, schemaProperty] of schemaEntries) {
+      if (process.env.DEBUG) {
+        console.log(
+          `[DEBUG] Checking property: ${propertyName}, isOptional: ${schemaProperty.isOptional}`
+        );
+        console.log(
+          `[DEBUG] declaredVariables.has(${propertyName}):`,
+          declaredVariables.has(propertyName)
+        );
+        console.log(
+          `[DEBUG] instantiatedProperties.has(${propertyName}):`,
+          instantiatedProperties.has(propertyName)
+        );
+      }
+
       if (
         !schemaProperty.isOptional &&
         !declaredVariables.has(propertyName) &&
         !instantiatedProperties.has(propertyName)
       ) {
+        if (process.env.DEBUG) {
+          console.log(`[DEBUG] Adding error for missing property: ${propertyName}`);
+          console.trace('Stack trace for missing property error');
+        }
         this.addError({
           message: `Required property '${propertyName}' of type '${schemaProperty.type}' is missing`,
           type: 'ValidationError',
@@ -1367,7 +1420,20 @@ export class SemanticAnalyzer {
     // 関数パラメータの処理
     const paramName = node.name?.name;
     if (paramName) {
-      const paramType = node.typeRef ? await this.visitNode(node.typeRef) : 'any';
+      let paramType: string | undefined;
+
+      // 型参照がある場合は型を推論
+      if (node.typeRef) {
+        paramType = await this.visitNode(node.typeRef);
+      } else {
+        paramType = 'any';
+      }
+
+      if (process.env.DEBUG) {
+        console.log(
+          `[DEBUG] visitParameter: name=${paramName}, typeRef=${JSON.stringify(node.typeRef)}, paramType=${paramType}`
+        );
+      }
 
       try {
         this.symbolTable.define({
@@ -1382,6 +1448,8 @@ export class SemanticAnalyzer {
           console.log(`[DEBUG] Parameter already defined: ${paramName}`);
         }
       }
+
+      return paramType;
     }
 
     return undefined;
@@ -1494,5 +1562,64 @@ export class SemanticAnalyzer {
 
     // Handle regular function calls
     return this.visitFunctionCall(node);
+  }
+
+  private async visitLambdaExpression(node: ASTNode): Promise<string | undefined> {
+    if (process.env.DEBUG) {
+      console.log(`[DEBUG] visitLambdaExpression called for node:`, JSON.stringify(node, null, 2));
+    }
+
+    // パラメータの型を推論
+    const parameterTypes: string[] = [];
+
+    if (node.parameters && Array.isArray(node.parameters)) {
+      for (const param of node.parameters) {
+        const paramType = await this.visitParameter(param);
+        parameterTypes.push(paramType || 'any');
+      }
+    }
+
+    // 新しいスコープを作成
+    this.symbolTable.enterScope('lambda');
+
+    // パラメータを現在のスコープに定義
+    if (node.parameters && Array.isArray(node.parameters)) {
+      for (const param of node.parameters) {
+        if (param.name) {
+          const paramType = await this.visitParameter(param);
+          try {
+            this.symbolTable.define({
+              name: param.name,
+              type: 'variable',
+              dataType: paramType || 'any',
+              location: this.getLocation(param),
+            });
+          } catch {
+            // パラメータが重複している場合のエラー処理
+            this.addError({
+              message: `Parameter '${param.name}' is already defined`,
+              type: 'NameError',
+              location: this.getLocation(param),
+            });
+          }
+        }
+      }
+    }
+
+    // 本体の型を推論
+    const bodyType = node.body ? await this.visitNode(node.body) : 'void';
+
+    // スコープを抜ける
+    this.symbolTable.exitScope();
+
+    // 関数型文字列を構築
+    const paramTypesStr = parameterTypes.length > 0 ? parameterTypes.join(', ') : '';
+    const functionType = `(${paramTypesStr}) -> ${bodyType || 'void'}`;
+
+    if (process.env.DEBUG) {
+      console.log(`[DEBUG] visitLambdaExpression result: ${functionType}`);
+    }
+
+    return functionType;
   }
 }
