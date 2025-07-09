@@ -19,6 +19,7 @@ export interface SemanticError {
     column: number;
   };
   type: 'NameError' | 'TypeError' | 'ScopeError' | 'ValidationError';
+  filePath?: string;
 }
 
 export interface SchemaProperty {
@@ -55,18 +56,18 @@ export class SemanticAnalyzer {
       // Reset state for each file analysis
       this.schemaPropertyInstances.clear();
       this.errors = [];
-      
+
       // 現在のファイルパスを保存
       this.currentFilePath = sourceFilePath;
-      
+
       if (sourceFilePath.endsWith('.canon')) {
         const directory = path.dirname(sourceFilePath);
         const filename = path.basename(sourceFilePath);
-        
+
         // config.canonの場合、schema.canonも探す
         if (filename === 'config.canon') {
           const schemaPath = path.join(directory, 'schema.canon');
-          
+
           if (fs.existsSync(schemaPath)) {
             // 1. schema.canonを解析（型定義のため、validationはスキップ）
             try {
@@ -84,7 +85,7 @@ export class SemanticAnalyzer {
               });
             }
           }
-          
+
           // 2. config.canonを解析（validationを実行）
           try {
             const configAst = await parseCanonFile(sourceFilePath);
@@ -207,6 +208,7 @@ export class SemanticAnalyzer {
 
   /**
    * Pass 1: 型定義を事前に収集（前方宣言対応）
+   * 現在のファイルのみを対象とする
    */
   private async collectTypeDefinitions(node: ASTNode): Promise<void> {
     if (!node || typeof node !== 'object') {
@@ -1228,6 +1230,10 @@ export class SemanticAnalyzer {
   }
 
   private addError(error: SemanticError): void {
+    // 現在のファイルパスを自動的に追加
+    if (!error.filePath && this.currentFilePath) {
+      error.filePath = this.currentFilePath;
+    }
     this.errors.push(error);
   }
 
@@ -1347,7 +1353,10 @@ export class SemanticAnalyzer {
       this.errors.forEach((error, index) => {
         console.log(`${index + 1}. [${error.type}] ${error.message}`);
         if (error.location) {
-          console.log(`   at line ${error.location.line}, column ${error.location.column}`);
+          const fileInfo = error.filePath ? `${path.basename(error.filePath)}:` : '';
+          console.log(
+            `   at ${fileInfo}line ${error.location.line}, column ${error.location.column}`
+          );
         }
       });
     }
@@ -1359,7 +1368,7 @@ export class SemanticAnalyzer {
   private async visitSchemaDirective(node: ASTNode): Promise<string | undefined> {
     // スキーマディレクティブの処理 - スキーマファイルを読み込む
     this.hasSchemaDirective = true; // Mark that this file has a schema directive
-    
+
     const schemaPath = node.path;
     if (schemaPath && typeof schemaPath === 'string') {
       try {
@@ -1381,17 +1390,20 @@ export class SemanticAnalyzer {
         // スキーマファイルをパースしてシンボルテーブルに追加
         const schemaAst = await parseCanonFile(resolvedPath);
 
-        // 型定義のみを収集（重複定義を避けるため）
-        await this.collectTypeDefinitions(schemaAst);
+        // スキーマファイル処理時は、現在のファイルパスを一時的に変更
+        const originalFilePath = this.currentFilePath;
+        this.currentFilePath = resolvedPath;
 
-        // スキーマ定義のみを処理（StructDeclarationなどはスキップ）
-        if (schemaAst.body && Array.isArray(schemaAst.body)) {
-          for (const item of schemaAst.body) {
-            if (item.type === 'SchemaDeclaration') {
-              await this.visitSchemaDeclaration(item);
-            }
-          }
-        }
+        // スキーマファイルから型定義（struct/union）のみを収集
+        // use文や変数・関数定義は無視する
+        await this.processSchemaFileForTypes(schemaAst);
+
+        // スキーマファイルからスキーマ定義（schema {}）のみを処理
+        // 他の定義は無視する
+        await this.processSchemaFileForSchemaDefinitions(schemaAst);
+
+        // ファイルパスを元に戻す
+        this.currentFilePath = originalFilePath;
 
         if (process.env.DEBUG) {
           console.log('[DEBUG] Schema file loaded:', schemaPath);
@@ -1641,5 +1653,59 @@ export class SemanticAnalyzer {
     }
 
     return functionType;
+  }
+
+  /**
+   * スキーマファイルから型定義（struct/union）のみを収集
+   * 他の定義（use文、変数、関数）は無視する
+   */
+  private async processSchemaFileForTypes(schemaAst: ASTNode): Promise<void> {
+    if (!schemaAst || !schemaAst.body || !Array.isArray(schemaAst.body)) {
+      return;
+    }
+
+    for (const item of schemaAst.body) {
+      if (item.type === 'StructDeclaration' || item.type === 'UnionDeclaration') {
+        const typeName = item.name?.name;
+        if (typeName) {
+          try {
+            this.symbolTable.define({
+              name: typeName,
+              type: 'type',
+              dataType: item.type === 'StructDeclaration' ? 'struct' : 'union',
+              location: this.getLocation(item),
+            });
+          } catch {
+            // 重複定義の場合はスキップ
+            if (process.env.DEBUG) {
+              console.log(`[DEBUG] Type already defined from schema: ${typeName}`);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * スキーマファイルからスキーマ定義（schema {}）のみを処理
+   * 他の定義は無視する
+   */
+  private async processSchemaFileForSchemaDefinitions(schemaAst: ASTNode): Promise<void> {
+    if (!schemaAst || !schemaAst.body || !Array.isArray(schemaAst.body)) {
+      return;
+    }
+
+    // スキーマファイルを処理する際は、hasSchemaDirectiveフラグを一時的に保存してリセット
+    const originalHasSchemaDirective = this.hasSchemaDirective;
+    this.hasSchemaDirective = false;
+
+    for (const item of schemaAst.body) {
+      if (item.type === 'SchemaDeclaration') {
+        await this.visitSchemaDeclaration(item);
+      }
+    }
+
+    // フラグを元に戻す
+    this.hasSchemaDirective = originalHasSchemaDirective;
   }
 }

@@ -4,8 +4,8 @@
  * 意味解析を実行するメインファイル
  */
 
-import { SemanticAnalyzer } from './semantic/SemanticAnalyzer';
 import * as path from 'path';
+import { SemanticAnalyzer } from './semantic/SemanticAnalyzer';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -30,7 +30,10 @@ async function main() {
       result.errors.forEach((error, index) => {
         console.log(`\n${index + 1}. [${error.type}] ${error.message}`);
         if (error.location) {
-          console.log(`   📍 Line ${error.location.line}, Column ${error.location.column}`);
+          const fileInfo = error.filePath ? `${path.basename(error.filePath)}:` : '';
+          console.log(
+            `   📍 ${fileInfo}Line ${error.location.line}, Column ${error.location.column}`
+          );
         }
       });
     }

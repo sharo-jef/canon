@@ -1,0 +1,10 @@
+#schema './test-schema-with-use.canon'
+
+// use randomはスキーマファイルで定義されているが、
+// ここでは使えないはず
+val shouldFail = random(10)
+
+// スキーマで定義されたstruct型は使えるはず
+MyStruct {
+    value = 42
+}

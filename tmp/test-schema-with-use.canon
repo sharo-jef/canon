@@ -1,0 +1,16 @@
+use random
+
+schema {
+    MyStruct
+}
+
+struct MyStruct {
+    value: int
+}
+
+// この変数と関数はconfig.canonから使えてはいけない
+val schemaVariable = "Should not be accessible"
+
+fun schemaFunction(): string {
+    "Should not be accessible"
+}
