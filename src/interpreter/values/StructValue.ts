@@ -23,7 +23,12 @@ export class StructValue extends CanonValue {
   toNative(): Record<string, any> {
     const result: Record<string, any> = {};
     for (const [key, value] of this.fields) {
-      result[key] = value.toNative();
+      try {
+        result[key] = value.toNative();
+      } catch (error) {
+        console.error(`Error converting field '${key}' in struct '${this.structName}':`, error);
+        result[key] = `[Error: ${error}]`;
+      }
     }
     return result;
   }

@@ -74,9 +74,7 @@ export class SemanticAnalyzer {
             try {
               const schemaAst = await parseCanonFile(schemaPath);
               if (schemaAst) {
-                if (process.env.DEBUG) {
-                  console.log(`[DEBUG] Analyzing schema.canon first`);
-                }
+                // Schema file is analyzed first to populate schema definitions
                 await this.analyze(schemaAst, true);
               }
             } catch (error) {
@@ -91,9 +89,7 @@ export class SemanticAnalyzer {
           try {
             const configAst = await parseCanonFile(sourceFilePath);
             if (configAst) {
-              if (process.env.DEBUG) {
-                console.log(`[DEBUG] Analyzing config.canon with validation`);
-              }
+              // Config file is analyzed with validation enabled
               await this.analyze(configAst, false);
             }
           } catch (error) {
@@ -231,7 +227,7 @@ export class SemanticAnalyzer {
           } catch {
             // 重複定義の場合はスキップ
             if (process.env.DEBUG) {
-              console.log(`[DEBUG] Type already defined: ${typeName}`);
+              // Type already exists, skip duplicate definition
             }
           }
         }
@@ -271,7 +267,7 @@ export class SemanticAnalyzer {
     // typeプロパティが存在しない場合もundefinedを返す
     if (!node.type) {
       if (process.env.DEBUG) {
-        console.log('[DEBUG] Node missing type property:', JSON.stringify(node, null, 2));
+        // Note: Node missing type property, may need additional handling
       }
       return undefined;
     }
@@ -372,7 +368,7 @@ export class SemanticAnalyzer {
       default:
         // 未対応のノードタイプの場合、子ノードを再帰的に処理
         if (process.env.DEBUG) {
-          console.log(`[DEBUG] Unhandled node type: ${node.type}`);
+          // Unhandled node type, may need additional implementation
         }
         await this.visitChildren(node);
         return undefined;
@@ -437,15 +433,9 @@ export class SemanticAnalyzer {
           location: schemaProperty.location,
         });
 
-        if (process.env.DEBUG) {
-          console.log(
-            `[DEBUG] Schema property added to global scope: ${propertyName}: ${schemaProperty.type}`
-          );
-        }
+        // Schema property added to global scope
       } catch {
-        if (process.env.DEBUG) {
-          console.log(`[DEBUG] Schema property already exists: ${propertyName}`);
-        }
+        // Schema property already exists, skip duplicate definition
         // 既に定義されている場合はスキップ（重複定義エラーを避ける）
       }
     }
@@ -561,7 +551,7 @@ export class SemanticAnalyzer {
       });
     } catch {
       if (process.env.DEBUG) {
-        console.log(`[DEBUG] 'this' already defined in scope: ${structName}`);
+        // 'this' already defined in scope
       }
     }
 
@@ -604,7 +594,7 @@ export class SemanticAnalyzer {
       });
     } catch {
       if (process.env.DEBUG) {
-        console.log(`[DEBUG] Function already defined: ${functionName}`);
+        // Function already defined
       }
     }
 
@@ -688,7 +678,7 @@ export class SemanticAnalyzer {
       });
     } catch {
       if (process.env.DEBUG) {
-        console.log(`[DEBUG] Variable already defined: ${variableName}`);
+        // Variable already defined
       }
     }
 
@@ -719,7 +709,7 @@ export class SemanticAnalyzer {
       });
     } catch {
       if (process.env.DEBUG) {
-        console.log(`[DEBUG] Property already defined: ${propertyName}`);
+        // Property already defined
       }
     }
 
@@ -749,7 +739,7 @@ export class SemanticAnalyzer {
       });
     } catch {
       if (process.env.DEBUG) {
-        console.log(`[DEBUG] Method already defined: ${methodName}`);
+        // Method already defined
       }
     }
 
@@ -1035,7 +1025,7 @@ export class SemanticAnalyzer {
           });
         } catch {
           if (process.env.DEBUG) {
-            console.log(`[DEBUG] Variable already defined in assignment: ${variableName}`);
+            // Variable already defined in assignment
           }
         }
 
@@ -1088,19 +1078,9 @@ export class SemanticAnalyzer {
     // 1. configファイルでの変数宣言の場合のみ
     // 2. schemaファイル内での変数宣言は自由に許可される
 
-    if (process.env.DEBUG) {
-      console.log(
-        `[DEBUG] validateAgainstSchema called for variable '${variableName}', currentFilePath: '${this.currentFilePath}'`
-      );
-    }
-
-    // 現在解析中のファイルがschemaファイル（ast.yamlの元ファイル）の場合は検証をスキップ
+    // Skip schema validation for variables in schema files
     if (!this.currentFilePath || !this.currentFilePath.includes('config.canon')) {
-      if (process.env.DEBUG) {
-        console.log(
-          `[DEBUG] Skipping schema validation for variable '${variableName}' in schema file`
-        );
-      }
+      // Skip schema validation for variables in schema files
       return;
     }
 
@@ -1139,13 +1119,6 @@ export class SemanticAnalyzer {
     const declaredVariables = new Set<string>();
     const instantiatedProperties = new Set<string>(this.schemaPropertyInstances);
 
-    if (process.env.DEBUG) {
-      console.log(
-        `[DEBUG] validateSchemaCompleteness: instantiated properties:`,
-        Array.from(instantiatedProperties)
-      );
-    }
-
     // Collect all variable names from symbol table
     const symbols = this.symbolTable.getAllSymbols();
     for (const symbol of symbols) {
@@ -1154,36 +1127,14 @@ export class SemanticAnalyzer {
       }
     }
 
-    if (process.env.DEBUG) {
-      console.log(`[DEBUG] declaredVariables:`, Array.from(declaredVariables));
-    }
-
     // Check for missing required properties
     const schemaEntries = Array.from(this.schemaDefinition.entries());
     for (const [propertyName, schemaProperty] of schemaEntries) {
-      if (process.env.DEBUG) {
-        console.log(
-          `[DEBUG] Checking property: ${propertyName}, isOptional: ${schemaProperty.isOptional}`
-        );
-        console.log(
-          `[DEBUG] declaredVariables.has(${propertyName}):`,
-          declaredVariables.has(propertyName)
-        );
-        console.log(
-          `[DEBUG] instantiatedProperties.has(${propertyName}):`,
-          instantiatedProperties.has(propertyName)
-        );
-      }
-
       if (
         !schemaProperty.isOptional &&
         !declaredVariables.has(propertyName) &&
         !instantiatedProperties.has(propertyName)
       ) {
-        if (process.env.DEBUG) {
-          console.log(`[DEBUG] Adding error for missing property: ${propertyName}`);
-          console.trace('Stack trace for missing property error');
-        }
         this.addError({
           message: `Required property '${propertyName}' of type '${schemaProperty.type}' is missing`,
           type: 'ValidationError',
@@ -1413,9 +1364,7 @@ export class SemanticAnalyzer {
         }
 
         if (process.env.DEBUG) {
-          console.log('[DEBUG] Schema directive - currentFilePath:', this.currentFilePath);
-          console.log('[DEBUG] Schema directive - schemaPath:', schemaPath);
-          console.log('[DEBUG] Schema directive - resolvedPath:', resolvedPath);
+          // Schema directive processing
         }
 
         // スキーマファイルをパースしてシンボルテーブルに追加
@@ -1437,7 +1386,7 @@ export class SemanticAnalyzer {
         this.currentFilePath = originalFilePath;
 
         if (process.env.DEBUG) {
-          console.log('[DEBUG] Schema file loaded:', schemaPath);
+          // Schema file loaded successfully
         }
       } catch (error) {
         this.addError({
@@ -1469,7 +1418,7 @@ export class SemanticAnalyzer {
           } catch {
             // 重複定義の場合はスキップ
             if (process.env.DEBUG) {
-              console.log(`[DEBUG] Variable already defined: ${targetName}`);
+              // Variable already defined
             }
           }
         }
@@ -1493,9 +1442,7 @@ export class SemanticAnalyzer {
       }
 
       if (process.env.DEBUG) {
-        console.log(
-          `[DEBUG] visitParameter: name=${paramName}, typeRef=${JSON.stringify(node.typeRef)}, paramType=${paramType}`
-        );
+        // Parameter processing
       }
 
       try {
@@ -1508,7 +1455,7 @@ export class SemanticAnalyzer {
       } catch {
         // 重複定義の場合はスキップ
         if (process.env.DEBUG) {
-          console.log(`[DEBUG] Parameter already defined: ${paramName}`);
+          // Parameter already defined
         }
       }
 
@@ -1564,7 +1511,7 @@ export class SemanticAnalyzer {
       this.symbolTable.defineStandardLibraryFunction(identifier);
 
       if (process.env.DEBUG) {
-        console.log('[DEBUG] Use statement - imported:', identifier);
+        // Use statement - imported symbol
       }
     }
     return undefined;
@@ -1611,7 +1558,7 @@ export class SemanticAnalyzer {
         this.addError({
           message: `Schema property '${calleeName}' can only be instantiated once, but found multiple instances`,
           type: 'ValidationError',
-          location: this.getLocation(node.location),
+          location: this.getLocation(node),
         });
         return calleeName;
       }
@@ -1620,7 +1567,7 @@ export class SemanticAnalyzer {
       this.schemaPropertyInstances.add(calleeName);
 
       if (process.env.DEBUG) {
-        console.log(`[DEBUG] Schema property instantiated: ${calleeName}`);
+        // Schema property instantiated
       }
 
       // Set struct instantiation flag
@@ -1640,13 +1587,28 @@ export class SemanticAnalyzer {
       return calleeName; // Return the type of the instantiated struct
     }
 
+    // Check if this is a struct constructor call
+    const symbol = this.symbolTable.resolve(calleeName);
+    if (
+      symbol &&
+      (symbol.type === 'struct' || (symbol.type === 'type' && symbol.dataType === 'struct'))
+    ) {
+      // This is a struct constructor call, but not defined in schema
+      this.addError({
+        message: `Direct instantiation of struct '${calleeName}' is not allowed. Only schema-defined properties can be instantiated at the top level`,
+        type: 'ValidationError',
+        location: this.getLocation(node),
+      });
+      return calleeName;
+    }
+
     // Handle regular function calls
     return this.visitFunctionCall(node);
   }
 
   private async visitLambdaExpression(node: ASTNode): Promise<string | undefined> {
     if (process.env.DEBUG) {
-      console.log(`[DEBUG] visitLambdaExpression called for node:`, JSON.stringify(node, null, 2));
+      // Lambda expression processing
     }
 
     // パラメータの型を推論（型注釈なしの場合はエラーを出す）
@@ -1712,7 +1674,7 @@ export class SemanticAnalyzer {
     const functionType = `(${paramTypesStr}) -> ${bodyType || 'void'}`;
 
     if (process.env.DEBUG) {
-      console.log(`[DEBUG] visitLambdaExpression result: ${functionType}`);
+      // Lambda expression result
     }
 
     return functionType;
@@ -1744,9 +1706,7 @@ export class SemanticAnalyzer {
     }
 
     if (process.env.DEBUG) {
-      console.log(
-        `[DEBUG] visitLambdaParameter: name=${paramName}, typeAnnotation=${JSON.stringify(node.typeAnnotation)}, paramType=${paramType}`
-      );
+      // Lambda parameter processing
     }
 
     return paramType;
@@ -1775,7 +1735,7 @@ export class SemanticAnalyzer {
           } catch {
             // 重複定義の場合はスキップ
             if (process.env.DEBUG) {
-              console.log(`[DEBUG] Type already defined from schema: ${typeName}`);
+              // Type already defined from schema
             }
           }
         }

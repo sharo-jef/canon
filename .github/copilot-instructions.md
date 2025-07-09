@@ -11,6 +11,8 @@
 - Canon syntax is similar to Kotlin DSL.
 - Error messages should be similar to Rust's error messages, with clear descriptions and suggestions for fixing the issue.
 - Always perform logical reasoning and avoid jumping to conclusions. Use the sequentialthinking tool and memory tool frequently.
+- Use the memory tool to remember your task when you are asked to do something and you MUST check the memory tool frequently.
+  - You MUST check if your task is done or not using the memory tool before you report the result.
 - Always follow the best practices.
 - **DO NOT EDIT TESTCASES WITHOUT PERMISSION.**
 - Do not use `tsx -e`

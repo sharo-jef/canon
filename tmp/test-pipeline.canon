@@ -1,0 +1,13 @@
+#schema './schema.canon'
+
+PluginHeader {
+    name = 'TestPlugin'
+    description = 'Test plugin for pipeline debugging'
+    version = Version(1, 0, 0)
+}
+
+pipeline {
+    build {
+        command = 'test'
+    }
+}

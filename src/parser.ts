@@ -450,16 +450,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     const questionToken = ctx.QUESTION();
     const isNullable = questionToken !== null && questionToken !== undefined;
 
-    // デバッグ出力
-    if (process.env.DEBUG) {
-      console.log(
-        `[DEBUG visitType] questionToken: ${questionToken}, type: ${typeof questionToken}, isNullable: ${isNullable}`
-      );
-      console.log(
-        `[DEBUG visitType] baseType: ${JSON.stringify(baseType)}, arrayDimensions: ${arrayDimensions}`
-      );
-    }
-
     let resultType = baseType;
 
     // Handle array dimensions
@@ -479,10 +469,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         innerType: resultType,
         loc: this.getLocationInfo(ctx),
       };
-    }
-
-    if (process.env.DEBUG) {
-      console.log(`[DEBUG visitType] resultType: ${JSON.stringify(resultType)}`);
     }
 
     return resultType;

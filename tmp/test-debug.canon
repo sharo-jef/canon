@@ -1,0 +1,12 @@
+#schema './definition/schema.canon'
+
+PluginHeader {
+    name = 'Plugin1'
+    description = 'Description of plugin1'
+}
+
+pipeline {
+    build {
+        command = 'go build'
+    }
+}

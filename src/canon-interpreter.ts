@@ -105,6 +105,8 @@ async function runInterpreter(options: CliOptions): Promise<void> {
       console.log('[DEBUG] Running semantic analysis...');
     }
     const analyzer = new SemanticAnalyzer();
+    // Set the current file path for proper relative path resolution
+    analyzer['currentFilePath'] = inputFile;
     await analyzer.analyze(ast);
 
     analysisResult = {

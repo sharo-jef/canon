@@ -1,0 +1,11 @@
+// テスト用のスキーマファイル
+schema {
+    config: ConfigStruct
+}
+
+struct ConfigStruct {
+    appName: string
+    appVersion: string
+    isDebug: bool
+    serverPort: int
+}

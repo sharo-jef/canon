@@ -1,0 +1,256 @@
+{
+  "error": {
+    "type": "builtin_function",
+    "name": "error"
+  },
+  "int": {
+    "type": "builtin_function",
+    "name": "int"
+  },
+  "float": {
+    "type": "builtin_function",
+    "name": "float"
+  },
+  "string": {
+    "type": "builtin_function",
+    "name": "string"
+  },
+  "bool": {
+    "type": "builtin_function",
+    "name": "bool"
+  },
+  "math": {
+    "pi": 3.141592653589793,
+    "max": {
+      "type": "builtin_function",
+      "name": "max"
+    },
+    "min": {
+      "type": "builtin_function",
+      "name": "min"
+    },
+    "abs": {
+      "type": "builtin_function",
+      "name": "abs"
+    },
+    "pow": {
+      "type": "builtin_function",
+      "name": "pow"
+    },
+    "sqrt": {
+      "type": "builtin_function",
+      "name": "sqrt"
+    },
+    "round": {
+      "type": "builtin_function",
+      "name": "round"
+    },
+    "floor": {
+      "type": "builtin_function",
+      "name": "floor"
+    },
+    "ceil": {
+      "type": "builtin_function",
+      "name": "ceil"
+    },
+    "deg": {
+      "type": "builtin_function",
+      "name": "deg"
+    },
+    "rad": {
+      "type": "builtin_function",
+      "name": "rad"
+    },
+    "sin": {
+      "type": "builtin_function",
+      "name": "sin"
+    },
+    "cos": {
+      "type": "builtin_function",
+      "name": "cos"
+    },
+    "tan": {
+      "type": "builtin_function",
+      "name": "tan"
+    },
+    "asin": {
+      "type": "builtin_function",
+      "name": "asin"
+    },
+    "acos": {
+      "type": "builtin_function",
+      "name": "acos"
+    },
+    "atan": {
+      "type": "builtin_function",
+      "name": "atan"
+    },
+    "atan2": {
+      "type": "builtin_function",
+      "name": "atan2"
+    },
+    "sinh": {
+      "type": "builtin_function",
+      "name": "sinh"
+    },
+    "cosh": {
+      "type": "builtin_function",
+      "name": "cosh"
+    },
+    "tanh": {
+      "type": "builtin_function",
+      "name": "tanh"
+    },
+    "exp": {
+      "type": "builtin_function",
+      "name": "exp"
+    },
+    "log": {
+      "type": "builtin_function",
+      "name": "log"
+    },
+    "log10": {
+      "type": "builtin_function",
+      "name": "log10"
+    },
+    "ldexp": {
+      "type": "builtin_function",
+      "name": "ldexp"
+    },
+    "frexp": {
+      "type": "builtin_function",
+      "name": "frexp"
+    },
+    "modf": {
+      "type": "builtin_function",
+      "name": "modf"
+    },
+    "fmod": {
+      "type": "builtin_function",
+      "name": "fmod"
+    }
+  },
+  "config": {
+    "type": "builtin_function",
+    "name": "config"
+  },
+  "getEnv": {
+    "type": "builtin_function",
+    "name": "getEnv"
+  },
+  "join": {
+    "type": "function",
+    "name": "join",
+    "parameters": [
+      "a",
+      "b"
+    ]
+  },
+  "pipeline": {
+    "type": "builtin_function",
+    "name": "pipeline"
+  },
+  "goBuild": "go build",
+  "goTest": "go test /tmp/pipeline/test",
+  "a": {
+    "type": "function",
+    "name": "<lambda>",
+    "parameters": []
+  },
+  "c": {
+    "type": "function",
+    "name": "<lambda>",
+    "parameters": [
+      "x"
+    ]
+  },
+  "d": {
+    "type": "function",
+    "name": "<lambda>",
+    "parameters": [
+      "x",
+      "y"
+    ]
+  },
+  "e": {
+    "type": "function",
+    "name": "<lambda>",
+    "parameters": []
+  },
+  "f": {
+    "type": "function",
+    "name": "<lambda>",
+    "parameters": [
+      "x"
+    ]
+  },
+  "g": {
+    "type": "function",
+    "name": "<lambda>",
+    "parameters": []
+  },
+  "example": 3,
+  "rangeExample": {
+    "from": 1,
+    "to": 10,
+    "step": 1
+  },
+  "rangeExample2": {
+    "from": 1,
+    "to": 10,
+    "step": 1
+  },
+  "rangeExample3": {
+    "from": 1,
+    "to": 9,
+    "step": 1
+  },
+  "rangeExample4": {
+    "from": 1,
+    "to": 9,
+    "step": 1
+  },
+  "rangeExample5": {
+    "from": 10,
+    "to": 1,
+    "step": -1
+  },
+  "rangeExample6": {
+    "from": 10,
+    "to": 1,
+    "step": -1
+  },
+  "schema": {},
+  "PluginHeader": {
+    "type": "builtin_function",
+    "name": "PluginHeader"
+  },
+  "Version": {
+    "type": "builtin_function",
+    "name": "Version"
+  },
+  "Pipeline": {
+    "type": "builtin_function",
+    "name": "Pipeline"
+  },
+  "BuildStep": {
+    "type": "builtin_function",
+    "name": "BuildStep"
+  },
+  "TestStep": {
+    "type": "builtin_function",
+    "name": "TestStep"
+  },
+  "add": {
+    "type": "function",
+    "name": "add",
+    "parameters": [
+      "other"
+    ]
+  },
+  "empty": {
+    "type": "function",
+    "name": "empty",
+    "parameters": []
+  }
+}

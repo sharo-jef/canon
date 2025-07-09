@@ -1,0 +1,14 @@
+#schema "../definition/schema.canon"
+
+PluginHeader {
+  name = "TestPlugin"
+  description = "A simple test plugin"
+  version = Version {
+    major = 1
+    minor = 0
+    // missing patch field
+  }
+}
+
+// Invalid function call
+invalidFunction()

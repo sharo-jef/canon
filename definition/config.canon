@@ -15,19 +15,13 @@ fun join(a: string, b: string): string {
 
 fun empty() {}
 
-goTest += ' ' + join(getEnv('PIPELINE_HOME_PATH')!, '/test')
+val joinLambda: (string, string) -> string = { a, b -> a + b }
+
+goTest += ' ' + joinLambda(getEnv('PIPELINE_HOME_PATH')!, '/test')
 
 pipeline {
     build {
-        command = goBuild
-    }
-    test {
-        script = goTest
-    }
-}
-Pipeline {
-    build {
-        command = goBuild
+        command = goBuild + string(1 add 2 add 3)
     }
     test {
         script = goTest
