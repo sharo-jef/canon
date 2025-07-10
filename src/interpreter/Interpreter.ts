@@ -277,16 +277,23 @@ export class Interpreter {
         throw new CanonRuntimeError('Config file must start with #schema directive');
       }
 
-      // First, process all variable declarations to ensure they're available
+      // First, process all struct declarations to ensure they're available
+      for (const stmt of node.body) {
+        if (stmt.type === 'StructDeclaration') {
+          this.visitNode(stmt);
+        }
+      }
+
+      // Then process all variable declarations
       for (const stmt of node.body) {
         if (stmt.type === 'VariableDeclaration') {
           this.visitNode(stmt);
         }
       }
 
-      // Then process all other statements
+      // Finally, process all other statements
       for (const stmt of node.body) {
-        if (stmt.type !== 'VariableDeclaration') {
+        if (stmt.type !== 'VariableDeclaration' && stmt.type !== 'StructDeclaration') {
           result = this.visitNode(stmt);
         }
       }
@@ -453,8 +460,23 @@ export class Interpreter {
             );
 
             // 引数数に合致するinitメソッドを探す
+            if (this.options.debug) {
+              console.log(`[DEBUG] Looking for init method with ${args.length} parameters`);
+              console.log(`[DEBUG] Found ${initMethods.length} init methods`);
+              initMethods.forEach((init, i) => {
+                console.log(
+                  `[DEBUG] Init method ${i}: ${init.parameters ? init.parameters.length : 0} parameters`
+                );
+              });
+            }
+
             for (const init of initMethods) {
               if (init.parameters && init.parameters.length === args.length) {
+                if (this.options.debug) {
+                  console.log(
+                    `[DEBUG] Found matching init method with ${init.parameters.length} parameters`
+                  );
+                }
                 // パラメータに値を設定
                 for (let i = 0; i < args.length; i++) {
                   const param = init.parameters[i];
@@ -478,6 +500,13 @@ export class Interpreter {
 
                   if (fieldName) {
                     fields.set(fieldName, args[i]);
+                    if (this.options.debug) {
+                      console.log(`[DEBUG] Set field ${fieldName} = ${args[i]}`);
+                    }
+                  } else {
+                    if (this.options.debug) {
+                      console.log(`[DEBUG] Could not determine field name for param:`, param);
+                    }
                   }
                 }
                 break;
@@ -541,8 +570,101 @@ export class Interpreter {
                 }
               }
             }
+            // Process property declarations
+            else if (member.type === 'PropertyDeclaration') {
+              const fieldName = member.name?.name;
+              if (fieldName) {
+                // Only set default value if the field wasn't already set by the constructor
+                if (!structValue.getField(fieldName)) {
+                  if (member.defaultValue) {
+                    const fieldValue = this.visitNode(member.defaultValue);
+                    structValue.setField(fieldName, fieldValue);
+                  } else if (member.isOptional) {
+                    // Optional field without default value gets null
+                    structValue.setField(fieldName, NullValue.getInstance());
+                  } else {
+                    // Required field without default value - defer validation until after lambda execution
+                    // Mark this field as needing validation (but skip private fields)
+                    if (!structValue.hasField(fieldName)) {
+                      structValue.setField(fieldName, NullValue.getInstance());
+                      // Only mark non-private fields as requiring validation
+                      if (!member.isPrivate) {
+                        structValue.setFieldRequiresValidation(fieldName);
+                      }
+                    }
+                  }
+
+                  // Store member annotations if present
+                  if (member.annotations && Array.isArray(member.annotations)) {
+                    structValue.setMemberAnnotations(fieldName, member.annotations);
+                  }
+                } else {
+                  // Field already exists, but we still need to store annotations
+                  if (member.annotations && Array.isArray(member.annotations)) {
+                    structValue.setMemberAnnotations(fieldName, member.annotations);
+                  }
+                }
+              }
+            }
+            // Process mixin declarations
+            else if (member.type === 'MixinDeclaration') {
+              const mixinName = member.mixinName?.name;
+              if (mixinName) {
+                if (this.options.debug) {
+                  console.log(`[DEBUG] Processing mixin: ${mixinName}`);
+                }
+                // Get the mixin struct constructor from the environment
+                const mixinConstructor = this.currentEnv.get(mixinName);
+                if (
+                  mixinConstructor &&
+                  (mixinConstructor.type === 'function' ||
+                    mixinConstructor.type === 'builtin_function')
+                ) {
+                  if (this.options.debug) {
+                    console.log(`[DEBUG] Found mixin constructor: ${mixinName}`);
+                  }
+                  // Create an instance of the mixin struct to get its fields
+                  const mixinInstance = (mixinConstructor as BuiltinFunctionValue).call([]);
+                  if (mixinInstance && mixinInstance.type === 'struct') {
+                    const mixinStruct = mixinInstance as StructValue;
+                    if (this.options.debug) {
+                      console.log(
+                        `[DEBUG] Mixin struct fields:`,
+                        Array.from(mixinStruct.getFields().entries())
+                      );
+                    }
+                    // Copy all fields from the mixin to the current struct
+                    for (const [fieldName, fieldValue] of mixinStruct.getFields()) {
+                      structValue.setField(fieldName, fieldValue);
+                      if (this.options.debug) {
+                        console.log(`[DEBUG] Copied field ${fieldName} from mixin`);
+                      }
+                    }
+                    // Copy member annotations from the mixin
+                    for (const [fieldName, annotations] of mixinStruct.getMemberAnnotations()) {
+                      structValue.setMemberAnnotations(fieldName, annotations);
+                    }
+                  } else {
+                    if (this.options.debug) {
+                      console.log(`[DEBUG] Mixin instance is not a struct:`, mixinInstance);
+                    }
+                  }
+                } else {
+                  if (this.options.debug) {
+                    console.log(
+                      `[DEBUG] Mixin constructor not found or not a function:`,
+                      mixinConstructor
+                    );
+                  }
+                }
+              }
+            }
           }
         }
+
+        // Note: Required field validation is handled elsewhere:
+        // - For lambda-based instantiation: after lambda execution
+        // - For non-lambda instantiation: in visitFunctionCall when detecting no lambda
 
         return structValue;
       }
@@ -804,6 +926,7 @@ export class Interpreter {
       const structName = functionNode.name;
 
       // Check if this is a struct instantiation
+      // Case 1: Only lambda argument - StructName { ... }
       if (args.length === 1 && args[0] instanceof UserFunctionValue) {
         // The argument is a lambda function that configures the struct
         const lambda = args[0] as UserFunctionValue;
@@ -872,6 +995,82 @@ export class Interpreter {
         }
 
         return struct;
+      }
+      // Case 2: Constructor arguments with lambda - StructName(args...) { ... }
+      else if (args.length > 1 && args[args.length - 1] instanceof UserFunctionValue) {
+        // Last argument is a lambda, others are constructor arguments
+        const constructorArgs = args.slice(0, -1);
+        const lambda = args[args.length - 1] as UserFunctionValue;
+
+        if (this.options.debug) {
+          console.log(`[DEBUG] Struct instantiation with constructor args and lambda`);
+          console.log(`[DEBUG] Constructor args:`, constructorArgs);
+          console.log(`[DEBUG] Lambda:`, lambda);
+        }
+
+        // Call the struct constructor with the constructor arguments
+        const structConstructor = this.currentEnv.get(structName);
+        if (structConstructor && structConstructor instanceof BuiltinFunctionValue) {
+          // Create the struct instance using the constructor
+          const struct = structConstructor.call(constructorArgs) as StructValue;
+
+          // Then apply the lambda to set additional fields
+          const tempEnv = new Environment(this.currentEnv);
+          tempEnv.define('this', struct);
+
+          const savedEnv = this.currentEnv;
+          this.currentEnv = tempEnv;
+
+          try {
+            const body = lambda.getBody();
+
+            if (Array.isArray(body)) {
+              for (const stmt of body) {
+                if (stmt.type === 'AssignmentStatement') {
+                  const fieldName = stmt.left.name;
+                  const fieldValue = this.visitNode(stmt.right);
+                  struct.setField(fieldName, fieldValue);
+                  if (this.options.debug) {
+                    console.log(`[DEBUG] Lambda set field ${fieldName} = ${fieldValue}`);
+                  }
+                }
+              }
+            } else if (body && typeof body === 'object' && Array.isArray(body.statements)) {
+              for (const stmt of body.statements) {
+                if (stmt.type === 'AssignmentStatement') {
+                  const fieldName = stmt.left.name;
+                  const fieldValue = this.visitNode(stmt.right);
+                  struct.setField(fieldName, fieldValue);
+                  if (this.options.debug) {
+                    console.log(`[DEBUG] Lambda set field ${fieldName} = ${fieldValue}`);
+                  }
+                }
+              }
+            } else {
+              this.visitNode(body);
+            }
+          } finally {
+            this.currentEnv = savedEnv;
+          }
+
+          // After lambda execution, validate required fields
+          this.validateRequiredFields(struct, structName);
+
+          // Store the struct instance if needed
+          if (this.schemaDefinition) {
+            const schemaFields = this.schemaDefinition.getFields();
+            if (schemaFields.has(structName)) {
+              this.globalEnv.define(`__${structName}_instance__`, struct);
+              if (this.options.debug) {
+                console.log(`[DEBUG] Stored struct instance '__${structName}_instance__':`, struct);
+              }
+            }
+          }
+
+          return struct;
+        } else {
+          throw new CanonRuntimeError(`Struct constructor '${structName}' not found`);
+        }
       }
     }
 
@@ -1886,5 +2085,24 @@ export class Interpreter {
 
     // Execute the function body with the extended scope
     return this.evaluateWithScope(functionValue.getBody(), scope);
+  }
+
+  /**
+   * Validate required fields after lambda execution
+   */
+  private validateRequiredFields(struct: StructValue, structName: string): void {
+    const fieldsRequiringValidation = struct.getFieldsRequiringValidation();
+
+    for (const fieldName of fieldsRequiringValidation) {
+      const fieldValue = struct.getField(fieldName);
+      // If field is still null after lambda execution, it's an error
+      if (!fieldValue || fieldValue.type === 'null') {
+        throw new CanonRuntimeError(
+          `Required field '${fieldName}' in struct '${structName}' has no default value and was not initialized`
+        );
+      }
+      // Clear the validation requirement
+      struct.clearFieldValidationRequirement(fieldName);
+    }
   }
 }

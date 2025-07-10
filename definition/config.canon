@@ -3,7 +3,9 @@
 PluginHeader {
     name = 'Plugin1'
     description = 'Description of plugin1'
-    version = Version(0, 0, 1)
+    version = Version(0, 0, 1) {
+        hoge = "a"
+    }
 }
 
 val goBuild = 'go build'

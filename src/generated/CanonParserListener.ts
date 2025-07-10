@@ -73,6 +73,7 @@ import { InitDeclarationContext } from "./CanonParser";
 import { GetterDeclarationContext } from "./CanonParser";
 import { MethodDeclarationContext } from "./CanonParser";
 import { RepeatedDeclarationContext } from "./CanonParser";
+import { MixinDeclarationContext } from "./CanonParser";
 import { MappingBlockContext } from "./CanonParser";
 import { MappingEntryContext } from "./CanonParser";
 import { ParameterListContext } from "./CanonParser";
@@ -937,6 +938,17 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitRepeatedDeclaration?: (ctx: RepeatedDeclarationContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.mixinDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	enterMixinDeclaration?: (ctx: MixinDeclarationContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.mixinDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	exitMixinDeclaration?: (ctx: MixinDeclarationContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.mappingBlock`.

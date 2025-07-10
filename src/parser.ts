@@ -32,6 +32,7 @@ import {
   GetterDeclarationContext,
   MethodDeclarationContext,
   RepeatedDeclarationContext,
+  MixinDeclarationContext,
   MappingBlockContext,
   MappingEntryContext,
   ParameterListContext,
@@ -321,7 +322,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitStructMember(ctx: StructMemberContext): ASTNode {
-    // structMember can be one of: propertyDeclaration, initDeclaration, getterDeclaration, methodDeclaration, repeatedDeclaration
+    // structMember can be one of: propertyDeclaration, initDeclaration, getterDeclaration, methodDeclaration, repeatedDeclaration, mixinDeclaration
     if (ctx.propertyDeclaration()) {
       return this.visit(ctx.propertyDeclaration()!);
     } else if (ctx.initDeclaration()) {
@@ -332,6 +333,8 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       return this.visit(ctx.methodDeclaration()!);
     } else if (ctx.repeatedDeclaration()) {
       return this.visit(ctx.repeatedDeclaration()!);
+    } else if (ctx.mixinDeclaration()) {
+      return this.visit(ctx.mixinDeclaration()!);
     } else {
       throw new Error('Unknown struct member type');
     }
@@ -929,6 +932,32 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       typeRef,
       mapping,
       defaultValue,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitMixinDeclaration(ctx: MixinDeclarationContext): ASTNode {
+    const annotations = ctx.annotation().map((ann) => this.visit(ann));
+    const identifierToken = ctx.IDENTIFIER();
+    const mixinName = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
+
+    return {
+      type: 'MixinDeclaration',
+      mixinName,
+      annotations,
       loc: this.getLocationInfo(ctx),
     };
   }

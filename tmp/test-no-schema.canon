@@ -1,8 +1,0 @@
-// スキーマディレクティブなしのテスト
-val name = "test-without-schema"
-val version = "1.0.0"
-
-config {
-    appName = name
-    appVersion = version
-}

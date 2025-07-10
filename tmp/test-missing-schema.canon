@@ -1,9 +1,0 @@
-#schema "./nonexistent-schema.canon"
-
-val name = "test-app"
-val version = "1.0.0"
-
-config {
-    appName = name
-    appVersion = version
-}

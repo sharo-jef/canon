@@ -5,7 +5,6 @@
  */
 
 import { promises as fs } from 'fs';
-import * as path from 'path';
 import { parseCanonFile } from './parser';
 import { SemanticAnalyzer } from './semantic/SemanticAnalyzer';
 import { Interpreter } from './interpreter/Interpreter';
@@ -86,7 +85,8 @@ async function runInterpreter(options: CliOptions): Promise<void> {
   if (debug) {
     console.log('[DEBUG] Parsing...');
   }
-  const { ast, errors: parseErrors } = await parseCanonFile(inputFile);
+  const ast = parseCanonFile(inputFile);
+  const parseErrors: any[] = []; // parseCanonFile doesn't return errors currently
 
   if (parseErrors.length > 0) {
     console.error('Parse errors:');
@@ -105,13 +105,7 @@ async function runInterpreter(options: CliOptions): Promise<void> {
     console.log('[DEBUG] Running semantic analysis...');
   }
   const analyzer = new SemanticAnalyzer();
-  await analyzer.analyze(ast);
-
-  const analysisResult = {
-    success: analyzer['errors'].length === 0,
-    errors: analyzer['errors'],
-    symbolTable: analyzer['symbolTable'],
-  };
+  const analysisResult = await analyzer.analyzeFromFile(inputFile);
 
   if (!analysisResult.success) {
     console.error('Semantic analysis errors:');
@@ -129,7 +123,7 @@ async function runInterpreter(options: CliOptions): Promise<void> {
   if (debug) {
     console.log('[DEBUG] Running interpreter...');
   }
-  const interpreter = new Interpreter({ debug });
+  const interpreter = new Interpreter({ debug, inputFilePath: inputFile });
   const result = interpreter.evaluate(ast);
 
   if (debug) {
@@ -148,7 +142,7 @@ async function runInterpreter(options: CliOptions): Promise<void> {
   } else {
     try {
       output = interpreter.getResultAsJSON();
-    } catch (error) {
+    } catch {
       // スキーマが定義されていない場合は結果をそのまま出力
       if (debug) {
         console.log('[DEBUG] No schema found, outputting raw result');

@@ -1,9 +1,0 @@
-// 基本的な変数定義のテスト
-val name = "test-app"
-val version = "1.0.0"
-val debug = true
-val port = 8080
-
-// 計算式
-val sum = 1 + 2 + 3
-val message = "Hello, " + name + "!"

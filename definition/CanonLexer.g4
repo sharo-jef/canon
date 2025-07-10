@@ -35,6 +35,7 @@ VAL: 'val';
 VAR: 'var';
 FUN: 'fun';
 INFIX: 'infix';
+MIXIN: 'mixin';
 
 // Built-in types
 STRING_TYPE: 'string';

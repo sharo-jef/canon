@@ -1,5 +1,0 @@
-#schema
-use "./test-serialize-comparison-schema.canon"
-
-TestStructMember {}
-TestStructLevel {}

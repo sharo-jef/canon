@@ -1,0 +1,10 @@
+struct MixinTest {
+  mixinField: string = "from mixin"
+}
+
+struct Version {
+  mixin MixinTest
+  version: string = "1.0"
+}
+
+val result = Version()

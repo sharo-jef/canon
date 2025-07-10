@@ -92,6 +92,7 @@ structMember
     | getterDeclaration
     | methodDeclaration
     | repeatedDeclaration
+    | mixinDeclaration
     ;
 
 statement
@@ -157,6 +158,7 @@ methodDeclaration  : annotation* NEWLINE* PRIVATE? FUN IDENTIFIER
 repeatedDeclaration: annotation* NEWLINE* REPEATED IDENTIFIER COLON type
                      mappingBlock?
                      ( ASSIGN expression )? ;
+mixinDeclaration   : annotation* NEWLINE* MIXIN IDENTIFIER ;
 mappingBlock       : LBRACE NEWLINE* (mappingEntry (statementSeparators mappingEntry)*)? NEWLINE* RBRACE ;
 mappingEntry       : IDENTIFIER ARROW IDENTIFIER ;
 

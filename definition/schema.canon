@@ -22,13 +22,13 @@ struct PluginHeader {
     }
 }
 
-// struct MixinTest {
-//     mixinField: string = 'mixin field'
-// }
+struct MixinTest {
+    mixinField: string = 'mixin field'
+}
 
-@serialize 'toString'
+// @serialize 'toString'
 struct Version {
-    // mixin MixinTest
+    mixin MixinTest
     init {
         validation()
     }

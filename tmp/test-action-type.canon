@@ -1,5 +1,0 @@
-val simpleAction: action = { -> }
-val voidAction: () -> null = { -> }
-
-// These should be the same type
-val assignment: action = voidAction

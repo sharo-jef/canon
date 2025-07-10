@@ -1,0 +1,5 @@
+#schema '../definition/schema.canon'
+
+val testVersion = Version(0, 0, 1) {
+    hoge = "a"
+}
