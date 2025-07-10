@@ -330,6 +330,25 @@ export class SymbolTable {
       dataType: 'function -> FloatRange',
     });
 
+    // Pipeline functions
+    this.define({
+      name: 'pipeline',
+      type: 'function',
+      dataType: 'function',
+    });
+
+    this.define({
+      name: 'build',
+      type: 'function',
+      dataType: 'function',
+    });
+
+    this.define({
+      name: 'test',
+      type: 'function',
+      dataType: 'function',
+    });
+
     // 標準ライブラリ関数はuse文でインポートした場合のみ利用可能
     // this.define({
     //   name: 'getEnv',

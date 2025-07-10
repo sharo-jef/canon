@@ -1,0 +1,5 @@
+#schema './schema.canon'
+
+val joinLambda: (string, string) -> string = { a, b -> a + b }
+
+val result = joinLambda("hello", "world")

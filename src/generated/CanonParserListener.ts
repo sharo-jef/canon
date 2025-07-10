@@ -55,6 +55,7 @@ import { UnionTypeContext } from "./CanonParser";
 import { TypeContext } from "./CanonParser";
 import { BaseTypeContext } from "./CanonParser";
 import { PrimitiveTypeContext } from "./CanonParser";
+import { FunctionTypeContext } from "./CanonParser";
 import { BlockContext } from "./CanonParser";
 import { StructBodyContext } from "./CanonParser";
 import { StructMemberContext } from "./CanonParser";
@@ -738,6 +739,17 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitPrimitiveType?: (ctx: PrimitiveTypeContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.functionType`.
+	 * @param ctx the parse tree
+	 */
+	enterFunctionType?: (ctx: FunctionTypeContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.functionType`.
+	 * @param ctx the parse tree
+	 */
+	exitFunctionType?: (ctx: FunctionTypeContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.block`.

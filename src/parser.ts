@@ -22,6 +22,7 @@ import {
   TypeContext,
   BaseTypeContext,
   PrimitiveTypeContext,
+  FunctionTypeContext,
   BlockContext,
   StatementContext,
   PropertyDeclarationContext,
@@ -477,6 +478,8 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   visitBaseType(ctx: BaseTypeContext): ASTNode {
     if (ctx.primitiveType()) {
       return this.visit(ctx.primitiveType()!);
+    } else if (ctx.functionType()) {
+      return this.visit(ctx.functionType()!);
     } else {
       const identifierToken = ctx.IDENTIFIER()!;
       return {
@@ -494,6 +497,42 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
               column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
             },
           },
+        },
+        loc: this.getLocationInfo(ctx),
+      };
+    }
+  }
+
+  visitFunctionType(ctx: FunctionTypeContext): ASTNode {
+    // FunctionType: LPAREN (type (COMMA type)*)? RPAREN ARROW type
+    const paramTypes: ASTNode[] = [];
+
+    // Get all type nodes from the function type
+    const typeNodes = ctx.type();
+
+    // The last type is the return type, all others are parameter types
+    if (typeNodes.length > 0) {
+      for (let i = 0; i < typeNodes.length - 1; i++) {
+        paramTypes.push(this.visit(typeNodes[i]));
+      }
+
+      const returnType = this.visit(typeNodes[typeNodes.length - 1]);
+
+      return {
+        type: 'FunctionType',
+        parameterTypes: paramTypes,
+        returnType: returnType,
+        loc: this.getLocationInfo(ctx),
+      };
+    } else {
+      // No parameters, no return type (should not happen with valid grammar)
+      return {
+        type: 'FunctionType',
+        parameterTypes: [],
+        returnType: {
+          type: 'PrimitiveType',
+          name: 'void',
+          loc: this.getLocationInfo(ctx),
         },
         loc: this.getLocationInfo(ctx),
       };

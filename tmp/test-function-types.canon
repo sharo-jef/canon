@@ -1,0 +1,8 @@
+// Test function type annotation feature
+val joinLambda: (string, string) -> string = { a, b -> a + b }
+
+val addNumbers: (int, int) -> int = { x, y -> x + y }
+
+val greet: (string) -> string = { name -> "Hello, " + name }
+
+val noParams: () -> string = { -> "No parameters!" }

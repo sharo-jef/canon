@@ -39,6 +39,7 @@ export class SemanticAnalyzer {
   private schemaPropertyInstances: Set<string> = new Set(); // Track instantiated schema properties
   private hasSchemaDirective: boolean = false; // Track if file has #schema directive
   private isInStructInstantiation: boolean = false; // Track if we're inside a struct instantiation
+  private currentExpectedFunctionType?: ASTNode; // Track expected function type for lambda inference
 
   constructor() {
     this.symbolTable = new SymbolTable();
@@ -325,6 +326,8 @@ export class SemanticAnalyzer {
         return this.visitPrimitiveType(node);
       case 'TypeReference':
         return this.visitTypeReference(node);
+      case 'FunctionType':
+        return this.visitFunctionType(node);
       case 'AssignmentStatement':
         return this.visitAssignmentStatement(node);
       case 'CallExpression':
@@ -634,13 +637,23 @@ export class SemanticAnalyzer {
     }
 
     // 型アノテーションがある場合
-    if (node.typeAnnotation) {
-      variableType = await this.visitNode(node.typeAnnotation);
+    if (node.typeAnnotation || node.typeRef) {
+      const typeAnnotation = node.typeAnnotation || node.typeRef;
+      variableType = await this.visitNode(typeAnnotation);
     }
 
     // 初期化式がある場合
     if (node.value) {
+      // 関数型注釈がある場合、ラムダ式の型推論のためにコンテキストを設定
+      const typeAnnotation = node.typeAnnotation || node.typeRef;
+      if (typeAnnotation && typeAnnotation.type === 'FunctionType') {
+        this.currentExpectedFunctionType = typeAnnotation;
+      }
+
       const initializerType = await this.visitNode(node.value);
+
+      // コンテキストをクリア
+      this.currentExpectedFunctionType = undefined;
 
       if (variableType && initializerType) {
         // 型アノテーションと初期化式の型の互換性をチェック
@@ -985,6 +998,23 @@ export class SemanticAnalyzer {
     }
 
     return typeName;
+  }
+
+  private async visitFunctionType(node: ASTNode): Promise<string | undefined> {
+    // FunctionType: (paramType1, paramType2, ...) -> returnType
+    const parameterTypes: string[] = [];
+
+    if (node.parameterTypes && Array.isArray(node.parameterTypes)) {
+      for (const paramType of node.parameterTypes) {
+        const type = await this.visitNode(paramType);
+        parameterTypes.push(type || 'any');
+      }
+    }
+
+    const returnType = node.returnType ? await this.visitNode(node.returnType) : 'void';
+
+    // 関数型の文字列表現を返す
+    return `(${parameterTypes.join(', ')}) -> ${returnType}`;
   }
 
   private async visitAssignmentStatement(node: ASTNode): Promise<string | undefined> {
@@ -1593,12 +1623,13 @@ export class SemanticAnalyzer {
       symbol &&
       (symbol.type === 'struct' || (symbol.type === 'type' && symbol.dataType === 'struct'))
     ) {
-      // This is a struct constructor call, but not defined in schema
-      this.addError({
-        message: `Direct instantiation of struct '${calleeName}' is not allowed. Only schema-defined properties can be instantiated at the top level`,
-        type: 'ValidationError',
-        location: this.getLocation(node),
-      });
+      // This is a struct constructor call - allow it
+      // Process the arguments if present
+      if (node.arguments && Array.isArray(node.arguments)) {
+        for (const arg of node.arguments) {
+          await this.visitNode(arg);
+        }
+      }
       return calleeName;
     }
 
@@ -1615,20 +1646,37 @@ export class SemanticAnalyzer {
     const parameterTypes: string[] = [];
 
     if (node.parameters && Array.isArray(node.parameters)) {
-      for (const param of node.parameters) {
+      for (let i = 0; i < node.parameters.length; i++) {
+        const param = node.parameters[i];
         if (param.typeAnnotation) {
           const paramType = await this.visitNode(param.typeAnnotation);
           parameterTypes.push(paramType || 'undefined');
         } else {
-          // 型注釈がない場合はエラー
-          if (!this.isInStructInstantiation && param.name) {
-            this.addError({
-              message: `Lambda parameter '${param.name}' requires an explicit type annotation`,
-              type: 'TypeError',
-              location: this.getLocation(param),
-            });
+          // 関数型注釈からパラメータ型を推論
+          let inferredType: string | undefined;
+          if (
+            this.currentExpectedFunctionType &&
+            this.currentExpectedFunctionType.parameterTypes &&
+            Array.isArray(this.currentExpectedFunctionType.parameterTypes) &&
+            i < this.currentExpectedFunctionType.parameterTypes.length
+          ) {
+            const paramTypeNode = this.currentExpectedFunctionType.parameterTypes[i];
+            inferredType = await this.visitNode(paramTypeNode);
           }
-          parameterTypes.push('undefined');
+
+          if (inferredType) {
+            parameterTypes.push(inferredType);
+          } else {
+            // 型注釈も型推論も失敗した場合はエラー
+            if (!this.isInStructInstantiation && param.name) {
+              this.addError({
+                message: `Lambda parameter '${param.name}' requires an explicit type annotation`,
+                type: 'TypeError',
+                location: this.getLocation(param),
+              });
+            }
+            parameterTypes.push('undefined');
+          }
         }
       }
     }
@@ -1638,12 +1686,18 @@ export class SemanticAnalyzer {
 
     // パラメータを現在のスコープに定義
     if (node.parameters && Array.isArray(node.parameters)) {
-      for (const param of node.parameters) {
+      for (let i = 0; i < node.parameters.length; i++) {
+        const param = node.parameters[i];
         if (param.name) {
-          // 型注釈から直接型を取得
-          const paramType = param.typeAnnotation
-            ? await this.visitNode(param.typeAnnotation)
-            : undefined;
+          // 型注釈から直接型を取得、または推論された型を使用
+          let paramType: string | undefined;
+          if (param.typeAnnotation) {
+            paramType = await this.visitNode(param.typeAnnotation);
+          } else {
+            // 推論された型を使用
+            paramType = parameterTypes[i];
+          }
+
           try {
             this.symbolTable.define({
               name: param.name,
@@ -1664,7 +1718,27 @@ export class SemanticAnalyzer {
     }
 
     // 本体の型を推論
-    const bodyType = node.body ? await this.visitNode(node.body) : 'void';
+    let bodyType: string | undefined;
+    if (node.body) {
+      if (Array.isArray(node.body)) {
+        // 本体が複数の文の場合、最後の文の型を取得
+        if (node.body.length > 0) {
+          const lastStatement = node.body[node.body.length - 1];
+          bodyType = await this.visitNode(lastStatement);
+        } else {
+          bodyType = 'void';
+        }
+      } else {
+        // 本体が単一の式の場合
+        bodyType = await this.visitNode(node.body);
+      }
+    } else {
+      bodyType = 'void';
+    }
+
+    if (process.env.DEBUG) {
+      console.log('Lambda body type:', bodyType);
+    }
 
     // スコープを抜ける
     this.symbolTable.exitScope();

@@ -73,8 +73,9 @@ variableDeclaration
 unionType : type ( BIT_OR type )* ;
 
 type      : baseType ( LBRACKET RBRACKET )* QUESTION? ;
-baseType  : primitiveType | IDENTIFIER ;
+baseType  : primitiveType | IDENTIFIER | functionType ;
 primitiveType : STRING_TYPE | INT_TYPE | FLOAT_TYPE | BOOL_TYPE ;
+functionType : LPAREN (type (COMMA type)*)? RPAREN ARROW type ;
 
 // ───── blocks / statements ────────────────────
 block
