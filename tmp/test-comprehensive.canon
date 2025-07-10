@@ -1,0 +1,35 @@
+// Comprehensive test for @serialize and action type
+@serialize('toString')
+struct Person {
+    name: string = "John"
+    age: int = 30
+    
+    get toString(): string {
+        "${name} (${age})"
+    }
+}
+
+@serialize('toArray')
+struct Point {
+    x: int = 0
+    y: int = 0
+    
+    get toArray(): int[] {
+        [x, y]
+    }
+}
+
+// Action type usage
+val doNothing: action = { -> }
+val explicitVoid: () -> null = { -> }
+
+// Functions that take action parameters
+fun performAction(act: action): string {
+    // In a real implementation, this would execute the action
+    "Action performed"
+}
+
+// Test instances
+val person = Person()
+val point = Point()
+val result = performAction(doNothing)

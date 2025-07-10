@@ -1,0 +1,13 @@
+schema {
+    TestStruct
+}
+
+@serialize("toString")
+struct TestStruct {
+    value: string = "test"
+    
+    @serialize
+    get toString(): string {
+        "conflict"
+    }
+}

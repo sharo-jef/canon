@@ -531,7 +531,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
         parameterTypes: [],
         returnType: {
           type: 'PrimitiveType',
-          name: 'void',
+          name: 'null',
           loc: this.getLocationInfo(ctx),
         },
         loc: this.getLocationInfo(ctx),
@@ -547,6 +547,10 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       typeName = 'int';
     } else if (ctx.BOOL_TYPE()) {
       typeName = 'bool';
+    } else if (ctx.FLOAT_TYPE()) {
+      typeName = 'float';
+    } else if (ctx.NULL_TYPE()) {
+      typeName = 'null';
     } else {
       typeName = 'unknown';
     }

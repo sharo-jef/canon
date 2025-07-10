@@ -17,7 +17,7 @@ fun empty() {}
 
 val joinLambda: (string, string) -> string = { a, b -> a + b }
 
-goTest += ' ' + joinLambda(getEnv('PIPELINE_HOME_PATH')!, '/test')
+goTest += ' ' + joinLambda(/*getEnv('PIPELINE_HOME_PATH')!*/'hoge', '/test')
 
 pipeline {
     build {

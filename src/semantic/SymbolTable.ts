@@ -164,7 +164,7 @@ export class SymbolTable {
    * プリミティブ型かどうかを判定
    */
   private isPrimitiveType(typeName: string): boolean {
-    return ['int', 'float', 'string', 'bool'].includes(typeName);
+    return ['int', 'float', 'string', 'bool', 'any', 'null'].includes(typeName);
   }
 
   /**
@@ -365,7 +365,7 @@ export class SymbolTable {
     // this.define({
     //   name: 'print',
     //   type: 'function',
-    //   dataType: 'function', // any -> void
+    //   dataType: 'function', // any -> null
     // });
   }
 
@@ -376,7 +376,7 @@ export class SymbolTable {
     const standardLibraryFunctions: Record<string, { type: SymbolType; dataType: string }> = {
       getEnv: { type: 'function', dataType: 'function' }, // string -> string?
       random: { type: 'function', dataType: 'function' }, // () -> float
-      print: { type: 'function', dataType: 'function' }, // any -> void
+      print: { type: 'function', dataType: 'function' }, // any -> null
     };
 
     const functionDef = standardLibraryFunctions[name];

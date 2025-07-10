@@ -1,11 +1,12 @@
-// テスト用のスキーマファイル
-schema {
-    config: ConfigStruct
+struct TestStruct {
+    name: string
+    
+    @serialize
+    fun toString(): string {
+        return "custom"
+    }
 }
 
-struct ConfigStruct {
-    appName: string
-    appVersion: string
-    isDebug: bool
-    serverPort: int
+schema {
+    testInstance: TestStruct
 }

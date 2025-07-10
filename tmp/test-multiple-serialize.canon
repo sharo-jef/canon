@@ -1,0 +1,17 @@
+schema {
+    TestStruct
+}
+
+struct TestStruct {
+    value: string = "test"
+    
+    @serialize
+    get toString(): string {
+        "first"
+    }
+    
+    @serialize
+    get toJson(): string {
+        "second"
+    }
+}

@@ -3,15 +3,25 @@
  */
 
 import { CanonValue } from './CanonValue';
+import { ASTNode } from '../../parser';
+import { UserFunctionValue } from './FunctionValue';
 
 export class StructValue extends CanonValue {
   readonly type = 'struct';
 
+  private memberAnnotations: Map<string, any[]> = new Map();
+  private interpreter?: any;
+
   constructor(
     private readonly structName: string,
-    private readonly fields: Map<string, CanonValue>
+    private readonly fields: Map<string, CanonValue>,
+    private readonly annotations: ASTNode[] = []
   ) {
     super();
+  }
+
+  setInterpreter(interpreter: any): void {
+    this.interpreter = interpreter;
   }
 
   toString(): string {
@@ -20,7 +30,107 @@ export class StructValue extends CanonValue {
     return `${this.structName} { ${fieldStrings.join(', ')} }`;
   }
 
-  toNative(): Record<string, any> {
+  toNative(): any {
+    // Check for member-level @serialize annotations
+    for (const [fieldName, fieldValue] of this.fields) {
+      const hasSerializeAnnotation = this.hasSerializeAnnotationForMember(fieldName);
+
+      if (hasSerializeAnnotation) {
+        try {
+          // If it's a function (getter/method), we need to call it
+          if (fieldValue.type === 'function' && fieldValue instanceof UserFunctionValue) {
+            if (this.interpreter) {
+              try {
+                // Create a scope that includes the struct fields
+                const structScope = new Map<string, CanonValue>();
+
+                // Add all struct fields to the scope (except the function itself)
+                for (const [key, value] of this.fields) {
+                  if (key !== fieldName) {
+                    structScope.set(key, value);
+                  }
+                }
+
+                // Call the function with the struct scope
+                const result = this.interpreter.evaluateWithScope(
+                  (fieldValue as UserFunctionValue).getBody(),
+                  structScope
+                );
+                return result.toNative();
+              } catch (error) {
+                console.warn(`Error calling function '${fieldName}':`, error);
+              }
+            } else {
+              console.warn(
+                `@serialize on function '${fieldName}' requires interpreter access to call`
+              );
+            }
+            return fieldValue.toNative();
+          }
+          // If it's not a function, just return the field value
+          return fieldValue.toNative();
+        } catch (error) {
+          console.warn(`Error calling serialize method '${fieldName}':`, error);
+        }
+      }
+    }
+
+    // Check for struct-level @serialize annotation
+    const serializeAnnotation = this.annotations.find(
+      (annotation: any) => annotation.name?.name === 'serialize'
+    );
+
+    if (serializeAnnotation && serializeAnnotation.arguments?.length > 0) {
+      const serializeTarget = serializeAnnotation.arguments[0];
+
+      if (serializeTarget.type === 'StringLiteral') {
+        const methodName = serializeTarget.value;
+
+        // Look for the method/getter in the struct fields
+        const method = this.fields.get(methodName);
+
+        if (method) {
+          // If it's a method/getter, call it and return the result
+          if (method.type === 'function' && method instanceof UserFunctionValue) {
+            if (this.interpreter) {
+              try {
+                // Create a scope that includes the struct fields
+                const structScope = new Map<string, CanonValue>();
+
+                // Add all struct fields to the scope (except the function itself)
+                for (const [key, value] of this.fields) {
+                  if (key !== methodName) {
+                    structScope.set(key, value);
+                  }
+                }
+
+                // Call the function with the struct scope
+                const result = this.interpreter.evaluateWithScope(
+                  (method as UserFunctionValue).getBody(),
+                  structScope
+                );
+                return result.toNative();
+              } catch (error) {
+                console.warn(`Error calling serialize method '${methodName}':`, error);
+              }
+            } else {
+              console.warn(
+                `@serialize on function '${methodName}' requires interpreter access to call`
+              );
+            }
+            return method.toNative();
+          } else {
+            // If it's a field, return its value
+            return method.toNative();
+          }
+        } else {
+          // If the method/getter doesn't exist, log warning and fall back to default
+          console.warn(`Serialize target '${methodName}' not found in struct '${this.structName}'`);
+        }
+      }
+    }
+
+    // Default behavior: return all fields
     const result: Record<string, any> = {};
     for (const [key, value] of this.fields) {
       try {
@@ -106,5 +216,14 @@ export class StructValue extends CanonValue {
     const newFields = new Map(this.fields);
     newFields.delete(name);
     return new StructValue(this.structName, newFields);
+  }
+
+  setMemberAnnotations(memberName: string, annotations: any[]): void {
+    this.memberAnnotations.set(memberName, annotations);
+  }
+
+  hasSerializeAnnotationForMember(memberName: string): boolean {
+    const annotations = this.memberAnnotations.get(memberName) || [];
+    return annotations.some((annotation: any) => annotation.name?.name === 'serialize');
   }
 }

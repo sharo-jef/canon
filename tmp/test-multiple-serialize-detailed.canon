@@ -1,0 +1,26 @@
+schema {
+    TestStruct
+}
+
+struct TestStruct {
+    value: string = "test"
+    
+    @serialize
+    get toString(): string {
+        "first serialize"
+    }
+    
+    fun someMethod(): string {
+        "not serialize"
+    }
+    
+    @serialize
+    get toJson(): string {
+        "second serialize"
+    }
+    
+    @serialize
+    fun getDisplay(): string {
+        "third serialize"
+    }
+}

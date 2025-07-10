@@ -74,7 +74,7 @@ unionType : type ( BIT_OR type )* ;
 
 type      : baseType ( LBRACKET RBRACKET )* QUESTION? ;
 baseType  : primitiveType | IDENTIFIER | functionType ;
-primitiveType : STRING_TYPE | INT_TYPE | FLOAT_TYPE | BOOL_TYPE ;
+primitiveType : STRING_TYPE | INT_TYPE | FLOAT_TYPE | BOOL_TYPE | NULL_TYPE ;
 functionType : LPAREN (type (COMMA type)*)? RPAREN ARROW type ;
 
 // ───── blocks / statements ────────────────────

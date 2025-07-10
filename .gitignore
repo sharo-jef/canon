@@ -87,3 +87,5 @@ coverage/
 
 # Canon specific
 # Add any Canon-specific temporary or generated files here
+
+dist/

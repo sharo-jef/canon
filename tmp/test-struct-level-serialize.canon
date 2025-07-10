@@ -1,0 +1,16 @@
+schema {
+    TestStruct
+}
+
+@serialize "toString"
+struct TestStruct {
+    major: int = 1
+    minor: int = 2
+    patch: int = 3
+    
+    get toString(): string {
+        `$major.$minor.$patch`
+    }
+}
+
+val test = TestStruct {}

@@ -70,7 +70,7 @@ export class Interpreter {
           throw new CanonRuntimeError('config() requires exactly one argument');
         }
 
-        const configStruct = new StructValue('Config', new Map());
+        const configStruct = new StructValue('Config', new Map(), []);
 
         // Lambda処理は既存のvisitFunctionCallで実装済み
         // ここではStructValueを返すだけ
@@ -116,37 +116,10 @@ export class Interpreter {
     // pipeline組み込み関数の追加
     this.globalEnv.define(
       'pipeline',
-      new BuiltinFunctionValue('pipeline', (args, lambdaBody) => {
-        // 後置ラムダを実行して構造体を作成
-        if (lambdaBody) {
-          const pipelineStruct = new StructValue('pipeline', new Map());
-          const pipelineEnv = new Environment(this.globalEnv);
-          pipelineEnv.define('this', pipelineStruct);
-
-          const oldEnv = this.currentEnv;
-          this.currentEnv = pipelineEnv;
-
-          try {
-            // 後置ラムダを実行して、その中でbuild/testが定義される
-            this.visitNode(lambdaBody);
-
-            // pipelineEnvから結果を取得
-            const fields = new Map<string, CanonValue>();
-            for (const name of pipelineEnv.getLocalNames()) {
-              if (name !== 'this') {
-                const value = pipelineEnv.getLocal(name);
-                if (value) {
-                  fields.set(name, value);
-                }
-              }
-            }
-
-            return new StructValue('pipeline', fields);
-          } finally {
-            this.currentEnv = oldEnv;
-          }
-        }
-        return new StructValue('pipeline', new Map());
+      new BuiltinFunctionValue('pipeline', (_args: CanonValue[]) => {
+        // For now, just return a simple struct
+        // This function may need to be redesigned based on actual usage
+        return new StructValue('pipeline', new Map(), []);
       })
     );
   }
@@ -282,6 +255,8 @@ export class Interpreter {
         return this.visitNullLiteral(node);
       case 'ThisExpression':
         return this.visitThisExpression(node);
+      case 'TemplateLiteral':
+        return this.visitTemplateLiteral(node);
       default:
         throw new CanonRuntimeError(`Unknown node type: ${node.type}`);
     }
@@ -520,7 +495,56 @@ export class Interpreter {
           }
         }
 
-        return new StructValue(structName, fields);
+        const structValue = new StructValue(structName, fields, node.annotations || []);
+
+        // Set interpreter reference for @serialize function calls
+        structValue.setInterpreter(this);
+
+        // Process struct body for methods/getters and field declarations
+        if (node.body && Array.isArray(node.body)) {
+          for (const member of node.body) {
+            // Process getters and methods
+            if (member.type === 'GetterDeclaration' || member.type === 'MethodDeclaration') {
+              const memberName = member.name?.name;
+              if (memberName) {
+                // Create a function value for the getter/method
+                const parameters = member.parameters || [];
+                const paramNames = parameters.map((p: any) => p.name?.name || p.name || '');
+                const functionValue = new UserFunctionValue(
+                  memberName,
+                  paramNames,
+                  member.body || member,
+                  new Map()
+                );
+
+                // Add the function to the struct fields
+                structValue.setField(memberName, functionValue);
+
+                // Store member annotations if present
+                if (member.annotations && Array.isArray(member.annotations)) {
+                  structValue.setMemberAnnotations(memberName, member.annotations);
+                }
+              }
+            }
+            // Process regular field declarations
+            else if (member.type === 'FieldDeclaration') {
+              const fieldName = member.name?.name;
+              if (fieldName) {
+                const fieldValue = member.value
+                  ? this.visitNode(member.value)
+                  : NullValue.getInstance();
+                structValue.setField(fieldName, fieldValue);
+
+                // Store member annotations if present
+                if (member.annotations && Array.isArray(member.annotations)) {
+                  structValue.setMemberAnnotations(fieldName, member.annotations);
+                }
+              }
+            }
+          }
+        }
+
+        return structValue;
       }
     );
 
@@ -786,7 +810,7 @@ export class Interpreter {
 
         // Create an empty struct with the given name
         const fields = new Map<string, CanonValue>();
-        const struct = new StructValue(structName, fields);
+        const struct = new StructValue(structName, fields, []);
 
         // Call the lambda function with the struct as context
         const tempEnv = new Environment(this.currentEnv);
@@ -987,6 +1011,49 @@ export class Interpreter {
     return new StringValue(node.value);
   }
 
+  private visitTemplateLiteral(node: ASTNode): CanonValue {
+    if (this.options.debug) {
+      console.log('[DEBUG] Processing template literal:', JSON.stringify(node, null, 2));
+    }
+
+    let result = '';
+
+    if (node.parts && Array.isArray(node.parts)) {
+      for (const part of node.parts) {
+        if (part.type === 'TemplateStringPart') {
+          // Static string part
+          result += part.value || '';
+        } else if (part.type === 'TemplateInterpolation') {
+          // Expression interpolation
+          const exprValue = this.visitNode(part.expression);
+
+          // Convert Canon value to string
+          let stringValue = '';
+          if (exprValue instanceof StringValue) {
+            stringValue = exprValue.getValue();
+          } else if (exprValue instanceof IntValue) {
+            stringValue = exprValue.getValue().toString();
+          } else if (exprValue instanceof BoolValue) {
+            stringValue = exprValue.getValue().toString();
+          } else if (exprValue instanceof FloatValue) {
+            stringValue = exprValue.getValue().toString();
+          } else {
+            // Fallback to Canon value's toString method
+            stringValue = exprValue.toString();
+          }
+
+          result += stringValue;
+        }
+      }
+    }
+
+    if (this.options.debug) {
+      console.log('[DEBUG] Template literal result:', result);
+    }
+
+    return new StringValue(result);
+  }
+
   private visitBooleanLiteral(node: ASTNode): CanonValue {
     return new BoolValue(node.value);
   }
@@ -1010,7 +1077,7 @@ export class Interpreter {
         fields.set(key, value);
       }
     }
-    return new StructValue('', fields);
+    return new StructValue('', fields, []);
   }
 
   /**
@@ -1326,7 +1393,7 @@ export class Interpreter {
         fields.set(name, value);
       }
     }
-    return new StructValue('Schema', fields);
+    return new StructValue('Schema', fields, []);
   }
 
   /**
@@ -1652,7 +1719,7 @@ export class Interpreter {
    * Handle pipeline function call with lambda body
    */
   private handlePipelineWithLambda(lambdaNode: ASTNode): CanonValue {
-    const pipelineStruct = new StructValue('pipeline', new Map());
+    const pipelineStruct = new StructValue('pipeline', new Map(), []);
     const pipelineEnv = new Environment(this.globalEnv);
     pipelineEnv.define('this', pipelineStruct);
 
@@ -1664,7 +1731,7 @@ export class Interpreter {
           const lambda = args[0] as UserFunctionValue;
 
           // Create a BuildStep struct
-          const buildStep = new StructValue('BuildStep', new Map());
+          const buildStep = new StructValue('BuildStep', new Map(), []);
           const buildEnv = new Environment(pipelineEnv);
           buildEnv.define('this', buildStep);
 
@@ -1702,7 +1769,7 @@ export class Interpreter {
           const lambda = args[0] as UserFunctionValue;
 
           // Create a TestStep struct
-          const testStep = new StructValue('TestStep', new Map());
+          const testStep = new StructValue('TestStep', new Map(), []);
           const testEnv = new Environment(pipelineEnv);
           testEnv.define('this', testStep);
 
@@ -1782,7 +1849,7 @@ export class Interpreter {
         }
       }
 
-      const result = new StructValue('pipeline', fields);
+      const result = new StructValue('pipeline', fields, []);
 
       // Store the result in global environment for schema-based output
       if (this.schemaDefinition) {

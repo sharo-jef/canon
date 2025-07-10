@@ -1,0 +1,17 @@
+@serialize('invalidMethod')
+struct Version {
+    major: int = 1
+    minor: int = 0
+    patch: int = 0
+    
+    get toString(): string {
+        "${major}.${minor}.${patch}"
+    }
+}
+
+@serialize('functionReturner')
+struct BadStruct {
+    get functionReturner(): (string) -> string {
+        { x: string -> x }
+    }
+}

@@ -1,0 +1,3 @@
+#schema "test-schema.canon"
+val testAction: action = { }
+val testNull: () -> null = { }

@@ -22,7 +22,13 @@ struct PluginHeader {
     }
 }
 
+// struct MixinTest {
+//     mixinField: string = 'mixin field'
+// }
+
+@serialize 'toString'
 struct Version {
+    // mixin MixinTest
     init {
         validation()
     }
@@ -67,6 +73,10 @@ struct TestStep {
 
 infix fun int.add(other: int): int {
     this + other
+}
+
+infix fun string.invoke(a: (string) -> null) {
+    a(this)
 }
 
 val example = 1 add (1 add 1)

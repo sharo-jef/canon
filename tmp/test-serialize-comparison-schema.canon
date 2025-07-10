@@ -1,0 +1,22 @@
+schema {
+    TestStructMember
+    TestStructLevel
+}
+
+struct TestStructMember {
+    value: string = "test"
+    
+    @serialize
+    get toString(): string {
+        "member-level"
+    }
+}
+
+@serialize "toString"
+struct TestStructLevel {
+    value: string = "test"
+    
+    get toString(): string {
+        "struct-level"
+    }
+}

@@ -41,6 +41,7 @@ STRING_TYPE: 'string';
 INT_TYPE: 'int';
 FLOAT_TYPE: 'float';
 BOOL_TYPE: 'bool';
+NULL_TYPE: 'null';
 
 // Operators
 PLUS: '+';

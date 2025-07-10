@@ -541,6 +541,15 @@ export class SemanticAnalyzer {
       return undefined;
     }
 
+    // Check @serialize annotation
+    if (node.annotations && Array.isArray(node.annotations)) {
+      for (const annotation of node.annotations) {
+        if (annotation.name?.name === 'serialize') {
+          await this.validateSerializeAnnotation(annotation, node);
+        }
+      }
+    }
+
     // 構造体内のスコープに入る
     this.symbolTable.enterScope(structName);
 
@@ -559,14 +568,157 @@ export class SemanticAnalyzer {
     }
 
     // 構造体のメンバーを処理
+    const memberNames = new Set<string>();
+    let serializeAnnotationCount = 0;
+    const serializeAnnotationLocations: Array<{ location: any; memberName: string }> = [];
+
     if (node.body && Array.isArray(node.body)) {
       for (const member of node.body) {
+        // Check for duplicate method/getter names
+        if (member.type === 'MethodDeclaration' || member.type === 'GetterDeclaration') {
+          const memberName = member.name?.name;
+          if (memberName) {
+            if (memberNames.has(memberName)) {
+              this.addError({
+                message: `Duplicate member '${memberName}' in struct '${structName}'`,
+                type: 'ValidationError',
+                location: this.getLocation(member),
+              });
+            } else {
+              memberNames.add(memberName);
+            }
+          }
+
+          // Check member-level @serialize annotations
+          if (member.annotations && Array.isArray(member.annotations)) {
+            for (const annotation of member.annotations) {
+              if (annotation.name?.name === 'serialize') {
+                serializeAnnotationCount++;
+                serializeAnnotationLocations.push({
+                  location: this.getLocation(annotation),
+                  memberName: memberName || 'unknown',
+                });
+
+                // For member-level @serialize, we check the member itself
+                await this.validateMemberSerializeAnnotation(annotation, member, structName);
+              }
+            }
+          }
+        }
         await this.visitNode(member);
+      }
+    }
+
+    // Check for struct-level @serialize annotation
+    if (node.annotations && Array.isArray(node.annotations)) {
+      for (const annotation of node.annotations) {
+        if (annotation.name?.name === 'serialize') {
+          serializeAnnotationCount++;
+          serializeAnnotationLocations.push({
+            location: this.getLocation(annotation),
+            memberName: 'struct-level',
+          });
+        }
+      }
+    }
+
+    // Validate that there's at most one @serialize annotation per struct
+    if (serializeAnnotationCount > 1) {
+      this.addError({
+        message: `Struct '${structName}' has ${serializeAnnotationCount} @serialize annotations. Only one @serialize annotation is allowed per struct.`,
+        type: 'ValidationError',
+        location: serializeAnnotationLocations[1].location, // Point to the second occurrence
+      });
+
+      // Add additional errors for all extra @serialize annotations
+      for (let i = 1; i < serializeAnnotationLocations.length; i++) {
+        const loc = serializeAnnotationLocations[i];
+        this.addError({
+          message: `Duplicate @serialize annotation on '${loc.memberName}'. Remove this annotation.`,
+          type: 'ValidationError',
+          location: loc.location,
+        });
       }
     }
 
     this.symbolTable.exitScope();
     return undefined;
+  }
+
+  private async validateSerializeAnnotation(
+    annotation: ASTNode,
+    structNode: ASTNode
+  ): Promise<void> {
+    // Check if annotation has arguments
+    if (!annotation.arguments || annotation.arguments.length === 0) {
+      this.addError({
+        message: '@serialize annotation requires a target method name',
+        type: 'ValidationError',
+        location: this.getLocation(annotation),
+      });
+      return;
+    }
+
+    const targetArg = annotation.arguments[0];
+    if (targetArg.type !== 'StringLiteral') {
+      this.addError({
+        message: '@serialize annotation target must be a string literal',
+        type: 'ValidationError',
+        location: this.getLocation(targetArg),
+      });
+      return;
+    }
+
+    const methodName = targetArg.value;
+
+    // Find the method/getter in the struct body
+    if (structNode.body && Array.isArray(structNode.body)) {
+      const method = structNode.body.find((member: any) => {
+        return (
+          (member.type === 'GetterDeclaration' || member.type === 'MethodDeclaration') &&
+          member.name?.name === methodName
+        );
+      });
+
+      if (!method) {
+        this.addError({
+          message: `Serialize target '${methodName}' not found in struct`,
+          type: 'ValidationError',
+          location: this.getLocation(targetArg),
+        });
+        return;
+      }
+
+      // Check if the method returns a function type
+      if (method.returnType) {
+        const returnType = await this.visitNode(method.returnType);
+        if (returnType && typeof returnType === 'string' && returnType.includes('->')) {
+          this.addError({
+            message: `@serialize target '${methodName}' cannot return a function type`,
+            type: 'ValidationError',
+            location: this.getLocation(method.returnType),
+          });
+        }
+      }
+    }
+  }
+
+  private async validateMemberSerializeAnnotation(
+    annotation: ASTNode,
+    member: ASTNode,
+    _structName: string
+  ): Promise<void> {
+    // For member-level @serialize, check if it returns a function type
+    if (member.returnType) {
+      const returnType = await this.visitNode(member.returnType);
+      if (returnType && typeof returnType === 'string' && returnType.includes('->')) {
+        this.addError({
+          message: `@serialize on '${member.name?.name}' cannot return a function type`,
+          type: 'ValidationError',
+          location: this.getLocation(member.returnType),
+        });
+      }
+    }
   }
 
   private async visitUnionDeclaration(_node: ASTNode): Promise<string | undefined> {
@@ -576,7 +728,7 @@ export class SemanticAnalyzer {
 
   private async visitFunctionDeclaration(node: ASTNode): Promise<string | undefined> {
     const functionName = node.name?.name;
-    const returnType = node.returnType ? await this.visitNode(node.returnType) : 'void';
+    const returnType = node.returnType ? await this.visitNode(node.returnType) : 'null';
 
     if (!functionName) {
       this.addError({
@@ -592,7 +744,7 @@ export class SemanticAnalyzer {
       this.symbolTable.define({
         name: functionName,
         type: 'function',
-        dataType: returnType || 'void',
+        dataType: returnType || 'null',
         location: this.getLocation(node),
       });
     } catch {
@@ -731,7 +883,7 @@ export class SemanticAnalyzer {
 
   private async visitMethodDeclaration(node: ASTNode): Promise<string | undefined> {
     const methodName = node.name?.name;
-    const returnType = node.returnType ? await this.visitNode(node.returnType) : 'void';
+    const returnType = node.returnType ? await this.visitNode(node.returnType) : 'null';
 
     if (!methodName) {
       this.addError({
@@ -747,7 +899,7 @@ export class SemanticAnalyzer {
       this.symbolTable.define({
         name: methodName,
         type: 'function',
-        dataType: returnType || 'void',
+        dataType: returnType || 'null',
         location: this.getLocation(node),
       });
     } catch {
@@ -859,7 +1011,7 @@ export class SemanticAnalyzer {
       // Check if it's a variable with a lambda type
       if (symbol.type === 'variable' && symbol.dataType && symbol.dataType.includes('->')) {
         // This is a lambda variable being called as a function
-        // Extract return type from lambda signature (e.g., "() -> void" -> "void")
+        // Extract return type from lambda signature (e.g., "() -> null" -> "null")
         const returnType = symbol.dataType.split('->')[1]?.trim() || 'any';
 
         // 引数の型チェック
@@ -978,7 +1130,9 @@ export class SemanticAnalyzer {
   }
 
   private async visitPrimitiveType(node: ASTNode): Promise<string | undefined> {
-    return node.name || node.typeName;
+    const typeName = node.name || node.typeName;
+
+    return typeName;
   }
 
   private async visitTypeReference(node: ASTNode): Promise<string | undefined> {
@@ -1011,7 +1165,7 @@ export class SemanticAnalyzer {
       }
     }
 
-    const returnType = node.returnType ? await this.visitNode(node.returnType) : 'void';
+    const returnType = node.returnType ? await this.visitNode(node.returnType) : 'null';
 
     // 関数型の文字列表現を返す
     return `(${parameterTypes.join(', ')}) -> ${returnType}`;
@@ -1262,7 +1416,7 @@ export class SemanticAnalyzer {
     }
 
     // プリミティブ型ではない場合は構造体の可能性
-    const primitiveTypes = ['int', 'float', 'string', 'bool', 'any', 'void'];
+    const primitiveTypes = ['int', 'float', 'string', 'bool', 'any', 'null'];
     if (primitiveTypes.includes(typeName)) {
       return false;
     }
@@ -1726,14 +1880,14 @@ export class SemanticAnalyzer {
           const lastStatement = node.body[node.body.length - 1];
           bodyType = await this.visitNode(lastStatement);
         } else {
-          bodyType = 'void';
+          bodyType = 'null'; // Empty body returns null
         }
       } else {
         // 本体が単一の式の場合
         bodyType = await this.visitNode(node.body);
       }
     } else {
-      bodyType = 'void';
+      bodyType = 'null'; // No body returns null
     }
 
     if (process.env.DEBUG) {
@@ -1745,7 +1899,7 @@ export class SemanticAnalyzer {
 
     // 関数型文字列を構築
     const paramTypesStr = parameterTypes.length > 0 ? parameterTypes.join(', ') : '';
-    const functionType = `(${paramTypesStr}) -> ${bodyType || 'void'}`;
+    const functionType = `(${paramTypesStr}) -> ${bodyType || 'null'}`;
 
     if (process.env.DEBUG) {
       // Lambda expression result

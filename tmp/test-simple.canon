@@ -1,11 +1,16 @@
-#schema "../definition/schema.canon"
-
-PluginHeader {
-  name = "TestPlugin"
-  description = "A simple test plugin"
-  version = Version {
-    major = 1
-    minor = 0
-    patch = 0
-  }
+#schema \
+\
+struct TestStruct {
+    name: string
+    
+    @serialize
+    fun toString(): string {
+        return \custom\
+    }
 }
+
+schema {
+    testInstance: TestStruct
+}
+
+val testInstance = TestStruct { name = \test\ }
