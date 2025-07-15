@@ -31,6 +31,7 @@ export class Interpreter {
   private currentEnv: Environment;
   private options: InterpreterOptions;
   private schemaDefinition: StructValue | null = null;
+  private allStructInstances: StructValue[] = []; // Track all struct instances for end-of-program validation
 
   /**
    * プログラムを実行
@@ -129,7 +130,10 @@ export class Interpreter {
    */
   evaluate(node: ASTNode): CanonValue {
     try {
-      return this.visitNode(node);
+      const result = this.visitNode(node);
+      // プログラム実行終了時に全ての必須フィールドを検証
+      this.validateAllRequiredFieldsAtProgramEnd();
+      return result;
     } catch (error) {
       if (error instanceof CanonRuntimeError) {
         throw error;
@@ -529,6 +533,9 @@ export class Interpreter {
         // Set interpreter reference for @serialize function calls
         structValue.setInterpreter(this);
 
+        // Track this struct instance for end-of-program validation
+        this.allStructInstances.push(structValue);
+
         // Process struct body for methods/getters and field declarations
         if (node.body && Array.isArray(node.body)) {
           for (const member of node.body) {
@@ -584,13 +591,11 @@ export class Interpreter {
                     structValue.setField(fieldName, NullValue.getInstance());
                   } else {
                     // Required field without default value - defer validation until after lambda execution
-                    // Mark this field as needing validation (but skip private fields)
+                    // Mark this field as needing validation (including private fields)
                     if (!structValue.hasField(fieldName)) {
                       structValue.setField(fieldName, NullValue.getInstance());
-                      // Only mark non-private fields as requiring validation
-                      if (!member.isPrivate) {
-                        structValue.setFieldRequiresValidation(fieldName);
-                      }
+                      // Mark all required fields (including private ones) as requiring validation
+                      structValue.setFieldRequiresValidation(fieldName);
                     }
                   }
 
@@ -934,6 +939,9 @@ export class Interpreter {
         // Create an empty struct with the given name
         const fields = new Map<string, CanonValue>();
         const struct = new StructValue(structName, fields, []);
+
+        // Track this struct instance for end-of-program validation
+        this.allStructInstances.push(struct);
 
         // Call the lambda function with the struct as context
         const tempEnv = new Environment(this.currentEnv);
@@ -2103,6 +2111,25 @@ export class Interpreter {
       }
       // Clear the validation requirement
       struct.clearFieldValidationRequirement(fieldName);
+    }
+  }
+
+  /**
+   * Validate all required fields of all struct instances at program end
+   */
+  private validateAllRequiredFieldsAtProgramEnd(): void {
+    for (const struct of this.allStructInstances) {
+      const fieldsRequiringValidation = struct.getFieldsRequiringValidation();
+
+      for (const fieldName of fieldsRequiringValidation) {
+        const fieldValue = struct.getField(fieldName);
+        // If field is still null at program end, it's an error
+        if (!fieldValue || fieldValue.type === 'null') {
+          throw new CanonRuntimeError(
+            `Required field '${fieldName}' in struct '${struct.getStructName()}' was not assigned during program execution`
+          );
+        }
+      }
     }
   }
 }

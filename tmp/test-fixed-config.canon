@@ -1,0 +1,31 @@
+#schema '../definition/schema.canon'
+
+PluginHeader {
+    name = 'Plugin1'
+    description = 'Description of plugin1'
+    version = Version(0, 0, 1) {
+        hoge = "assigned value" // Required field is now assigned
+    }
+}
+
+val goBuild = 'go build'
+var goTest = 'go' + ' ' + 'test'
+
+fun join(a: string, b: string): string {
+    a + b
+}
+
+fun empty() {}
+
+val joinLambda: (string, string) -> string = { a, b -> a + b }
+
+goTest += ' ' + joinLambda(/*getEnv('PIPELINE_HOME_PATH')!*/'hoge', '/test')
+
+pipeline {
+    build {
+        command = goBuild + string(1 add 2 add 3)
+    }
+    test {
+        script = goTest
+    }
+}

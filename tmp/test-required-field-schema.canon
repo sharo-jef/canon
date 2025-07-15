@@ -1,0 +1,8 @@
+schema {
+    TestStruct
+}
+
+struct TestStruct {
+    name: string
+    hoge: string  // required field without default value
+}

@@ -1,0 +1,7 @@
+#schema './test-required-field-schema.canon'
+
+// This should fail because hoge is required but not assigned
+val testInstance = TestStruct {
+    name = 'test'
+    // hoge is not assigned - should cause error
+}
