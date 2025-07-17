@@ -173,8 +173,7 @@ export class CanonLanguageServer {
       this.ensureTmpDir();
 
       // Create temporary file
-      const timestamp = Date.now();
-      const tempFileName = `temp_canon_${timestamp}.canon`;
+      const tempFileName = `temp_canon_${crypto.randomUUID()}.canon`;
       tempFilePath = path.join(this.tmpDir, tempFileName);
 
       console.log(`Creating temporary file: ${tempFilePath}`);
