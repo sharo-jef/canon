@@ -1,0 +1,30 @@
+#schema './schema.canon'
+
+// Configuration for a web server
+server {
+  port = 8080
+  host = 'localhost'
+  ssl = false
+}
+
+database {
+  driver = 'postgresql'
+  host = 'localhost'
+  port = 5432
+  name = 'myapp'
+  username = 'user'
+  password = 'password'
+}
+
+// List configuration
+features = [
+  'authentication',
+  'logging',
+  'monitoring'
+]
+
+// Range example
+versions = 1..10
+
+// Template string example
+welcome_message = `Welcome to ${server.host}:${server.port}!`

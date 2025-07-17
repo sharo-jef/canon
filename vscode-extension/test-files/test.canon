@@ -1,0 +1,22 @@
+// Canon Language Test File
+// This file should trigger syntax highlighting and extension activation
+
+schema TestConfig {
+  name: string
+  port: int = 8080
+  enabled: bool = true
+}
+
+struct DatabaseConfig {
+  host: string
+  port: int
+  username: string
+  password: string
+}
+
+fun calculatePort(base: int, offset: int) -> int {
+  return base + offset
+}
+
+// Test template string
+val connectionString = "postgresql://${username}:${password}@${host}:${port}"

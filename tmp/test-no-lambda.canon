@@ -1,7 +1,0 @@
-#schema '../definition/schema.canon'
-
-PluginHeader {
-    name = 'Plugin1'
-    description = 'Description of plugin1'
-    version = Version(0, 0, 1)  // No lambda here
-}

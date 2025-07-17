@@ -140,6 +140,103 @@ export class SemanticAnalyzer {
   }
 
   /**
+   * 一時ファイルを使用してCanonファイルを読み込んで意味解析を実行
+   * VSCode拡張向けに、元のファイルパスを使用してスキーマファイルを解決
+   */
+  async analyzeFromTempFile(
+    tempFilePath: string,
+    originalFilePath: string
+  ): Promise<{
+    success: boolean;
+    errors: SemanticError[];
+    symbolTable: SymbolTable;
+  }> {
+    try {
+      // Reset state for each file analysis
+      this.schemaPropertyInstances.clear();
+      this.errors = [];
+
+      // 元のファイルパスを保存（スキーマファイル解決に使用）
+      this.currentFilePath = originalFilePath;
+
+      if (originalFilePath.endsWith('.canon')) {
+        const directory = path.dirname(originalFilePath);
+        const filename = path.basename(originalFilePath);
+
+        // config.canonの場合、schema.canonも探す
+        if (filename === 'config.canon') {
+          const schemaPath = path.join(directory, 'schema.canon');
+
+          if (fs.existsSync(schemaPath)) {
+            // 1. schema.canonを解析（型定義のため、validationはスキップ）
+            try {
+              const schemaAst = await parseCanonFile(schemaPath);
+              if (schemaAst) {
+                // Schema file is analyzed first to populate schema definitions
+                await this.analyze(schemaAst, true);
+              }
+            } catch (error) {
+              this.addError({
+                message: `Failed to parse schema.canon: ${error}`,
+                type: 'ValidationError',
+              });
+            }
+          }
+
+          // 2. 一時ファイルを解析（validationを実行）
+          try {
+            const configAst = await parseCanonFile(tempFilePath);
+            if (configAst) {
+              // Config file is analyzed with validation enabled
+              await this.analyze(configAst, false);
+            }
+          } catch (error) {
+            this.addError({
+              message: `Failed to parse config.canon: ${error}`,
+              type: 'ValidationError',
+            });
+          }
+        } else {
+          // 他のファイルの場合は一時ファイルを直接解析
+          try {
+            const ast = await parseCanonFile(tempFilePath);
+            if (ast) {
+              await this.analyze(ast, true); // schema.canonではvalidationをスキップ
+            }
+          } catch (error) {
+            this.addError({
+              message: `Failed to parse ${originalFilePath}: ${error}`,
+              type: 'ValidationError',
+            });
+          }
+        }
+      } else {
+        this.addError({
+          message: `Unsupported file type: ${originalFilePath}. Only .canon files are supported.`,
+          type: 'ValidationError',
+        });
+      }
+
+      return {
+        success: this.errors.length === 0,
+        errors: this.errors,
+        symbolTable: this.symbolTable,
+      };
+    } catch (error) {
+      this.addError({
+        message: `Failed to analyze file: ${error}`,
+        type: 'ValidationError',
+      });
+
+      return {
+        success: false,
+        errors: this.errors,
+        symbolTable: this.symbolTable,
+      };
+    }
+  }
+
+  /**
    * use文のみを処理（config.canonファイルから）
    */
   private async processUseStatements(node: ASTNode): Promise<void> {
@@ -1548,7 +1645,11 @@ export class SemanticAnalyzer {
         }
 
         if (process.env.DEBUG) {
-          // Schema directive processing
+          console.log(`[DEBUG] Schema directive processing:`);
+          console.log(`[DEBUG] Original schema path: ${schemaPath}`);
+          console.log(`[DEBUG] Current file path: ${this.currentFilePath}`);
+          console.log(`[DEBUG] Resolved schema path: ${resolvedPath}`);
+          console.log(`[DEBUG] File exists: ${fs.existsSync(resolvedPath)}`);
         }
 
         // スキーマファイルをパースしてシンボルテーブルに追加
@@ -1574,7 +1675,7 @@ export class SemanticAnalyzer {
         }
       } catch (error) {
         this.addError({
-          message: `Failed to load schema file: ${schemaPath} - ${error}`,
+          message: `Error loading schema: ${error instanceof Error ? error.message : String(error)}`,
           type: 'ValidationError',
           location: this.getLocation(node),
         });

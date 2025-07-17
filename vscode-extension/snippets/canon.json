@@ -1,0 +1,157 @@
+{
+  "Schema Declaration": {
+    "prefix": "schema",
+    "body": ["schema {", "\t$1", "}"],
+    "description": "Create a schema declaration"
+  },
+  "Struct Declaration": {
+    "prefix": "struct",
+    "body": ["struct $1 {", "\t$2", "}"],
+    "description": "Create a struct declaration"
+  },
+  "Struct with Init": {
+    "prefix": "struct-init",
+    "body": ["struct $1 {", "\tinit {", "\t\t$2", "\t}", "\t$3", "}"],
+    "description": "Create a struct with init block"
+  },
+  "Union Declaration": {
+    "prefix": "union",
+    "body": ["union $1 = $2 | $3"],
+    "description": "Create a union type declaration"
+  },
+  "Type Declaration": {
+    "prefix": "type",
+    "body": ["type $1 = $2"],
+    "description": "Create a type alias"
+  },
+  "Property Declaration": {
+    "prefix": "prop",
+    "body": ["$1: $2"],
+    "description": "Create a property declaration"
+  },
+  "Optional Property": {
+    "prefix": "prop?",
+    "body": ["$1?: $2"],
+    "description": "Create an optional property declaration"
+  },
+  "Property with Default": {
+    "prefix": "prop=",
+    "body": ["$1: $2 = $3"],
+    "description": "Create a property with default value"
+  },
+  "Function Declaration": {
+    "prefix": "fun",
+    "body": ["fun $1($2): $3 {", "\t$4", "}"],
+    "description": "Create a function declaration"
+  },
+  "Getter Declaration": {
+    "prefix": "get",
+    "body": ["get $1(): $2 {", "\t$3", "}"],
+    "description": "Create a getter declaration"
+  },
+  "Private Function": {
+    "prefix": "private-fun",
+    "body": ["private fun $1($2): $3 {", "\t$4", "}"],
+    "description": "Create a private function"
+  },
+  "Repeated Declaration": {
+    "prefix": "repeated",
+    "body": ["repeated $1: $2[] {", "\t$3", "}"],
+    "description": "Create a repeated property declaration"
+  },
+  "If Expression": {
+    "prefix": "if",
+    "body": ["if ($1) $2 else $3"],
+    "description": "Create an if expression"
+  },
+  "If Block": {
+    "prefix": "if-block",
+    "body": ["if ($1) {", "\t$2", "} else {", "\t$3", "}"],
+    "description": "Create an if-else block"
+  },
+  "Lambda Expression": {
+    "prefix": "lambda",
+    "body": ["{ $1 -> $2 }"],
+    "description": "Create a lambda expression"
+  },
+  "Anonymous Function": {
+    "prefix": "fun-anon",
+    "body": ["fun($1) {", "\t$2", "}"],
+    "description": "Create an anonymous function"
+  },
+  "Variable Declaration": {
+    "prefix": "val",
+    "body": ["val $1 = $2"],
+    "description": "Create an immutable variable"
+  },
+  "Mutable Variable": {
+    "prefix": "var",
+    "body": ["var $1 = $2"],
+    "description": "Create a mutable variable"
+  },
+  "Use Statement": {
+    "prefix": "use",
+    "body": ["use $1"],
+    "description": "Create a use statement"
+  },
+  "Annotation": {
+    "prefix": "@",
+    "body": ["@$1"],
+    "description": "Create an annotation"
+  },
+  "Description Annotation": {
+    "prefix": "@description",
+    "body": ["@description '$1'"],
+    "description": "Create a description annotation"
+  },
+  "Name Annotation": {
+    "prefix": "@name",
+    "body": ["@name '$1'"],
+    "description": "Create a name annotation"
+  },
+  "Serialize Annotation": {
+    "prefix": "@serialize",
+    "body": ["@serialize '$1'"],
+    "description": "Create a serialize annotation"
+  },
+  "Template String": {
+    "prefix": "template",
+    "body": ["`$1`"],
+    "description": "Create a template string"
+  },
+  "Template String with Interpolation": {
+    "prefix": "template-interp",
+    "body": ["`$1\\${$2}$3`"],
+    "description": "Create a template string with interpolation"
+  },
+  "Range Expression": {
+    "prefix": "range",
+    "body": ["$1..$2"],
+    "description": "Create a range expression"
+  },
+  "Range Inclusive": {
+    "prefix": "range-inc",
+    "body": ["$1..=$2"],
+    "description": "Create an inclusive range expression"
+  },
+  "Range with Step": {
+    "prefix": "range-step",
+    "body": ["$1..$2 step $3"],
+    "description": "Create a range with step"
+  },
+  "List Literal": {
+    "prefix": "list",
+    "body": ["[$1]"],
+    "description": "Create a list literal"
+  },
+  "Schema Directive": {
+    "prefix": "#schema",
+    "body": ["#schema '$1'"],
+    "description": "Add schema directive"
+  },
+  "Pipeline Expression": {
+    "prefix": "pipe",
+    "body": ["$1 |> $2"],
+    "description": "Create a pipeline expression"
+  }
+}

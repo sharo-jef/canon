@@ -5,7 +5,7 @@
  */
 
 import { promises as fs } from 'fs';
-import { parseCanonFile } from './parser';
+import { parseCanon, parseCanonWithStructuredErrors } from './parser';
 import { SemanticAnalyzer } from './semantic/SemanticAnalyzer';
 import { Interpreter } from './interpreter/Interpreter';
 import { SchemaValidator } from './interpreter/SchemaValidator';
@@ -16,6 +16,9 @@ interface CliOptions {
   outputFile?: string;
   debug?: boolean;
   schemaOnly?: boolean;
+  validate?: boolean;
+  jsonOutput?: boolean;
+  originalFilePath?: string;
 }
 
 async function main() {
@@ -27,6 +30,9 @@ async function main() {
     console.error('  --output <file>    Output JSON file (default: stdout)');
     console.error('  --debug           Enable debug output');
     console.error('  --schema-only     Only output schema information');
+    console.error('  --validate        Validate only (for VSCode extension)');
+    console.error('  --original-file-path <path>  Original file path (for VSCode extension)');
+    console.error('  --json-output     Output structured JSON (for tooling)');
     process.exit(1);
   }
 
@@ -45,6 +51,15 @@ async function main() {
         break;
       case '--schema-only':
         options.schemaOnly = true;
+        break;
+      case '--validate':
+        options.validate = true;
+        break;
+      case '--json-output':
+        options.jsonOutput = true;
+        break;
+      case '--original-file-path':
+        options.originalFilePath = args[++i];
         break;
       default:
         console.error(`Unknown option: ${args[i]}`);
@@ -68,7 +83,8 @@ async function main() {
 }
 
 async function runInterpreter(options: CliOptions): Promise<void> {
-  const { inputFile, outputFile, debug, schemaOnly } = options;
+  const { inputFile, outputFile, debug, schemaOnly, validate, jsonOutput, originalFilePath } =
+    options;
 
   // ファイルの存在確認
   try {
@@ -79,25 +95,61 @@ async function runInterpreter(options: CliOptions): Promise<void> {
 
   if (debug) {
     console.log(`[DEBUG] Processing file: ${inputFile}`);
+    if (originalFilePath) {
+      console.log(`[DEBUG] Original file path: ${originalFilePath}`);
+    }
   }
 
   // 1. パースしてASTを生成
   if (debug) {
     console.log('[DEBUG] Parsing...');
   }
-  const ast = parseCanonFile(inputFile);
-  const parseErrors: any[] = []; // parseCanonFile doesn't return errors currently
 
-  if (parseErrors.length > 0) {
-    console.error('Parse errors:');
-    for (const error of parseErrors) {
-      console.error(`  ${error.message}`);
+  let ast;
+  try {
+    if (jsonOutput) {
+      // VSCode拡張などのツール向けに構造化エラーを返す
+      const source = await fs.readFile(inputFile, 'utf-8');
+      const parseResult = parseCanonWithStructuredErrors(source, inputFile);
+
+      if (!parseResult.success) {
+        // JSON形式でエラーを出力
+        const jsonError = {
+          success: false,
+          errors: parseResult.errors,
+        };
+        console.log(JSON.stringify(jsonError, null, 2));
+        process.exit(1);
+      }
+
+      ast = parseResult.ast;
+    } else {
+      // 従来のヒューマンリーダブルなエラー出力
+      const source = await fs.readFile(inputFile, 'utf-8');
+      ast = parseCanon(source, inputFile);
     }
-    throw new Error('Parse failed');
+  } catch (error) {
+    if (validate) {
+      // VSCode extension用：エラーを標準エラー出力に出力して終了
+      console.error(`Parse error: ${error instanceof Error ? error.message : String(error)}`);
+      process.exit(1);
+    }
+    throw error;
   }
 
   if (debug) {
     console.log('[DEBUG] Parse successful');
+  }
+
+  // Validate modeの場合はここで終了（成功）
+  if (validate) {
+    console.log('Validation successful');
+    process.exit(0);
+  }
+
+  // エラーハンドリング：astが未定義の場合
+  if (!ast) {
+    throw new Error('Failed to parse Canon file');
   }
 
   // 2. セマンティック解析
@@ -105,14 +157,38 @@ async function runInterpreter(options: CliOptions): Promise<void> {
     console.log('[DEBUG] Running semantic analysis...');
   }
   const analyzer = new SemanticAnalyzer();
-  const analysisResult = await analyzer.analyzeFromFile(inputFile);
+
+  // Use analyzeFromTempFile if original file path is provided (for VSCode extension)
+  // Otherwise use the regular analyzeFromFile method
+  let analysisResult;
+  if (originalFilePath) {
+    analysisResult = await analyzer.analyzeFromTempFile(inputFile, originalFilePath);
+  } else {
+    analysisResult = await analyzer.analyzeFromFile(inputFile);
+  }
 
   if (!analysisResult.success) {
-    console.error('Semantic analysis errors:');
-    for (const error of analysisResult.errors) {
-      console.error(`  ${error.message} at line ${error.location?.line || '?'}`);
+    if (jsonOutput) {
+      // JSON形式でセマンティックエラーを出力
+      const jsonError = {
+        success: false,
+        errors: analysisResult.errors.map((error) => ({
+          code: 'E9999', // セマンティックエラー用のコード
+          message: error.message,
+          filename: inputFile,
+          location: error.location || { line: 1, column: 1 },
+        })),
+      };
+      console.log(JSON.stringify(jsonError, null, 2));
+      process.exit(1);
+    } else {
+      // 従来のヒューマンリーダブルなエラー出力
+      console.error('Semantic analysis errors:');
+      for (const error of analysisResult.errors) {
+        console.error(`  ${error.message} at line ${error.location?.line || '?'}`);
+      }
+      throw new Error('Semantic analysis failed');
     }
-    throw new Error('Semantic analysis failed');
   }
 
   if (debug) {
@@ -153,15 +229,15 @@ async function runInterpreter(options: CliOptions): Promise<void> {
   }
 
   // 5. 結果出力
-  const jsonOutput = JSON.stringify(output, null, 2);
+  const jsonResult = JSON.stringify(output, null, 2);
 
   if (outputFile) {
-    await fs.writeFile(outputFile, jsonOutput, 'utf8');
+    await fs.writeFile(outputFile, jsonResult, 'utf8');
     if (debug) {
       console.log(`[DEBUG] Output written to: ${outputFile}`);
     }
   } else {
-    console.log(jsonOutput);
+    console.log(jsonResult);
   }
 }
 

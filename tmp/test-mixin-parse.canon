@@ -1,4 +1,0 @@
-struct TestStruct {
-  mixin SomeMixin
-  property: string
-}

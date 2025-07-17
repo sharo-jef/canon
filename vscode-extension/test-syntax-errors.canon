@@ -1,0 +1,19 @@
+// Test file for Canon syntax error detection
+
+schema TestConfig {
+  name: string
+  port: int
+  // Missing closing brace - should show error
+
+struct BadStruct
+  field: string
+}
+
+fun invalidFunction {
+  // Missing parameters - should show error
+}
+
+schema AnotherTest {
+  field: 
+  // Missing type - should show error
+}

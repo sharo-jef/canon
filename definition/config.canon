@@ -1,18 +1,18 @@
 #schema './schema.canon'
 
 PluginHeader {
-    name = 'Plugin1'
-    description = 'Description of plugin1'
-    version = Version(0, 0, 1) {
-        hoge = "a"
-    }
+  name = 'Plugin1'
+  description = 'Description of plugin1'
+  version = Version(0, 0, 1) {
+    hoge = "a"
+  }
 }
 
 val goBuild = 'go build'
 var goTest = 'go' + ' ' + 'test'
 
 fun join(a: string, b: string): string {
-    a + b
+  a + b
 }
 
 fun empty() {}
@@ -22,12 +22,12 @@ val joinLambda: (string, string) -> string = { a, b -> a + b }
 goTest += ' ' + joinLambda(/*getEnv('PIPELINE_HOME_PATH')!*/'hoge', '/test')
 
 pipeline {
-    build {
-        command = goBuild + string(1 add 2 add 3)
-    }
-    test {
-        script = goTest
-    }
+  build {
+    command = goBuild + string(1 add 2 add 3)
+  }
+  test {
+    script = goTest
+  }
 }
 val a = {}
 // val b = { x -> x + 2 }
@@ -36,3 +36,4 @@ val d = { x: int, y: int -> x + y }
 val e = { -> "hello" }
 val f = { x: int -> }
 val g = {->}
+val h = { x: int, y: int -> x + y + 1 }

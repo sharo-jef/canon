@@ -1,5 +1,0 @@
-#schema './test-schema.canon'
-
-testVersion = Version(0, 0, 1) {
-    // hoge is not set intentionally to test that private fields don't require validation
-}

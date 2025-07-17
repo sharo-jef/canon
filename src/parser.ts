@@ -90,6 +90,7 @@ import {
 import { CanonParserVisitor } from './generated/CanonParserVisitor';
 import { CanonErrorListener } from './error/CanonErrorListener';
 import { ErrorFormatter } from './error/ErrorFormatter';
+import { ParseError } from './error/ParseError';
 
 export interface ASTLocation {
   start: { line: number; column: number };
@@ -99,6 +100,15 @@ export interface ASTLocation {
 export interface ASTNode {
   type: string;
   [key: string]: any;
+}
+
+/**
+ * Parse result with structured errors for tooling integration
+ */
+export interface ParseResult {
+  success: boolean;
+  ast?: ASTNode;
+  errors?: ParseError[];
 }
 
 /**
@@ -1900,6 +1910,15 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 }
 
 /**
+ * Parse Canon source code and return structured result for tooling
+ */
+export interface ParseResult {
+  success: boolean;
+  ast?: ASTNode;
+  errors?: ParseError[];
+}
+
+/**
  * Parse Canon source code and return AST
  */
 export function parseCanon(source: string, filename: string = '<unknown>'): ASTNode {
@@ -1948,6 +1967,107 @@ export function parseCanon(source: string, filename: string = '<unknown>'): ASTN
   // Build AST
   const astBuilder = new ASTBuilder();
   return astBuilder.visit(tree);
+}
+
+/**
+ * Parse Canon source code and return structured result for tooling
+ */
+export function parseCanonWithStructuredErrors(
+  source: string,
+  filename: string = '<unknown>'
+): ParseResult {
+  // Create input stream
+  const inputStream = CharStreams.fromString(source);
+
+  // Create lexer
+  const lexer = new CanonLexer(inputStream);
+
+  // Create token stream
+  const tokenStream = new CommonTokenStream(lexer);
+
+  // Create parser
+  const parser = new CanonParser(tokenStream);
+
+  // Remove default error listeners
+  parser.removeErrorListeners();
+  lexer.removeErrorListeners();
+
+  // Add our custom error listener
+  const errorListener = new CanonErrorListener(filename);
+  parser.addErrorListener(errorListener);
+  // Note: lexer uses a different error listener interface, keep default for now
+
+  // Parse the program
+  const tree = parser.program();
+
+  // Check for parse errors
+  const errorCollection = errorListener.getErrors();
+  if (errorCollection.hasErrors()) {
+    const errors = Array.from(errorCollection.getErrors());
+    return {
+      success: false,
+      errors: errors,
+    };
+  }
+
+  // Basic error checking - if there are no children, likely a parse error
+  if (tree.childCount === 0 && source.trim().length > 0) {
+    return {
+      success: false,
+      errors: [
+        {
+          code: 'E0005',
+          message: `Failed to parse Canon file: ${filename}`,
+          filename: filename,
+          location: { line: 1, column: 1 },
+        },
+      ] as ParseError[],
+    };
+  }
+
+  // Build AST
+  const astBuilder = new ASTBuilder();
+  try {
+    const ast = astBuilder.visit(tree);
+    return {
+      success: true,
+      ast: ast,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      errors: [
+        {
+          code: 'E0005',
+          message: error instanceof Error ? error.message : 'Unknown AST building error',
+          filename: filename,
+          location: { line: 1, column: 1 },
+        },
+      ] as ParseError[],
+    };
+  }
+}
+
+/**
+ * Parse Canon file and return structured result for tooling
+ */
+export function parseCanonFileWithStructuredErrors(filePath: string): ParseResult {
+  try {
+    const source = fs.readFileSync(filePath, 'utf-8');
+    return parseCanonWithStructuredErrors(source, filePath);
+  } catch (error) {
+    return {
+      success: false,
+      errors: [
+        {
+          code: 'E0005',
+          message: error instanceof Error ? error.message : 'Failed to read file',
+          filename: filePath,
+          location: { line: 1, column: 1 },
+        },
+      ] as ParseError[],
+    };
+  }
 }
 
 /**
