@@ -151,7 +151,13 @@ export class CanonLanguageServer {
       console.error('Error in parseDocument:', error);
       return {
         success: false,
-        errors: [error.message || 'Unknown parsing error'],
+        errors: [
+          {
+            code: 'PARSE_ERROR',
+            message: error.message || 'Unknown parsing error',
+            stack: error.stack || 'No stack trace available',
+          },
+        ],
       };
     }
   }
