@@ -18,6 +18,7 @@
         "declaration": true,
         "declarationMap": true,
         "sourceMap": true,
+        "downlevelIteration": true,
         "removeComments": true,
         "noImplicitAny": true,
         "noImplicitReturns": true,

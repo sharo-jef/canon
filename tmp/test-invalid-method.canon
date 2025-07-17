@@ -1,5 +1,0 @@
-struct TestStruct {
-    methodWithoutFun() {
-        1 + 1
-    }
-}

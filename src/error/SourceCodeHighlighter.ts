@@ -37,7 +37,11 @@ export class SourceCodeHighlighter {
     const maxWidth = maxLineNumber.toString().length;
     const currentWidth = lineNumber.toString().length;
     const padding = ' '.repeat(maxWidth - currentWidth);
-    return `${padding}${lineNumber}`;
+    const result = `${padding}${lineNumber}`;
+    console.log(
+      `DEBUG: createLinePrefix(${lineNumber}, ${maxLineNumber}) -> maxWidth=${maxWidth}, currentWidth=${currentWidth}, padding="${padding}" (length=${padding.length}), result="${result}" (length=${result.length})`
+    );
+    return result;
   }
 
   /**
@@ -45,7 +49,11 @@ export class SourceCodeHighlighter {
    */
   private createEmptyPrefix(maxLineNumber: number): string {
     const maxWidth = maxLineNumber.toString().length;
-    return ' '.repeat(maxWidth);
+    const result = ' '.repeat(maxWidth);
+    console.log(
+      `DEBUG: createEmptyPrefix(${maxLineNumber}) -> maxWidth=${maxWidth}, result="${result}" (length=${result.length})`
+    );
+    return result;
   }
 
   /**
@@ -57,6 +65,10 @@ export class SourceCodeHighlighter {
     endColumn?: number,
     highlightChar: string = '^'
   ): string {
+    console.log(
+      `DEBUG: createHighlightLine(line="${line}", startColumn=${startColumn}, endColumn=${endColumn}, highlightChar="${highlightChar}")`
+    );
+
     // Convert from 1-based column to 0-based index
     const start = Math.max(0, startColumn - 1);
     const end = endColumn !== undefined ? Math.min(line.length, endColumn - 1) : start + 1;
@@ -71,6 +83,9 @@ export class SourceCodeHighlighter {
       result += highlightChar;
     }
 
+    console.log(
+      `DEBUG: createHighlightLine result: start=${start}, end=${end}, result="${result}" (length=${result.length})`
+    );
     return result;
   }
 
@@ -99,7 +114,7 @@ export class SourceCodeHighlighter {
 
     // Only add empty line if we have context to show
     if (startLine < targetLine || targetLine < endLine) {
-      const emptyPrefix = ' '.repeat(maxLineNumber.toString().length);
+      const emptyPrefix = this.createEmptyPrefix(maxLineNumber);
       result.push(`${emptyPrefix} |`);
     }
 
@@ -165,7 +180,11 @@ export class SourceCodeHighlighter {
         }
       }
 
-      result.push(`${emptyPrefix} | ${highlightLine}`);
+      const caretLine = `${emptyPrefix} | ${highlightLine}`;
+      console.log(
+        `DEBUG: Caret line assembly: emptyPrefix="${emptyPrefix}" (length=${emptyPrefix.length}), highlightLine="${highlightLine}" (length=${highlightLine.length}), caretLine="${caretLine}" (length=${caretLine.length})`
+      );
+      result.push(caretLine);
     }
 
     // Add context lines after the error

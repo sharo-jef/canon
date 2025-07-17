@@ -1,4 +1,0 @@
-struct InvalidStruct {
-    someFunction()
-    val example = 1
-}

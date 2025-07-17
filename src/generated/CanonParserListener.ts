@@ -38,8 +38,11 @@ import { LogicalAndExprContext } from "./CanonParser";
 import { LogicalOrExprContext } from "./CanonParser";
 import { PipelineExprContext } from "./CanonParser";
 import { ProgramContext } from "./CanonParser";
+import { ProgramElementContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { UseStatementContext } from "./CanonParser";
+import { StatementSeparatorContext } from "./CanonParser";
+import { StatementSeparatorsContext } from "./CanonParser";
 import { TopLevelStatementContext } from "./CanonParser";
 import { TopLevelElementContext } from "./CanonParser";
 import { SchemaDeclarationContext } from "./CanonParser";
@@ -52,6 +55,7 @@ import { UnionTypeContext } from "./CanonParser";
 import { TypeContext } from "./CanonParser";
 import { BaseTypeContext } from "./CanonParser";
 import { PrimitiveTypeContext } from "./CanonParser";
+import { FunctionTypeContext } from "./CanonParser";
 import { BlockContext } from "./CanonParser";
 import { StructBodyContext } from "./CanonParser";
 import { StructMemberContext } from "./CanonParser";
@@ -69,6 +73,7 @@ import { InitDeclarationContext } from "./CanonParser";
 import { GetterDeclarationContext } from "./CanonParser";
 import { MethodDeclarationContext } from "./CanonParser";
 import { RepeatedDeclarationContext } from "./CanonParser";
+import { MixinDeclarationContext } from "./CanonParser";
 import { MappingBlockContext } from "./CanonParser";
 import { MappingEntryContext } from "./CanonParser";
 import { ParameterListContext } from "./CanonParser";
@@ -85,6 +90,7 @@ import { AnnotationContext } from "./CanonParser";
 import { ListLiteralContext } from "./CanonParser";
 import { LambdaExpressionContext } from "./CanonParser";
 import { LambdaParametersContext } from "./CanonParser";
+import { LambdaParameterContext } from "./CanonParser";
 import { LambdaBodyContext } from "./CanonParser";
 import { AnonymousFunctionContext } from "./CanonParser";
 import { SpreadExpressionContext } from "./CanonParser";
@@ -549,6 +555,17 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitProgram?: (ctx: ProgramContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `CanonParser.programElement`.
+	 * @param ctx the parse tree
+	 */
+	enterProgramElement?: (ctx: ProgramElementContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.programElement`.
+	 * @param ctx the parse tree
+	 */
+	exitProgramElement?: (ctx: ProgramElementContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `CanonParser.schemaDirective`.
 	 * @param ctx the parse tree
 	 */
@@ -569,6 +586,28 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitUseStatement?: (ctx: UseStatementContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.statementSeparator`.
+	 * @param ctx the parse tree
+	 */
+	enterStatementSeparator?: (ctx: StatementSeparatorContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.statementSeparator`.
+	 * @param ctx the parse tree
+	 */
+	exitStatementSeparator?: (ctx: StatementSeparatorContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.statementSeparators`.
+	 * @param ctx the parse tree
+	 */
+	enterStatementSeparators?: (ctx: StatementSeparatorsContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.statementSeparators`.
+	 * @param ctx the parse tree
+	 */
+	exitStatementSeparators?: (ctx: StatementSeparatorsContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.topLevelStatement`.
@@ -701,6 +740,17 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitPrimitiveType?: (ctx: PrimitiveTypeContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.functionType`.
+	 * @param ctx the parse tree
+	 */
+	enterFunctionType?: (ctx: FunctionTypeContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.functionType`.
+	 * @param ctx the parse tree
+	 */
+	exitFunctionType?: (ctx: FunctionTypeContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.block`.
@@ -890,6 +940,17 @@ export interface CanonParserListener extends ParseTreeListener {
 	exitRepeatedDeclaration?: (ctx: RepeatedDeclarationContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `CanonParser.mixinDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	enterMixinDeclaration?: (ctx: MixinDeclarationContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.mixinDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	exitMixinDeclaration?: (ctx: MixinDeclarationContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `CanonParser.mappingBlock`.
 	 * @param ctx the parse tree
 	 */
@@ -1064,6 +1125,17 @@ export interface CanonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitLambdaParameters?: (ctx: LambdaParametersContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CanonParser.lambdaParameter`.
+	 * @param ctx the parse tree
+	 */
+	enterLambdaParameter?: (ctx: LambdaParameterContext) => void;
+	/**
+	 * Exit a parse tree produced by `CanonParser.lambdaParameter`.
+	 * @param ctx the parse tree
+	 */
+	exitLambdaParameter?: (ctx: LambdaParameterContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CanonParser.lambdaBody`.

@@ -1,2 +1,0 @@
-val exclusive_range = 1..10
-val inclusive_range = 1..=10

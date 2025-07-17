@@ -1,72 +1,82 @@
 // comment
 # comment
 /*
-    comment
+comment
 */
 
 schema {
-    // Same as `PluginHeader: PluginHeader`
-    @description 'A plugin header'
-    PluginHeader
-    pipeline: Pipeline
+  // Same as `PluginHeader: PluginHeader`
+  @description 'A plugin header'
+  PluginHeader
+  pipeline: Pipeline
 }
 
 @description("Plugin header struct")
 struct PluginHeader {
-    name: string
-    description?: string
-    version: Version = Version {
-        major = 0
-        minor = 0
-        patch = 1
-    }
+  name: string
+  description?: string
+  version: Version = Version {
+    major = 0
+    minor = 0
+    patch = 1
+  }
 }
 
+struct MixinTest {
+  mixinField: string = 'mixin field'
+}
+
+// @serialize 'toString'
 struct Version {
-    init {
-        validation()
-    }
-    init(major: int) {
-        val m = major + 1
-        var ma = m - 3
-        ma += 1 + 1
-        this.major = ma
-        minor = 0
-        patch = 0
-        validation()
-    }
-    init(this.major, this.minor, this.patch) {
-        `${major + minor + patch}あいうえお$majorほげ${this.major}`
-        validation()
-    }
-    private fun validation() {
-        if (this.major == 0 && this.minor == 0 && this.patch == 0) error('Given version is not valid')
-    }
-    major: int
-    minor: int
-    patch: int
-    private hoge: string
-    get toString(): string {
-        `$major.$minor.$patch`
-    }
+  mixin MixinTest
+  init {
+    validation()
+  }
+  init(major: int) {
+    val m = major + 1
+    var ma = m - 3
+    ma += 1 + 1
+    this.major = ma
+    minor = 0
+    patch = 0
+    validation()
+  }
+  init(this.major, this.minor, this.patch) {
+    `${major + minor + patch}あいうえお$majorほげ${this.major}`
+    validation()
+  }
+  private fun validation() {
+    if (this.major == 0 && this.minor == 0 && this.patch == 0) error('Given version is not valid')
+  }
+  major: int
+  minor: int
+  patch: int
+  private hoge: string
+  get toString(): string {
+    `$major.$minor.$patch`
+  }
 }
 
 struct Pipeline {
-    repeated steps: Step[] {
-        build -> BuildStep
-        test -> TestStep
-    }
+  repeated steps: Step[] {
+    build -> BuildStep
+    test -> TestStep
+  }
 }
 union Step = BuildStep | TestStep
 struct BuildStep {
-    command: string
+  command: string
 }
 struct TestStep {
-    script: string
+  script: string
 }
 
 infix fun int.add(other: int): int {
-    this + other
+  this + other
+}
+
+infix fun string.invoke(a: (string) -> null) {
+  a(this)
 }
 
 val example = 1 add (1 add 1)

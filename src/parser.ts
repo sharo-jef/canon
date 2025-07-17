@@ -7,8 +7,10 @@ import { CanonLexer } from './generated/CanonLexer';
 import {
   CanonParser,
   ProgramContext,
+  ProgramElementContext,
   SchemaDirectiveContext,
   UseStatementContext,
+  TopLevelStatementContext,
   TopLevelElementContext,
   SchemaDeclarationContext,
   StructDeclarationContext,
@@ -20,6 +22,7 @@ import {
   TypeContext,
   BaseTypeContext,
   PrimitiveTypeContext,
+  FunctionTypeContext,
   BlockContext,
   StatementContext,
   PropertyDeclarationContext,
@@ -29,6 +32,7 @@ import {
   GetterDeclarationContext,
   MethodDeclarationContext,
   RepeatedDeclarationContext,
+  MixinDeclarationContext,
   MappingBlockContext,
   MappingEntryContext,
   ParameterListContext,
@@ -63,6 +67,7 @@ import {
   ListLiteralExprContext,
   LambdaExpressionContext,
   LambdaParametersContext,
+  LambdaParameterContext,
   LambdaBodyContext,
   LambdaExprContext,
   AnonymousFunctionContext,
@@ -85,6 +90,7 @@ import {
 import { CanonParserVisitor } from './generated/CanonParserVisitor';
 import { CanonErrorListener } from './error/CanonErrorListener';
 import { ErrorFormatter } from './error/ErrorFormatter';
+import { ParseError } from './error/ParseError';
 
 export interface ASTLocation {
   start: { line: number; column: number };
@@ -94,6 +100,15 @@ export interface ASTLocation {
 export interface ASTNode {
   type: string;
   [key: string]: any;
+}
+
+/**
+ * Parse result with structured errors for tooling integration
+ */
+export interface ParseResult {
+  success: boolean;
+  ast?: ASTNode;
+  errors?: ParseError[];
 }
 
 /**
@@ -161,10 +176,14 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     for (let i = 0; i < ctx.childCount; i++) {
       const child = ctx.getChild(i);
       if (child instanceof RuleNode) {
-        const result = this.visit(child);
-        if (result && result.type !== 'Unknown') {
-          children.push(result);
+        const ruleName = child.ruleContext?.constructor.name;
+        if (ruleName === 'ProgramElementContext') {
+          const result = this.visit(child);
+          if (result && result.type !== 'Unknown') {
+            children.push(result);
+          }
         }
+        // Skip StatementSeparatorsContext and newline tokens
       }
     }
 
@@ -215,6 +234,36 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       }
     }
     return this.defaultResult();
+  }
+
+  visitTopLevelStatement(ctx: TopLevelStatementContext): ASTNode {
+    // For TopLevelStatement, we need to visit all its elements
+    // and return them as a wrapper or handle them in visitProgram
+
+    // Since this is a container rule, we'll visit all children
+    // and collect the results, but we need to return a single ASTNode
+    const elements: ASTNode[] = [];
+
+    for (let i = 0; i < ctx.childCount; i++) {
+      const child = ctx.getChild(i);
+      if (child instanceof RuleNode) {
+        const ruleName = child.ruleContext?.constructor.name;
+        if (ruleName === 'TopLevelElementContext') {
+          const result = this.visit(child);
+          if (result && result.type !== 'Unknown') {
+            elements.push(result);
+          }
+        }
+        // Skip StatementSeparatorsContext nodes
+      }
+    }
+
+    // Return the elements as a special container
+    return {
+      type: 'TopLevelStatement',
+      elements: elements,
+      loc: this.getLocationInfo(ctx),
+    };
   }
 
   visitSchemaDeclaration(ctx: SchemaDeclarationContext): ASTNode {
@@ -283,7 +332,7 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitStructMember(ctx: StructMemberContext): ASTNode {
-    // structMember can be one of: propertyDeclaration, initDeclaration, getterDeclaration, methodDeclaration, repeatedDeclaration
+    // structMember can be one of: propertyDeclaration, initDeclaration, getterDeclaration, methodDeclaration, repeatedDeclaration, mixinDeclaration
     if (ctx.propertyDeclaration()) {
       return this.visit(ctx.propertyDeclaration()!);
     } else if (ctx.initDeclaration()) {
@@ -294,6 +343,8 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       return this.visit(ctx.methodDeclaration()!);
     } else if (ctx.repeatedDeclaration()) {
       return this.visit(ctx.repeatedDeclaration()!);
+    } else if (ctx.mixinDeclaration()) {
+      return this.visit(ctx.mixinDeclaration()!);
     } else {
       throw new Error('Unknown struct member type');
     }
@@ -413,16 +464,6 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     const questionToken = ctx.QUESTION();
     const isNullable = questionToken !== null && questionToken !== undefined;
 
-    // デバッグ出力
-    if (process.env.DEBUG) {
-      console.log(
-        `[DEBUG visitType] questionToken: ${questionToken}, type: ${typeof questionToken}, isNullable: ${isNullable}`
-      );
-      console.log(
-        `[DEBUG visitType] baseType: ${JSON.stringify(baseType)}, arrayDimensions: ${arrayDimensions}`
-      );
-    }
-
     let resultType = baseType;
 
     // Handle array dimensions
@@ -444,16 +485,14 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       };
     }
 
-    if (process.env.DEBUG) {
-      console.log(`[DEBUG visitType] resultType: ${JSON.stringify(resultType)}`);
-    }
-
     return resultType;
   }
 
   visitBaseType(ctx: BaseTypeContext): ASTNode {
     if (ctx.primitiveType()) {
       return this.visit(ctx.primitiveType()!);
+    } else if (ctx.functionType()) {
+      return this.visit(ctx.functionType()!);
     } else {
       const identifierToken = ctx.IDENTIFIER()!;
       return {
@@ -477,6 +516,42 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     }
   }
 
+  visitFunctionType(ctx: FunctionTypeContext): ASTNode {
+    // FunctionType: LPAREN (type (COMMA type)*)? RPAREN ARROW type
+    const paramTypes: ASTNode[] = [];
+
+    // Get all type nodes from the function type
+    const typeNodes = ctx.type();
+
+    // The last type is the return type, all others are parameter types
+    if (typeNodes.length > 0) {
+      for (let i = 0; i < typeNodes.length - 1; i++) {
+        paramTypes.push(this.visit(typeNodes[i]));
+      }
+
+      const returnType = this.visit(typeNodes[typeNodes.length - 1]);
+
+      return {
+        type: 'FunctionType',
+        parameterTypes: paramTypes,
+        returnType: returnType,
+        loc: this.getLocationInfo(ctx),
+      };
+    } else {
+      // No parameters, no return type (should not happen with valid grammar)
+      return {
+        type: 'FunctionType',
+        parameterTypes: [],
+        returnType: {
+          type: 'PrimitiveType',
+          name: 'null',
+          loc: this.getLocationInfo(ctx),
+        },
+        loc: this.getLocationInfo(ctx),
+      };
+    }
+  }
+
   visitPrimitiveType(ctx: PrimitiveTypeContext): ASTNode {
     let typeName: string;
     if (ctx.STRING_TYPE()) {
@@ -485,6 +560,10 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       typeName = 'int';
     } else if (ctx.BOOL_TYPE()) {
       typeName = 'bool';
+    } else if (ctx.FLOAT_TYPE()) {
+      typeName = 'float';
+    } else if (ctx.NULL_TYPE()) {
+      typeName = 'null';
     } else {
       typeName = 'unknown';
     }
@@ -863,6 +942,32 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
       typeRef,
       mapping,
       defaultValue,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitMixinDeclaration(ctx: MixinDeclarationContext): ASTNode {
+    const annotations = ctx.annotation().map((ann) => this.visit(ann));
+    const identifierToken = ctx.IDENTIFIER();
+    const mixinName = {
+      type: 'Identifier',
+      name: identifierToken.text,
+      loc: {
+        start: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine,
+        },
+        end: {
+          line: identifierToken.symbol.line,
+          column: identifierToken.symbol.charPositionInLine + identifierToken.text.length,
+        },
+      },
+    };
+
+    return {
+      type: 'MixinDeclaration',
+      mixinName,
+      annotations,
       loc: this.getLocationInfo(ctx),
     };
   }
@@ -1535,12 +1640,10 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
 
   // Lambda expression visitors
   visitLambdaExpression(ctx: LambdaExpressionContext): ASTNode {
-    let parameters: string[] = [];
+    let parameters: ASTNode[] = [];
     if (ctx.lambdaParameters()) {
-      parameters = ctx
-        .lambdaParameters()!
-        .IDENTIFIER()
-        .map((id) => id.text);
+      const lambdaParams = this.visit(ctx.lambdaParameters()!);
+      parameters = lambdaParams.parameters || [];
     }
 
     let body: ASTNode[] = [];
@@ -1570,9 +1673,22 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
   }
 
   visitLambdaParameters(ctx: LambdaParametersContext): ASTNode {
+    const parameters = ctx.lambdaParameter().map((param) => this.visit(param));
     return {
       type: 'LambdaParameters',
-      parameters: ctx.IDENTIFIER().map((id) => id.text),
+      parameters,
+      loc: this.getLocationInfo(ctx),
+    };
+  }
+
+  visitLambdaParameter(ctx: LambdaParameterContext): ASTNode {
+    const name = ctx.IDENTIFIER().text;
+    const typeAnnotation = ctx.type() ? this.visit(ctx.type()!) : null;
+
+    return {
+      type: 'LambdaParameter',
+      name,
+      typeAnnotation,
       loc: this.getLocationInfo(ctx),
     };
   }
@@ -1781,7 +1897,25 @@ class ASTBuilder extends AbstractParseTreeVisitor<ASTNode> implements CanonParse
     };
   }
 
-  // ...existing code...
+  visitProgramElement(ctx: ProgramElementContext): ASTNode {
+    // ProgramElement is a choice rule, so we visit the actual content
+    for (let i = 0; i < ctx.childCount; i++) {
+      const child = ctx.getChild(i);
+      if (child instanceof RuleNode) {
+        return this.visit(child);
+      }
+    }
+    return this.defaultResult();
+  }
+}
+
+/**
+ * Parse Canon source code and return structured result for tooling
+ */
+export interface ParseResult {
+  success: boolean;
+  ast?: ASTNode;
+  errors?: ParseError[];
 }
 
 /**
@@ -1833,6 +1967,107 @@ export function parseCanon(source: string, filename: string = '<unknown>'): ASTN
   // Build AST
   const astBuilder = new ASTBuilder();
   return astBuilder.visit(tree);
+}
+
+/**
+ * Parse Canon source code and return structured result for tooling
+ */
+export function parseCanonWithStructuredErrors(
+  source: string,
+  filename: string = '<unknown>'
+): ParseResult {
+  // Create input stream
+  const inputStream = CharStreams.fromString(source);
+
+  // Create lexer
+  const lexer = new CanonLexer(inputStream);
+
+  // Create token stream
+  const tokenStream = new CommonTokenStream(lexer);
+
+  // Create parser
+  const parser = new CanonParser(tokenStream);
+
+  // Remove default error listeners
+  parser.removeErrorListeners();
+  lexer.removeErrorListeners();
+
+  // Add our custom error listener
+  const errorListener = new CanonErrorListener(filename);
+  parser.addErrorListener(errorListener);
+  // Note: lexer uses a different error listener interface, keep default for now
+
+  // Parse the program
+  const tree = parser.program();
+
+  // Check for parse errors
+  const errorCollection = errorListener.getErrors();
+  if (errorCollection.hasErrors()) {
+    const errors = Array.from(errorCollection.getErrors());
+    return {
+      success: false,
+      errors: errors,
+    };
+  }
+
+  // Basic error checking - if there are no children, likely a parse error
+  if (tree.childCount === 0 && source.trim().length > 0) {
+    return {
+      success: false,
+      errors: [
+        {
+          code: 'E0005',
+          message: `Failed to parse Canon file: ${filename}`,
+          filename: filename,
+          location: { line: 1, column: 1 },
+        },
+      ] as ParseError[],
+    };
+  }
+
+  // Build AST
+  const astBuilder = new ASTBuilder();
+  try {
+    const ast = astBuilder.visit(tree);
+    return {
+      success: true,
+      ast: ast,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      errors: [
+        {
+          code: 'E0005',
+          message: error instanceof Error ? error.message : 'Unknown AST building error',
+          filename: filename,
+          location: { line: 1, column: 1 },
+        },
+      ] as ParseError[],
+    };
+  }
+}
+
+/**
+ * Parse Canon file and return structured result for tooling
+ */
+export function parseCanonFileWithStructuredErrors(filePath: string): ParseResult {
+  try {
+    const source = fs.readFileSync(filePath, 'utf-8');
+    return parseCanonWithStructuredErrors(source, filePath);
+  } catch (error) {
+    return {
+      success: false,
+      errors: [
+        {
+          code: 'E0005',
+          message: error instanceof Error ? error.message : 'Failed to read file',
+          filename: filePath,
+          location: { line: 1, column: 1 },
+        },
+      ] as ParseError[],
+    };
+  }
 }
 
 /**

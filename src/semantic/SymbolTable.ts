@@ -142,6 +142,32 @@ export class SymbolTable {
   }
 
   /**
+   * 型が定義されているかチェック (struct, union, or primitive)
+   */
+  isTypeDefined(typeName: string): boolean {
+    // 配列型やNullable型を考慮 (e.g., "string[]", "int?")
+    const baseTypeName = typeName.replace(/(\[\]|\?)+$/, '');
+
+    const symbol = this.resolve(baseTypeName);
+    if (!symbol) {
+      return false;
+    }
+    return (
+      symbol.type === 'struct' ||
+      symbol.type === 'union' ||
+      symbol.type === 'type' ||
+      this.isPrimitiveType(baseTypeName)
+    );
+  }
+
+  /**
+   * プリミティブ型かどうかを判定
+   */
+  private isPrimitiveType(typeName: string): boolean {
+    return ['int', 'float', 'string', 'bool', 'any', 'null'].includes(typeName);
+  }
+
+  /**
    * 現在のスコープ内でシンボルが定義されているかチェック
    */
   isDefinedInCurrentScope(name: string): boolean {
@@ -160,7 +186,8 @@ export class SymbolTable {
     const indent = '  '.repeat(depth);
     console.log(`${indent}Scope: ${scope.name}`);
 
-    for (const [name, symbol] of scope.symbols) {
+    const symbols = Array.from(scope.symbols.entries());
+    for (const [name, symbol] of symbols) {
       console.log(`${indent}  ${name}: ${symbol.type} (${symbol.dataType})`);
     }
 
@@ -303,24 +330,63 @@ export class SymbolTable {
       dataType: 'function -> FloatRange',
     });
 
-    // 標準ライブラリ関数（use文でインポートが必要）
+    // Pipeline functions
     this.define({
-      name: 'getEnv',
+      name: 'pipeline',
       type: 'function',
-      dataType: 'function', // string -> string?
+      dataType: 'function',
     });
 
     this.define({
-      name: 'random',
+      name: 'build',
       type: 'function',
-      dataType: 'function', // () -> float
+      dataType: 'function',
     });
 
     this.define({
-      name: 'print',
+      name: 'test',
       type: 'function',
-      dataType: 'function', // any -> void
+      dataType: 'function',
     });
+
+    // 標準ライブラリ関数はuse文でインポートした場合のみ利用可能
+    // this.define({
+    //   name: 'getEnv',
+    //   type: 'function',
+    //   dataType: 'function', // string -> string?
+    // });
+
+    // this.define({
+    //   name: 'random',
+    //   type: 'function',
+    //   dataType: 'function', // () -> float
+    // });
+
+    // this.define({
+    //   name: 'print',
+    //   type: 'function',
+    //   dataType: 'function', // any -> null
+    // });
+  }
+
+  /**
+   * 標準ライブラリ関数をuse文でインポート
+   */
+  defineStandardLibraryFunction(name: string): void {
+    const standardLibraryFunctions: Record<string, { type: SymbolType; dataType: string }> = {
+      getEnv: { type: 'function', dataType: 'function' }, // string -> string?
+      random: { type: 'function', dataType: 'function' }, // () -> float
+      print: { type: 'function', dataType: 'function' }, // any -> null
+    };
+
+    const functionDef = standardLibraryFunctions[name];
+    if (functionDef) {
+      this.define({
+        name,
+        type: functionDef.type,
+        dataType: functionDef.dataType,
+      });
+    }
   }
 
   /**
@@ -359,5 +425,47 @@ export class SymbolTable {
     };
 
     return searchInScope(this.globalScope);
+  }
+
+  /**
+   * Find a scope by type name
+   */
+  findTypeScope(typeName: string): Scope | undefined {
+    const findScopeRecursively = (scope: Scope): Scope | undefined => {
+      if (scope.name === typeName) {
+        return scope;
+      }
+
+      for (const child of scope.children) {
+        const result = findScopeRecursively(child);
+        if (result) {
+          return result;
+        }
+      }
+
+      return undefined;
+    };
+
+    return findScopeRecursively(this.globalScope);
+  }
+
+  /**
+   * Get all symbols from all scopes
+   */
+  getAllSymbols(): Symbol[] {
+    const allSymbols: Symbol[] = [];
+
+    const collectFromScope = (scope: Scope): void => {
+      const symbols = Array.from(scope.symbols.values());
+      for (const symbol of symbols) {
+        allSymbols.push(symbol);
+      }
+      for (const child of scope.children) {
+        collectFromScope(child);
+      }
+    };
+
+    collectFromScope(this.globalScope);
+    return allSymbols;
   }
 }

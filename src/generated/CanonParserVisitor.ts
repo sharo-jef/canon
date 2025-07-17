@@ -38,8 +38,11 @@ import { LogicalAndExprContext } from "./CanonParser";
 import { LogicalOrExprContext } from "./CanonParser";
 import { PipelineExprContext } from "./CanonParser";
 import { ProgramContext } from "./CanonParser";
+import { ProgramElementContext } from "./CanonParser";
 import { SchemaDirectiveContext } from "./CanonParser";
 import { UseStatementContext } from "./CanonParser";
+import { StatementSeparatorContext } from "./CanonParser";
+import { StatementSeparatorsContext } from "./CanonParser";
 import { TopLevelStatementContext } from "./CanonParser";
 import { TopLevelElementContext } from "./CanonParser";
 import { SchemaDeclarationContext } from "./CanonParser";
@@ -52,6 +55,7 @@ import { UnionTypeContext } from "./CanonParser";
 import { TypeContext } from "./CanonParser";
 import { BaseTypeContext } from "./CanonParser";
 import { PrimitiveTypeContext } from "./CanonParser";
+import { FunctionTypeContext } from "./CanonParser";
 import { BlockContext } from "./CanonParser";
 import { StructBodyContext } from "./CanonParser";
 import { StructMemberContext } from "./CanonParser";
@@ -69,6 +73,7 @@ import { InitDeclarationContext } from "./CanonParser";
 import { GetterDeclarationContext } from "./CanonParser";
 import { MethodDeclarationContext } from "./CanonParser";
 import { RepeatedDeclarationContext } from "./CanonParser";
+import { MixinDeclarationContext } from "./CanonParser";
 import { MappingBlockContext } from "./CanonParser";
 import { MappingEntryContext } from "./CanonParser";
 import { ParameterListContext } from "./CanonParser";
@@ -85,6 +90,7 @@ import { AnnotationContext } from "./CanonParser";
 import { ListLiteralContext } from "./CanonParser";
 import { LambdaExpressionContext } from "./CanonParser";
 import { LambdaParametersContext } from "./CanonParser";
+import { LambdaParameterContext } from "./CanonParser";
 import { LambdaBodyContext } from "./CanonParser";
 import { AnonymousFunctionContext } from "./CanonParser";
 import { SpreadExpressionContext } from "./CanonParser";
@@ -378,6 +384,13 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitProgram?: (ctx: ProgramContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by `CanonParser.programElement`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitProgramElement?: (ctx: ProgramElementContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `CanonParser.schemaDirective`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -390,6 +403,20 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitUseStatement?: (ctx: UseStatementContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.statementSeparator`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStatementSeparator?: (ctx: StatementSeparatorContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.statementSeparators`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStatementSeparators?: (ctx: StatementSeparatorsContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.topLevelStatement`.
@@ -474,6 +501,13 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitPrimitiveType?: (ctx: PrimitiveTypeContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.functionType`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFunctionType?: (ctx: FunctionTypeContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.block`.
@@ -595,6 +629,13 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitRepeatedDeclaration?: (ctx: RepeatedDeclarationContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by `CanonParser.mixinDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitMixinDeclaration?: (ctx: MixinDeclarationContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `CanonParser.mappingBlock`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -705,6 +746,13 @@ export interface CanonParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitLambdaParameters?: (ctx: LambdaParametersContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CanonParser.lambdaParameter`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLambdaParameter?: (ctx: LambdaParameterContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CanonParser.lambdaBody`.

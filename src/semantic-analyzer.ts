@@ -4,21 +4,24 @@
  * 意味解析を実行するメインファイル
  */
 
+import * as path from 'path';
 import { SemanticAnalyzer } from './semantic/SemanticAnalyzer';
-import path from 'path';
 
 async function main() {
   const args = process.argv.slice(2);
-  const astFilePath = args[0] || path.join(__dirname, '..', 'ast.yaml');
+  const sourceFilePath = args[0] || 'definition/schema.canon';
+
+  // Convert relative path to absolute path
+  const absoluteSourceFilePath = path.resolve(sourceFilePath);
 
   console.log(`Canon Semantic Analyzer`);
-  console.log(`AST file: ${astFilePath}`);
+  console.log(`Source file: ${sourceFilePath}`);
   console.log('='.repeat(50));
 
   const analyzer = new SemanticAnalyzer();
 
   try {
-    const result = await analyzer.analyzeFromFile(astFilePath);
+    const result = await analyzer.analyzeFromFile(absoluteSourceFilePath);
 
     if (result.success) {
       console.log('✅ Semantic analysis completed successfully!');
@@ -27,7 +30,10 @@ async function main() {
       result.errors.forEach((error, index) => {
         console.log(`\n${index + 1}. [${error.type}] ${error.message}`);
         if (error.location) {
-          console.log(`   📍 Line ${error.location.line}, Column ${error.location.column}`);
+          const fileInfo = error.filePath ? `${path.basename(error.filePath)}:` : '';
+          console.log(
+            `   📍 ${fileInfo}Line ${error.location.line}, Column ${error.location.column}`
+          );
         }
       });
     }

@@ -1,2 +1,0 @@
-val intValue = 42
-val castResult = string(intValue)
